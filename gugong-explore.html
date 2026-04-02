@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>故宫探秘 · 古建智寻</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        background: #0a0b0e;
+        color: #f5f0e6;
+        overflow-x: hidden;
+      }
+
+      /* 长卷地标：玉佩式按钮；仅 .palace-link--nav 可跳转 */
+      .palace-link {
+        position: absolute;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 4.5rem;
+        padding: 0.55rem 1.1rem 0.6rem;
+        border-radius: 6px;
+        background: linear-gradient(
+          165deg,
+          #6b1414 0%,
+          #4a0c0c 38%,
+          #3d0a0a 72%,
+          #2a0606 100%
+        );
+        border: 2px solid rgba(212, 175, 55, 0.85);
+        box-shadow:
+          0 0 0 1px rgba(139, 0, 0, 0.35),
+          0 10px 28px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+        transform: translate(-50%, -50%);
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-weight: 400;
+        font-size: 1.15rem;
+        letter-spacing: 0.2em;
+        color: #f5e6c8;
+        text-decoration: none;
+        cursor: pointer;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      }
+
+      button.palace-link {
+        margin: 0;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
+      .palace-link::before {
+        content: "";
+        position: absolute;
+        inset: 3px;
+        border-radius: 4px;
+        border: 1px solid rgba(212, 175, 55, 0.22);
+        pointer-events: none;
+      }
+
+      .palace-link--static {
+        cursor: default;
+        opacity: 0.92;
+      }
+
+      .palace-link--nav:hover,
+      .palace-link--nav:focus-visible {
+        transform: translate(-50%, -50%) scale(1.04);
+        filter: brightness(1.08);
+        box-shadow:
+          0 0 0 1px rgba(212, 175, 55, 0.65),
+          0 14px 36px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        outline: none;
+      }
+
+      .palace-link--nav:focus-visible {
+        outline: 2px solid rgba(212, 175, 55, 0.85);
+        outline-offset: 4px;
+      }
+
+      .palace-link--static:hover,
+      .palace-link--static:focus-visible {
+        transform: translate(-50%, -50%);
+        filter: brightness(1.02);
+        box-shadow:
+          0 0 0 1px rgba(139, 0, 0, 0.35),
+          0 10px 28px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+      }
+
+      .scene-img {
+        display: block;
+        width: 100%;
+        max-width: none;
+        height: auto;
+        vertical-align: middle;
+      }
+
+    </style>
+  </head>
+  <body class="font-sansCN">
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+      <div class="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <a href="./index.html" class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</a>
+        <div class="flex flex-wrap items-center gap-6 font-flow text-lg tracking-[0.22em] md:text-xl">
+          <a href="./index.html" class="text-amber-100/90">首页</a>
+          <a href="./list.html" class="text-zinc-300 transition-colors hover:text-amber-100/95">建筑分类</a>
+        </div>
+        <a
+          href="./index.html"
+          class="rounded-md border border-white/15 bg-stone-800/60 px-4 py-2 font-flow text-base tracking-[0.16em] text-stone-100 transition-colors hover:bg-stone-700/80 md:text-lg"
+        >
+          返回首页
+        </a>
+      </div>
+    </nav>
+
+    <main class="w-full max-w-none pt-[5.25rem]">
+      <!-- 第一景：通栏铺满；玉佩锚点用 left/bottom 微调 -->
+      <section id="scene1" class="relative w-full">
+        <img
+          class="scene-img"
+          src="./assets/gugong-journey-1.png"
+          alt="古建山水长卷"
+          loading="eager"
+          decoding="async"
+        />
+        <!--
+          自上而下：恭王府 → 万宁桥 → 宛平城 → 卢沟桥 → 四合院 → 故宫（仅故宫可点进内景）
+          定位：left/top 为百分比，锚点在按钮中心（translate -50% -50%）。若与插图有偏差可微调 style。
+        -->
+        <button
+          type="button"
+          class="palace-link palace-link--static"
+          style="left: 26%; top: 14%"
+          aria-label="恭王府（示意）"
+          title="敬请期待"
+        >
+          恭王府
+        </button>
+        <button
+          type="button"
+          class="palace-link palace-link--static"
+          style="left: 50%; top: 30%"
+          aria-label="万宁桥（示意）"
+          title="敬请期待"
+        >
+          万宁桥
+        </button>
+        <button
+          type="button"
+          class="palace-link palace-link--static"
+          style="left: 71%; top: 40%"
+          aria-label="宛平城（示意）"
+          title="敬请期待"
+        >
+          宛平城
+        </button>
+        <button
+          type="button"
+          class="palace-link palace-link--static"
+          style="left: 24%; top: 56%"
+          aria-label="卢沟桥（示意）"
+          title="敬请期待"
+        >
+          卢沟桥
+        </button>
+        <button
+          type="button"
+          class="palace-link palace-link--static"
+          style="left: 84%; top: 72%"
+          aria-label="四合院（示意）"
+          title="敬请期待"
+        >
+          四合院
+        </button>
+        <a
+          id="jadeGugong"
+          class="palace-link palace-link--nav"
+          href="./gugong-palace-map.html"
+          style="left: 50%; top: 86%"
+          aria-label="跳转到故宫内景图页面"
+        >
+          故宫
+        </a>
+      </section>
+    </main>
+  </body>
+</html>

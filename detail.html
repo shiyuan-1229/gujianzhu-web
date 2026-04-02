@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>故宫太和殿 · 细部与风骨</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              xuans: "#0a0a0a",
+              qianbai: "#f0f0f0",
+              shiqing: "#1661ab",
+              zhusha: "#ff461f",
+              paper: "#f5f5f0",
+              ink: "#121212",
+            },
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --bg0: #1a1a2e;
+        --bg1: #050505;
+        --paper: #121212;
+        --fg: #e0e0e0;
+        --muted: rgba(224, 224, 224, 0.72);
+        --gold: #d4af37;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: radial-gradient(1200px 820px at 50% 40%, var(--bg0), var(--bg1) 68%);
+        color: var(--fg);
+        line-height: 1.8;
+        letter-spacing: 1px;
+      }
+
+      h1,
+      h2,
+      h3,
+      .font-serifCN {
+        font-family: "Noto Serif SC", "SimSun", serif !important;
+      }
+
+      /* 暗部颗粒：让 Hero 更有"胶片感" */
+      .grain {
+        pointer-events: none;
+        position: fixed;
+        inset: -30%;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+        transform: rotate(-8deg);
+        mix-blend-mode: overlay;
+        opacity: 0.33;
+        z-index: 5;
+        transition: opacity 0.5s ease;
+      }
+
+      body.body--cinematic-hero .grain {
+        opacity: 0.12;
+      }
+
+      /* Hero：背景图容器，使用 transform 做视差 */
+      .hero {
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+        background: #000;
+      }
+
+      .hero-bg {
+        position: absolute;
+        inset: -10% 0 -10% 0;
+        z-index: 0;
+        background-position: center;
+        background-size: cover;
+        will-change: transform;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .hero-video {
+        position: absolute;
+        top: -10%;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        object-fit: cover;
+        object-position: center;
+        pointer-events: none;
+        will-change: transform;
+        transform: translate3d(0, 0, 0);
+        z-index: 1;
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .hero-video.is-active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* 故宫视频模式：提亮画面、减轻暗角 */
+      .hero.hero--cinematic .hero-video.is-active {
+        filter: brightness(1.42) contrast(1.06) saturate(1.06);
+      }
+
+      .hero.hero--cinematic .hero-vignette {
+        background: radial-gradient(1200px 700px at 50% 38%, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.38)),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.06), rgba(10, 10, 10, 0.42));
+      }
+
+      .hero.hero--cinematic .hero-copy {
+        display: none;
+      }
+
+      /* 视频全屏时顶栏不铺灰底，避免挡住画面 */
+      header.header-over-video {
+        background: transparent !important;
+        border-bottom-color: transparent !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      header.header-over-video .font-ancient,
+      header.header-over-video .font-flow,
+      header.header-over-video nav a {
+        text-shadow: 0 1px 14px rgba(0, 0, 0, 0.85), 0 0 1px rgba(0, 0, 0, 0.9);
+      }
+
+      header.header-over-video nav span {
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+      }
+
+      .hero-scroll-cue {
+        pointer-events: none;
+      }
+
+      .hero.hero--cinematic .hero-scroll-cue {
+        pointer-events: auto;
+        cursor: default;
+        border: 1px solid rgba(240, 240, 240, 0.28);
+        background: rgba(0, 0, 0, 0.28);
+        padding: 0.45rem 1.35rem;
+        border-radius: 9999px;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        color: rgba(240, 240, 240, 0.78);
+      }
+
+      .hero-vignette {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: radial-gradient(1200px 700px at 50% 38%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.78)),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.20), rgba(10, 10, 10, 0.85));
+        pointer-events: none;
+      }
+
+      .hero-title {
+        text-shadow: 0 18px 80px rgba(0, 0, 0, 0.85), 0 2px 0 rgba(0, 0, 0, 0.35);
+        letter-spacing: 0.08em;
+        will-change: transform;
+      }
+
+      /* 画册纸张质感（内容区） */
+      .paper {
+        background: var(--paper);
+        color: var(--fg);
+      }
+
+      /* 黑 -> 纸 的过渡，避免割裂 */
+      .paper-bridge {
+        height: 140px;
+        background: linear-gradient(180deg, rgba(5, 5, 5, 1), rgba(18, 18, 18, 1));
+      }
+
+      .paper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.05), transparent 38%),
+          radial-gradient(circle at 80% 92%, rgba(255, 255, 255, 0.04), transparent 42%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.0)),
+          radial-gradient(900px 520px at 18% 18%, rgba(58, 12, 163, 0.08), transparent 60%),
+          radial-gradient(900px 520px at 82% 84%, rgba(212, 175, 55, 0.06), transparent 62%);
+        opacity: 0.55;
+        mix-blend-mode: screen;
+      }
+
+      /* Drop cap：段落首字下沉放大 */
+      .dropcap::first-letter {
+        float: left;
+        font-family: "Noto Serif SC", serif;
+        font-weight: 700;
+        font-size: 3.4rem;
+        line-height: 0.9;
+        padding: 0.28rem 0.55rem 0 0;
+        margin-top: 0.10rem;
+        color: rgba(212, 175, 55, 0.92);
+      }
+
+      /* 图像：不做硬边框，用柔和阴影与裁切 */
+      .plate {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 26px 90px rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(212, 175, 55, 0.18);
+      }
+
+      /* 线框区：墨线与纸张的对比 */
+      .wireframe-shell {
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.00));
+        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(212, 175, 55, 0.16);
+      }
+
+      .wireframe svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .wirepath {
+        fill: none;
+        stroke: rgba(224, 224, 224, 0.82);
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .wire-accent {
+        stroke: rgba(212, 175, 55, 0.78);
+        stroke-width: 2.4;
+      }
+
+      /* 小屏优化 */
+      @media (max-width: 860px) {
+        .hero-title {
+          letter-spacing: 0.04em;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="font-sansCN">
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- 顶部导航：灰色半透明 + 古风字 -->
+    <header
+      id="siteHeader"
+      class="fixed left-0 top-0 z-20 w-full border-b border-white/10 bg-gray-900/50 text-zinc-200 shadow-[0_4px_20px_rgba(0,0,0,0.28)] backdrop-blur-md"
+    >
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 md:px-6 md:py-3">
+        <a href="./index.html" class="select-none">
+          <div class="font-ancient text-[1.35rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.55rem]">古建智寻</div>
+          <div class="mt-0.5 font-flow text-[10px] tracking-[0.2em] text-zinc-400 md:text-xs md:tracking-[0.22em]">细部与风骨</div>
+        </a>
+        <nav class="flex items-center gap-4 font-flow text-sm tracking-[0.2em] text-zinc-400 md:gap-5 md:text-[0.9375rem] md:tracking-[0.24em]">
+          <a class="transition-colors hover:text-amber-100/95" href="./list.html">列表</a>
+          <span class="opacity-30">·</span>
+          <a class="transition-colors hover:text-amber-100/95" href="./index.html">地图</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero：100vh 视差 -->
+    <section class="hero" id="heroSection">
+      <div
+        id="heroBg"
+        class="hero-bg"
+        style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg');"
+        role="img"
+        aria-label="古建筑背景图"
+      ></div>
+      <video
+        id="heroVideo"
+        class="hero-video"
+        muted
+        playsinline
+        loop
+        preload="metadata"
+        aria-hidden="true"
+      ></video>
+      <div class="hero-vignette" aria-hidden="true"></div>
+
+      <div class="relative z-10 h-full">
+        <div class="mx-auto max-w-6xl h-full px-6 flex items-center">
+          <div id="heroCopy" class="hero-copy w-full">
+            <div class="text-qianbai/70 text-xs tracking-[0.34em] mb-5">
+              PALACE · CEREMONY · AXIS
+            </div>
+            <h1
+              id="heroTitle"
+              class="hero-title font-serifCN text-qianbai text-[64px] md:text-[92px] leading-[1.02]"
+            >
+              故宫太和殿
+            </h1>
+            <div class="mt-7 flex items-center gap-4">
+              <div class="h-px w-24 bg-gradient-to-r from-qianbai/0 via-qianbai/55 to-qianbai/0"></div>
+              <div class="text-qianbai/70 text-sm tracking-[0.22em]">北京 · 中轴</div>
+              <div class="h-px flex-1 bg-gradient-to-r from-qianbai/0 via-qianbai/18 to-qianbai/0"></div>
+            </div>
+
+            <div class="mt-10 text-qianbai/70 text-sm leading-relaxed max-w-xl">
+              向下滚动，背景缓行如云；标题逆风而上，如同礼制空间里的步伐。此页以"画册"的节奏，呈现宫殿的秩序、尺度与光影。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 故宫视频页仅保留此提示；其它建筑详情仍显示上方 heroCopy -->
+      <div
+        id="heroScrollCue"
+        class="hero-scroll-cue absolute bottom-10 left-1/2 z-10 -translate-x-1/2 select-none text-qianbai/55 text-xs tracking-[0.36em]"
+      >
+        SCROLL
+      </div>
+    </section>
+
+    <div class="paper-bridge" aria-hidden="true"></div>
+
+    <!-- 内容区：米白画册 -->
+    <section class="paper relative">
+      <div class="mx-auto max-w-6xl px-6 py-20 md:py-28 relative z-10">
+        <div class="grid grid-cols-12 gap-8 items-start">
+          <div class="col-span-12 md:col-span-7">
+            <h2 class="font-serifCN text-3xl md:text-4xl tracking-wide leading-tight" style="color: var(--gold)">
+              结构不是静止的几何，<br />
+              而是一种被风与雪校准过的经验。
+            </h2>
+          </div>
+          <div class="col-span-12 md:col-span-5">
+            <div class="text-sm tracking-[0.22em] leading-relaxed" style="color: rgba(224,224,224,0.72)">
+              以极深的暗部进入，再以米白纸面铺开——让观看从"惊叹"转入"细读"。在这里，台基、屋脊与出檐不只是名词，
+              它们是节奏、比例与工艺。
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-14 md:mt-16 grid grid-cols-12 gap-8 items-start">
+          <div class="col-span-12 md:col-span-5">
+            <div class="plate">
+              <img
+                class="w-full h-[520px] object-cover"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1600px-Forbidden_City_Beijing_detail_2019.jpg"
+                alt="太和殿细节图"
+                loading="lazy"
+              />
+            </div>
+            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+              PLATE 01 · 屋面与出檐的层次
+            </div>
+          </div>
+
+          <div class="col-span-12 md:col-span-7">
+            <p class="dropcap text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+              太和殿以礼制为纲，以尺度为神。高台基托举殿体，层层出檐收束体量，视觉在"仰望"中完成秩序的建立。
+              远看是中轴的线，近看是木作与彩画的呼吸。每一道比例与间距，都在长期的经验里被反复校准。
+            </p>
+            <p class="mt-8 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+              画册式的留白，是为了让你听见材质：石的沉稳、木的温润、琉璃瓦的冷光、尘埃的浮游。它们共同构成一种"低频的庄严"。
+              不必堆砌信息，只需给空间足够的余裕，秩序就会自己讲述。
+            </p>
+
+            <div class="mt-10 grid grid-cols-2 gap-5">
+              <div class="plate">
+                <img
+                  class="w-full h-[240px] object-cover"
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Forbidden_City_Beijing_roof_detail.jpg/1200px-Forbidden_City_Beijing_roof_detail.jpg"
+                  alt="屋脊与瓦当细部"
+                  loading="lazy"
+                />
+              </div>
+              <div class="plate">
+                <img
+                  class="w-full h-[240px] object-cover"
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Forbidden_City_Beijing_courtyard_2017.jpg/1200px-Forbidden_City_Beijing_courtyard_2017.jpg"
+                  alt="院落与空间层次"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+              PLATE 02–03 · 架构与空间的层次
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16 md:mt-20 grid grid-cols-12 gap-8 items-start">
+          <div class="col-span-12 md:col-span-6 md:order-2">
+            <div class="plate">
+              <img
+                class="w-full h-[560px] object-cover"
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Forbidden_City_Beijing_corridor_light.jpg/1600px-Forbidden_City_Beijing_corridor_light.jpg"
+                alt="宫殿光影图"
+                loading="lazy"
+              />
+            </div>
+            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+              PLATE 04 · 光沿着梁架行走
+            </div>
+          </div>
+          <div class="col-span-12 md:col-span-6 md:order-1">
+            <h3 class="font-serifCN text-2xl tracking-wide" style="color: var(--gold)">尺度的"规矩"，是审美的根</h3>
+            <p class="mt-7 dropcap text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+              当我们说"东方美学"，其实是在说一种克制：让结构成为装饰，让比例替代繁复。中轴、台阶与开间的重复，
+              像一段被推敲、最终被定格的节拍。它不是符号，而是一套把经验写进空间里的算法。
+            </p>
+            <p class="mt-8 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+              因而，页面也遵循同样的纪律：非对称的排布、充分的页边距、让图像与文字交错但不拥挤。你不需要被告知"该看哪里"，
+              因为留白会引导视线。
+            </p>
+            <div class="mt-10 flex items-center gap-4">
+              <div class="h-px w-16" style="background: rgba(224,224,224,0.28)"></div>
+              <div class="text-xs tracking-[0.30em]" style="color: rgba(224,224,224,0.65)">NOTES · PROPORTION</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 线框图：滚动到此处触发"一笔画" -->
+        <div class="mt-16 md:mt-20">
+          <div class="grid grid-cols-12 gap-8 items-end">
+            <div class="col-span-12 md:col-span-5">
+              <h3 class="font-serifCN text-2xl tracking-wide" style="color: var(--gold)">线框图 · 斗拱意象</h3>
+              <p class="mt-6 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+                当你滚动至此，墨线会像画笔一样自动勾勒。它不是工程图，而是一种"结构的速写"——用最少的线，描出力的走向。
+              </p>
+              <div class="mt-6 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+                SCROLL TO DRAW · STROKE-DASHARRAY
+              </div>
+            </div>
+            <div class="col-span-12 md:col-span-7">
+              <div id="wireframeBlock" class="wireframe-shell p-6 md:p-8">
+                <div class="wireframe">
+                  <svg viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" aria-label="斗拱线框图">
+                    <!-- 底座 -->
+                    <path
+                      class="wirepath"
+                      d="M120 410 L800 410 L800 452 L120 452 Z"
+                    />
+                    <!-- 柱 -->
+                    <path class="wirepath" d="M220 130 L220 410" />
+                    <path class="wirepath" d="M700 130 L700 410" />
+
+                    <!-- 梁 -->
+                    <path class="wirepath" d="M190 150 L730 150" />
+                    <path class="wirepath" d="M170 185 L750 185" />
+
+                    <!-- 斗拱（多边形意象） -->
+                    <path
+                      class="wirepath wire-accent"
+                      d="M280 185 L280 235 L330 235 L330 265 L370 265 L370 235 L430 235 L430 270 L490 270 L490 235 L550 235 L550 265 L590 265 L590 235 L640 235 L640 185"
+                    />
+
+                    <!-- 檐口 -->
+                    <path class="wirepath" d="M150 120 L770 120" />
+                    <path class="wirepath" d="M180 98 L740 98" />
+                    <path class="wirepath" d="M220 78 L700 78" />
+
+                    <!-- 细部辅助线 -->
+                    <path class="wirepath" d="M240 312 L680 312" />
+                    <path class="wirepath" d="M240 338 L680 338" />
+                    <path class="wirepath" d="M240 364 L680 364" />
+                  </svg>
+                </div>
+              </div>
+              <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+                PLATE 05 · 结构速写（示意）
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16 md:mt-20 flex items-center justify-between">
+          <a href="./list.html" class="text-xs tracking-[0.28em] hover:text-white transition" style="color: rgba(224,224,224,0.72)">
+            ← BACK TO LIST
+          </a>
+          <div class="text-xs tracking-[0.22em]" style="color: rgba(224,224,224,0.45)">DETAIL</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+    <script>
+      document.documentElement.style.webkitFontSmoothing = "antialiased";
+      document.documentElement.style.mozOsxFontSmoothing = "grayscale";
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // 建筑数据库
+      const BUILDINGS_DB = {
+        "北京故宫": {
+          name: "北京故宫",
+          category: "皇宫",
+          province: "北京",
+          year: "明永乐四年（1406年）",
+          desc: "明清两代皇家宫殿，世界现存规模最大的木质结构古建筑群，体现中国古代皇家建筑最高成就。",
+          heroVideo: "./古建筑/计算机大赛-景点图片/北京市/北京故宫/故宫.mp4",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1600px-Forbidden_City_Beijing_detail_2019.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Forbidden_City_Beijing_roof_detail.jpg/1200px-Forbidden_City_Beijing_roof_detail.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Forbidden_City_Beijing_courtyard_2017.jpg/1200px-Forbidden_City_Beijing_courtyard_2017.jpg"
+          ]
+        },
+        "北京四合院": {
+          name: "北京四合院",
+          category: "民居",
+          province: "北京",
+          year: "元代定型，明清成熟",
+          desc: "典型北方民居，中轴对称、院落围合，承载传统礼制与市井生活文化。",
+          heroImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
+          detailImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
+          subImages: [
+            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200",
+            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"
+          ]
+        },
+        "卢沟桥": {
+          name: "卢沟桥",
+          category: "桥梁",
+          province: "北京",
+          year: "金大定二十九年（1189年）",
+          desc: "华北地区现存最古老的石拱桥，桥身雕刻精美，见证多段历史。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/2560px-Marco_Polo_Bridge_1.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Marco_Polo_Bridge_lions.jpg/1600px-Marco_Polo_Bridge_lions.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/1200px-Marco_Polo_Bridge_1.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Marco_Polo_Bridge_lions.jpg/1200px-Marco_Polo_Bridge_lions.jpg"
+          ]
+        },
+        "颐和园": {
+          name: "颐和园",
+          category: "官府",
+          province: "北京",
+          year: "清乾隆十五年（1750年）",
+          desc: "清代皇家园林，集南北造园艺术之大成，属于皇家行宫建筑。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Summer_Palace_Long_Corridor_2010.jpg/2560px-Summer_Palace_Long_Corridor_2010.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Summer_Palace_Beijing_2019.jpg/1600px-Summer_Palace_Beijing_2019.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Summer_Palace_Long_Corridor_2010.jpg/1200px-Summer_Palace_Long_Corridor_2010.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Summer_Palace_Beijing_2019.jpg/1200px-Summer_Palace_Beijing_2019.jpg"
+          ]
+        },
+        "乔家大院": {
+          name: "乔家大院",
+          category: "民居",
+          province: "山西",
+          year: "清乾隆年间（1756年）",
+          desc: "清代晋商大院代表，高墙深院、砖雕精美，体现晋商文化与家族聚居形态。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/2560px-Qiao_Family_Compound_2013.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1600px-Qiao_Family_Compound_2013.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1200px-Qiao_Family_Compound_2013.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1200px-Qiao_Family_Compound_2013.jpg"
+          ]
+        },
+        "霍州署": {
+          name: "霍州署",
+          category: "官府",
+          province: "山西",
+          year: "始建于唐",
+          desc: "我国现存最完整的古代州级衙署，与故宫、直隶总督署、内乡县衙并称中国四大古代官衙。",
+          heroImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
+          detailImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
+          subImages: [
+            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200",
+            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"
+          ]
+        },
+        "鱼沼飞梁": {
+          name: "鱼沼飞梁",
+          category: "桥梁",
+          province: "山西",
+          year: "始建于北魏",
+          desc: "晋祠内十字形石桥，是中国现存最早的十字形桥梁，展现古代桥梁工程智慧。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/2560px-Jinci_Temple_Taiyuan_2013.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/1600px-Jinci_Temple_Taiyuan_2013.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/1200px-Jinci_Temple_Taiyuan_2013.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/1200px-Jinci_Temple_Taiyuan_2013.jpg"
+          ]
+        },
+        "平遥古城墙": {
+          name: "平遥古城墙",
+          category: "官府",
+          province: "山西",
+          year: "明代城墙",
+          desc: "中国现存最完整的古代县城城墙，体现古代城市防御与官府规划智慧。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/2560px-Pingyao_city_wall_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/1600px-Pingyao_city_wall_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/1200px-Pingyao_city_wall_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/1200px-Pingyao_city_wall_2012.jpg"
+          ]
+        },
+        "苏州拙政园": {
+          name: "苏州拙政园",
+          category: "民居",
+          province: "江苏",
+          year: "明正德初年（1509年）",
+          desc: "明代江南园林代表，以水为核心，亭台楼阁错落，是文人写意山水园的典范。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/2560px-Zhuozheng_Garden_Suzhou_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/1600px-Zhuozheng_Garden_Suzhou_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/1200px-Zhuozheng_Garden_Suzhou_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/1200px-Zhuozheng_Garden_Suzhou_2012.jpg"
+          ]
+        },
+        "淮安府衙": {
+          name: "淮安府衙",
+          category: "官府",
+          province: "江苏",
+          year: "明洪武三年（1370年）",
+          desc: "明清府级官署，现存建筑保存完整，展现古代地方行政机构布局。",
+          heroImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
+          detailImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
+          subImages: [
+            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200",
+            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"
+          ]
+        },
+        "宝带桥": {
+          name: "宝带桥",
+          category: "桥梁",
+          province: "江苏",
+          year: "唐元和十一年（816年）",
+          desc: "唐代多孔连拱石桥，是中国现存最长的古代石桥之一，为大运河重要遗产点。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Baodai_Bridge_Suzhou_2012.jpg/2560px-Baodai_Bridge_Suzhou_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Baodai_Bridge_Suzhou_2012.jpg/1600px-Baodai_Bridge_Suzhou_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Baodai_Bridge_Suzhou_2012.jpg/1200px-Baodai_Bridge_Suzhou_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Baodai_Bridge_Suzhou_2012.jpg/1200px-Baodai_Bridge_Suzhou_2012.jpg"
+          ]
+        },
+        "周庄民居": {
+          name: "周庄民居",
+          category: "民居",
+          province: "江苏",
+          year: "江南水乡",
+          desc: "江南水乡民居代表，粉墙黛瓦、依水而建，体现江南市井生活与建筑美学。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/2560px-Zhouzhuang_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/1600px-Zhouzhuang_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/1200px-Zhouzhuang_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/1200px-Zhouzhuang_2012.jpg"
+          ]
+        },
+        "阆中古城民居": {
+          name: "阆中古城民居",
+          category: "民居",
+          province: "四川",
+          year: "明清川北",
+          desc: "明清川北民居代表，融合北方四合院与南方吊脚楼特点，依山傍水布局。",
+          heroImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
+          detailImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
+          subImages: [
+            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200",
+            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"
+          ]
+        },
+        "泸州龙脑桥": {
+          name: "泸州龙脑桥",
+          category: "桥梁",
+          province: "四川",
+          year: "明洪武年间（1378年）",
+          desc: "明代石雕桥，以龙首雕刻为特色，是四川地区古代桥梁艺术精品。",
+          heroImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
+          detailImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
+          subImages: [
+            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200",
+            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"
+          ]
+        },
+        "泸定桥": {
+          name: "泸定桥",
+          category: "桥梁",
+          province: "四川",
+          year: "清康熙四十四年（1705年）",
+          desc: "清代铁索桥，横跨大渡河，是中国古代索桥建筑的杰出代表。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/2560px-Luding_Bridge_2016.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/1600px-Luding_Bridge_2016.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/1200px-Luding_Bridge_2016.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/1200px-Luding_Bridge_2016.jpg"
+          ]
+        },
+        "陈家祠": {
+          name: "陈家祠",
+          category: "民居",
+          province: "广东",
+          year: "清光绪十四年（1888年）",
+          desc: "清代岭南建筑代表，以砖雕、陶塑、灰塑等装饰工艺闻名，是岭南民间建筑艺术巅峰。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/2560px-Chen_Clan_Academy_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/1600px-Chen_Clan_Academy_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/1200px-Chen_Clan_Academy_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/1200px-Chen_Clan_Academy_2012.jpg"
+          ]
+        },
+        "潮州广济桥": {
+          name: "潮州广济桥",
+          category: "桥梁",
+          province: "广东",
+          year: "南宋乾道七年（1171年）",
+          desc: "南宋启闭式石桥，集梁桥、浮桥、拱桥于一体，被誉为世界上最早的启闭式桥梁。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/2560px-Guangji_Bridge_Chaozhou_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/1600px-Guangji_Bridge_Chaozhou_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/1200px-Guangji_Bridge_Chaozhou_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/1200px-Guangji_Bridge_Chaozhou_2012.jpg"
+          ]
+        },
+        "开平碉楼": {
+          name: "开平碉楼",
+          category: "民居",
+          province: "广东",
+          year: "明清民国",
+          desc: "明清至民国时期防御性民居，融合中西建筑元素，是岭南侨乡建筑代表。",
+          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/2560px-Kaiping_Diaolou_2012.jpg",
+          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/1600px-Kaiping_Diaolou_2012.jpg",
+          subImages: [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/1200px-Kaiping_Diaolou_2012.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/1200px-Kaiping_Diaolou_2012.jpg"
+          ]
+        }
+      };
+
+      // 从URL获取建筑名称
+      const getBuildingFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('building') || '北京故宫';
+      };
+
+      // 更新页面内容
+      const updatePageContent = () => {
+        const buildingName = getBuildingFromUrl();
+        const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB['北京故宫'];
+
+        // 更新标题
+        document.title = `${building.name} · 华夏建筑选集`;
+        document.getElementById('heroTitle').textContent = building.name;
+        
+        // 更新 Hero：北京故宫用本地视频，其余用背景图
+        const heroBg = document.getElementById("heroBg");
+        const heroVideo = document.getElementById("heroVideo");
+        const videoSrc = building.heroVideo;
+        const heroSection = document.getElementById("heroSection");
+        const siteHeader = document.getElementById("siteHeader");
+        if (videoSrc && heroVideo) {
+          heroVideo.classList.add("is-active");
+          if (heroVideo.getAttribute("src") !== videoSrc) {
+            heroVideo.src = videoSrc;
+          }
+          heroVideo.play().catch(() => {});
+          heroBg.style.backgroundImage = "none";
+          heroBg.style.backgroundColor = "#000";
+          heroSection?.classList.add("hero--cinematic");
+          siteHeader?.classList.add("header-over-video");
+          document.body.classList.add("body--cinematic-hero");
+        } else {
+          heroVideo.classList.remove("is-active");
+          heroVideo.pause();
+          heroVideo.removeAttribute("src");
+          heroVideo.load();
+          heroBg.style.backgroundColor = "";
+          heroBg.style.backgroundImage = `url('${building.heroImage}')`;
+          heroSection?.classList.remove("hero--cinematic");
+          siteHeader?.classList.remove("header-over-video");
+          document.body.classList.remove("body--cinematic-hero");
+        }
+        
+        // 更新副标题
+        const subtitleEl = document.querySelector('.hero .text-qianbai\\/70.text-sm');
+        if (subtitleEl) {
+          subtitleEl.textContent = `${building.province} · ${building.category}`;
+        }
+
+        // 更新顶部标签
+        const tagEl = document.querySelector('.hero .text-qianbai\\/70.text-xs');
+        if (tagEl) {
+          tagEl.textContent = `${building.category.toUpperCase()} · ${building.province.toUpperCase()} · ${building.year}`;
+        }
+
+        // 更新介绍文字
+        const introEl = document.querySelector('.hero .text-qianbai\\/70.text-sm.leading-relaxed');
+        if (introEl) {
+          introEl.textContent = building.desc;
+        }
+
+        // 更新详情图片
+        const detailImg = document.querySelector('.paper img[alt="太和殿细节图"]');
+        if (detailImg) {
+          detailImg.src = building.detailImage;
+          detailImg.alt = `${building.name}细节图`;
+        }
+
+        // 更新小图
+        const subImages = document.querySelectorAll('.paper .grid.grid-cols-2 img');
+        if (subImages.length >= 2) {
+          subImages[0].src = building.subImages[0];
+          subImages[0].alt = `${building.name}细部图`;
+          subImages[1].src = building.subImages[1];
+          subImages[1].alt = `${building.name}全景图`;
+        }
+      };
+
+      // 初始化页面
+      updatePageContent();
+
+      // Hero 视差：背景/视频慢，文字快
+      const bg = document.getElementById("heroBg");
+      const heroVideoEl = document.getElementById("heroVideo");
+      const title = document.getElementById("heroTitle");
+
+      gsap.to(bg, {
+        y: 140,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      gsap.to(heroVideoEl, {
+        y: 140,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      gsap.to(title, {
+        y: -220,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      // 线框"画笔"动画：进入视口自动勾勒
+      const wireBlock = document.getElementById("wireframeBlock");
+      const paths = wireBlock.querySelectorAll("path");
+
+      paths.forEach((p) => {
+        const len = p.getTotalLength();
+        p.style.strokeDasharray = String(len);
+        p.style.strokeDashoffset = String(len);
+      });
+
+      gsap.to(paths, {
+        strokeDashoffset: 0,
+        duration: 1.6,
+        ease: "power2.out",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: wireBlock,
+          start: "top 72%",
+          once: true,
+        },
+      });
+    </script>
+  </body>
+</html>

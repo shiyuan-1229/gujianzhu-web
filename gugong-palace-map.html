@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>故宫内景 · 古建智寻</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        background: #0a0b0e;
+        color: #f5f0e6;
+        overflow-x: hidden;
+      }
+      .scene-img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        vertical-align: middle;
+      }
+      .scene-stage {
+        width: 100%;
+        height: calc(100vh - 5.25rem);
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+      <div class="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <a href="./index.html" class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</a>
+        <div class="flex flex-wrap items-center gap-6 font-flow text-lg tracking-[0.22em]">
+          <a href="./index.html" class="text-zinc-300 transition-colors hover:text-amber-100/95">首页</a>
+          <a href="./gugong-explore.html" class="text-amber-100/90">故宫探秘</a>
+        </div>
+        <a
+          href="./gugong-explore.html"
+          class="rounded-md border border-white/15 bg-stone-800/60 px-4 py-2 font-flow text-base tracking-[0.16em] text-stone-100 transition-colors hover:bg-stone-700/80"
+        >
+          返回上一页
+        </a>
+      </div>
+    </nav>
+
+    <main class="w-full max-w-none pt-[5.25rem]">
+      <section class="scene-stage relative">
+        <img
+          class="scene-img"
+          src="./assets/gugong-journey-2.png"
+          alt="故宫建筑群鸟瞰"
+          loading="eager"
+          decoding="async"
+        />
+      </section>
+    </main>
+  </body>
+</html>

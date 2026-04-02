@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>古建筑列表 · 华夏建筑选集</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              xuans: "#0a0a0a",
+              qianbai: "#f0f0f0",
+              shiqing: "#1661ab",
+              zhusha: "#ff461f",
+            },
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --bg0: #1a1a2e;
+        --bg1: #050505;
+        --fg: rgba(240, 240, 240, 0.92);
+        --muted: rgba(240, 240, 240, 0.62);
+        --gold: #d4af37;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: radial-gradient(1200px 820px at 50% 40%, var(--bg0), var(--bg1) 68%);
+        color: var(--fg);
+        line-height: 1.8;
+        letter-spacing: 1px;
+        overflow: hidden; /* 整页不滚，右侧独立滚动 */
+      }
+
+      h1,
+      h2,
+      h3,
+      .font-serifCN {
+        font-family: "Noto Serif SC", "SimSun", serif !important;
+      }
+
+      /* 背景层次：暗部与颗粒 */
+      .grain {
+        pointer-events: none;
+        position: fixed;
+        inset: -30%;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+        transform: rotate(-8deg);
+        mix-blend-mode: overlay;
+        opacity: 0.42;
+        z-index: 1;
+      }
+
+      .bg-bloom {
+        pointer-events: none;
+        position: fixed;
+        inset: -10%;
+        background:
+          url("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg")
+            center/cover no-repeat,
+          radial-gradient(900px 700px at 18% 18%, rgba(212, 175, 55, 0.22), transparent 60%),
+          radial-gradient(900px 700px at 78% 84%, rgba(35, 35, 42, 0.78), transparent 62%);
+        filter: blur(0px);
+        opacity: 0.78;
+        z-index: 1;
+      }
+      .bg-bloom::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(520px 260px at 34% 52%, rgba(212, 175, 55, 0.18), transparent 62%),
+          radial-gradient(620px 320px at 72% 62%, rgba(224, 224, 224, 0.05), transparent 60%),
+          linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.72));
+        mix-blend-mode: screen;
+        opacity: 0.9;
+      }
+
+      /* 竖排：标题与简介 */
+      .vertical {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+      }
+
+      /* 卷轴舞台：悬浮玉牌（摒弃网格/瀑布流） */
+      .masonry {
+        position: relative;
+        width: 100%;
+        height: min(720px, 72vh);
+        min-height: 540px;
+        overflow: visible;
+        padding: 40px 10px;
+        background: transparent;
+        border: 0;
+        display: block;
+      }
+      @media (max-width: 860px) {
+        html,
+        body {
+          overflow: auto; /* 小屏允许整页滚动 */
+        }
+        .masonry {
+          height: min(640px, 70vh);
+          min-height: 520px;
+        }
+      }
+
+      .masonry-item {
+        position: absolute;
+        left: 50%;
+        top: 42%;
+        margin: 0;
+        transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+          rotateX(var(--rx, 0deg))
+          rotateY(var(--ry, 0deg))
+          rotateZ(var(--rz, 0deg));
+        transform-style: preserve-3d;
+        will-change: transform;
+        z-index: 2;
+      }
+
+      /* 列表页同步优化：悬浮玻璃卡片 + 金边 + hover 内部微放大 */
+      .arch-card {
+        position: relative;
+        border-radius: 22px;
+        overflow: hidden;
+        width: 300px;
+        height: 460px;
+        transition: box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 260ms ease;
+        opacity: 0.92;
+        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.35);
+        background: rgba(10, 11, 18, 0.55);
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        cursor: pointer;
+        transform-style: preserve-3d;
+      }
+
+      .arch-card:hover {
+        opacity: 1;
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.50);
+      }
+
+      .card-media {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #111;
+      }
+
+      .card-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1);
+        transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+          filter 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        filter: saturate(0.9) contrast(1.02);
+      }
+
+      .arch-card:hover .card-img {
+        transform: scale(1.06);
+        filter: saturate(1) contrast(1.05);
+      }
+
+      .card-mask {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(900px 420px at 28% 18%, rgba(0, 0, 0, 0.20), rgba(0, 0, 0, 0.62)),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.10), rgba(10, 10, 10, 0.72));
+        pointer-events: none;
+        opacity: 0.65;
+        transition: opacity 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .arch-card:hover .card-mask {
+        opacity: 0;
+      }
+
+      /* 玉牌翻面：CSS 3D Flip */
+      .jade-inner {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transition: transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .arch-card.is-flipped .jade-inner {
+        transform: rotateY(180deg);
+      }
+      .jade-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+      }
+      .jade-front {
+        transform: translateZ(28px);
+      }
+      .jade-back {
+        transform: rotateY(180deg) translateZ(28px);
+        background:
+          radial-gradient(600px 320px at 30% 20%, rgba(212, 175, 55, 0.16), transparent 60%),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.10), rgba(10, 10, 10, 0.85));
+        border-radius: 22px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 0;
+        overflow: hidden;
+      }
+      .jade-back-photo-wrap {
+        flex: 1 1 52%;
+        min-height: 0;
+        width: 100%;
+        position: relative;
+        background: #0a0a0a;
+      }
+      .jade-back-photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      .jade-back-text {
+        flex: 0 0 auto;
+        padding: 14px 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: linear-gradient(180deg, rgba(8, 8, 8, 0.2), rgba(10, 10, 10, 0.92));
+      }
+      .jade-back-title {
+        font-family: "Noto Serif SC", "SimSun", serif;
+        font-size: 20px;
+        line-height: 1.2;
+        color: rgba(240, 240, 240, 0.92);
+        letter-spacing: 0.04em;
+      }
+      .jade-back-sub {
+        font-size: 12px;
+        color: rgba(240, 240, 240, 0.68);
+        letter-spacing: 0.10em;
+        line-height: 1.6;
+      }
+      .detail-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(212, 175, 55, 0.45);
+        background: linear-gradient(180deg, rgba(212, 175, 55, 0.16), rgba(212, 175, 55, 0.06));
+        color: rgba(240, 240, 240, 0.92);
+        text-decoration: none;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+        box-shadow: 0 18px 55px rgba(0, 0, 0, 0.40);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+      }
+      .detail-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .card-meta {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 14px 16px 16px;
+        background: linear-gradient(180deg, rgba(10, 10, 10, 0), rgba(10, 10, 10, 0.76));
+      }
+
+      /* 旧的滚动条/网格样式已废弃：此页改为 3D 悬浮排版 */
+
+      .meta-line {
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, rgba(240, 240, 240, 0), rgba(240, 240, 240, 0.22), rgba(240, 240, 240, 0));
+        opacity: 0.9;
+      }
+
+      .gold-underline {
+        position: relative;
+        height: 1px;
+        width: 100%;
+        margin-top: 12px;
+        opacity: 0.92;
+      }
+      .gold-underline::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 1px;
+        width: 100%;
+        background: rgba(240, 240, 240, 0.16);
+      }
+      .gold-underline::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 1px;
+        width: 0%;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.95), rgba(212, 175, 55, 0));
+        transition: width 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .arch-card:hover .gold-underline::after {
+        width: 100%;
+      }
+
+      /* 横向滚动卡片样式 */
+      .scroll-container {
+        position: relative;
+        z-index: 2;
+        overflow-x: auto;
+        overflow-y: hidden;
+        width: 100% !important;
+        height: 100% !important;
+        background: transparent;
+        box-sizing: border-box;
+      }
+      
+      .masonry {
+        display: flex;
+        gap: 0;
+        z-index: 1;
+        position: relative;
+        min-width: max-content;
+        padding: 0 !important;
+      }
+      
+      .masonry-item {
+        flex: 0 0 auto;
+        width: 300px;
+        margin-bottom: 0;
+        margin-right: -34px; /* 允许卡片边缘轻微重叠 */
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        transform-style: flat !important;
+        z-index: auto !important;
+      }
+      .masonry-item:last-child {
+        margin-right: 0;
+      }
+      
+      .arch-card {
+        width: 100%;
+        height: 380px;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+        background: rgba(10, 11, 18, 0.55);
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      
+      .arch-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 48px 160px rgba(0, 0, 0, 0.65);
+      }
+
+      /* 点击后也保持上浮（不影响翻面/跳转交互） */
+      .arch-card.is-active {
+        transform: translateY(-12px);
+      }
+      
+      .card-media {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #111;
+      }
+      
+      .card-meta {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 14px 16px 16px;
+        background: linear-gradient(180deg, rgba(10, 10, 10, 0), rgba(10, 10, 10, 0.76));
+      }
+      
+      .card-meta .font-serifCN {
+        font-size: 1.2rem;
+        color: rgba(240, 240, 240, 0.92) !important;
+      }
+      
+      .card-meta .text-xs {
+        font-size: 0.8rem;
+        color: rgba(240, 240, 240, 0.68) !important;
+      }
+
+      /* 覆盖卡片里原本的 tailwind 颜色类（保持翻面/正面都更统一） */
+      .card-meta .text-gray-800,
+      .card-meta .text-gray-700 {
+        color: rgba(240, 240, 240, 0.68) !important;
+      }
+      .card-meta [class*="text-qianbai/60"] {
+        color: rgba(240, 240, 240, 0.68) !important;
+      }
+      .card-meta [class*="text-qianbai/55"] {
+        color: rgba(240, 240, 240, 0.55) !important;
+      }
+      
+      /* 横向滚动条样式 */
+      .scroll-container::-webkit-scrollbar {
+        height: 8px;
+      }
+      
+      .scroll-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      
+      .scroll-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 10px;
+      }
+      
+      .scroll-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.8);
+      }
+      .scroll-middle {
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+      .scroll-content {
+        display: block !important;
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .scroll-content .masonry {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 78%;
+        height: 60%;
+        min-height: 220px;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body class="font-sansCN">
+    <!-- 背景图片 -->
+      <div class="fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
+        <img
+          src="./background2.jpg"
+          alt="背景"
+          class="w-[106%] h-[106%] object-contain"
+        />
+      </div>
+
+    <div class="bg-bloom" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <main class="h-screen w-screen relative z-10">
+      <!-- 顶部导航栏（对齐首页视觉，不改筛选/交互逻辑） -->
+      <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+        <div class="container mx-auto flex items-center justify-between px-4 py-3">
+          <div class="select-none">
+            <div class="font-ancient text-[1.65rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.9rem]">古建智寻</div>
+            <div class="mt-1 font-flow text-xs tracking-[0.2em] text-zinc-400">华夏建筑选集</div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 md:gap-3">
+            <button class="filter-btn active rounded-md border border-amber-200/35 bg-stone-700/70 px-3 py-2 font-flow text-sm tracking-[0.18em] text-stone-100 transition-all duration-300 hover:bg-stone-600/80 md:px-4" data-category="all">全部</button>
+            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-zinc-300 transition-all duration-300 hover:border-white/15 hover:text-amber-100 md:px-4" data-category="民居">民居</button>
+            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-zinc-300 transition-all duration-300 hover:border-white/15 hover:text-amber-100 md:px-4" data-category="皇宫">皇宫</button>
+            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-zinc-300 transition-all duration-300 hover:border-white/15 hover:text-amber-100 md:px-4" data-category="官府">官府</button>
+            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-zinc-300 transition-all duration-300 hover:border-white/15 hover:text-amber-100 md:px-4" data-category="桥梁">桥梁</button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- 横向滚动卡片区域：给顶部分类导航留出空间，并让卷轴两端露出更多 -->
+      <div class="absolute top-[26vh] left-1/2 transform -translate-x-1/2 z-10 w-[88%] h-[58vh]">
+        <!-- 卷轴背景 -->
+        <div class="w-full h-full relative">
+          <!-- 已用全屏背景 background2.png，这里不再重复渲染卷轴图片 -->
+          <img src="./background2.jpg" alt="卷轴" class="hidden" />
+          
+          <!-- 横向滚动卡片 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="scroll-container w-full h-[80%] overflow-x-auto overflow-y-hidden px-12">
+              <div class="masonry flex gap-0 p-0">
+              <!-- 北京故宫 -->
+              <div class="masonry-item block" data-category="皇宫">
+                <article class="arch-card">
+                  <div class="card-media">
+                    <img class="card-img" alt="北京故宫" loading="lazy" src="./古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528639601.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">北京故宫</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">皇宫 · 明永乐四年始建</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">PALACE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 北京四合院 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 4/3">
+                    <img class="card-img" alt="北京四合院" loading="lazy" src="./古建筑/计算机大赛-景点图片/北京市/北京四合院/image_1774528680995.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">北京四合院</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 元代定型</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">COURTYARD</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 卢沟桥 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 16/9">
+                    <img class="card-img" alt="卢沟桥" loading="lazy" src="./古建筑/计算机大赛-景点图片/北京市/卢沟桥/image_1774528694379.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">卢沟桥</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 金大定二十九年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- 乔家大院 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 3/2">
+                    <img class="card-img" alt="乔家大院" loading="lazy" src="./古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528720101.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">乔家大院</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 清乾隆年间</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">COURTYARD</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 霍州署 -->
+              <div class="masonry-item block" data-category="官府">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 4/3">
+                    <img class="card-img" alt="霍州署" loading="lazy" src="./古建筑/计算机大赛-景点图片/山西省/霍州署/image_1774528743601.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">霍州署</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">官府 · 始建于唐</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">YAMEN</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 鱼沼飞梁 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 1/1">
+                    <img class="card-img" alt="鱼沼飞梁" loading="lazy" src="./古建筑/计算机大赛-景点图片/山西省/鱼沼飞梁/image_1774528758917.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">鱼沼飞梁</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 始建于北魏</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 平遥古城墙 -->
+              <div class="masonry-item block" data-category="官府">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 3/2">
+                    <img class="card-img" alt="平遥古城墙" loading="lazy" src="./古建筑/计算机大赛-景点图片/山西省/平遥古城墙/image_1774528768544.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">平遥古城墙</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">官府 · 明代城墙</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">WALL</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 淮安府衙 -->
+              <div class="masonry-item block" data-category="官府">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 3/2">
+                    <img class="card-img" alt="淮安府衙" loading="lazy" src="./古建筑/计算机设计网页供图/淮安府1.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">淮安府衙</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">官府 · 明洪武三年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">YAMEN</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 宝带桥 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 16/9">
+                    <img class="card-img" alt="宝带桥" loading="lazy" src="./古建筑/计算机设计网页供图/宝带桥1.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">宝带桥</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 唐元和十一年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 周庄民居 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 3/4">
+                    <img class="card-img" alt="周庄民居" loading="lazy" src="./古建筑/计算机设计网页供图/周庄民居2.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">周庄民居</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 江南水乡</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">TOWN</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 阆中古城民居 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 3/2">
+                    <img class="card-img" alt="阆中古城民居" loading="lazy" src="./古建筑/计算机大赛-景点图片/四川省/阆中古城民居/837b22cd5023687d788ce02d57d2303a.jpeg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">阆中古城民居</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 明清川北</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">TOWN</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 泸州龙脑桥 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 16/9">
+                    <img class="card-img" alt="泸州龙脑桥" loading="lazy" src="./古建筑/计算机大赛-景点图片/四川省/泸州龙脑桥/861800b5a561dd0cad34045c53054d49.png" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">泸州龙脑桥</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 明洪武年间</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 泸定桥 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 16/9">
+                    <img class="card-img" alt="泸定桥" loading="lazy" src="./古建筑/计算机大赛-景点图片/四川省/泸定桥/fO7eO5I8B.jpeg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">泸定桥</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 清康熙四十四年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 陈家祠 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 4/3">
+                    <img class="card-img" alt="陈家祠" loading="lazy" src="./古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fT1Iov.jpeg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">陈家祠</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 清光绪十四年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">ACADEMY</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 潮州广济桥 -->
+              <div class="masonry-item block" data-category="桥梁">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 16/9">
+                    <img class="card-img" alt="潮州广济桥" loading="lazy" src="./古建筑/计算机大赛-景点图片/广东省/潮州广济桥/fO7g5vz3A.jpeg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">潮州广济桥</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">桥梁 · 南宋乾道七年</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">BRIDGE</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+              
+              <!-- 开平碉楼 -->
+              <div class="masonry-item block" data-category="民居">
+                <article class="arch-card">
+                  <div class="card-media" style="aspect-ratio: 2/3">
+                    <img class="card-img" alt="开平碉楼" loading="lazy" src="./古建筑/计算机设计网页供图/开平碉楼4.jpg" />
+                    <div class="card-mask"></div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="flex items-end justify-between gap-4">
+                      <div>
+                        <div class="font-serifCN text-black text-lg tracking-wide">开平碉楼</div>
+                        <div class="text-gray-800 text-xs tracking-[0.22em] mt-1">民居 · 明清民国</div>
+                      </div>
+                      <div class="text-gray-700 text-xs tracking-[0.28em]">DIAOLOU</div>
+                    </div>
+                    <div class="gold-underline"></div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+    <script>
+      document.documentElement.style.webkitFontSmoothing = "antialiased";
+      document.documentElement.style.mozOsxFontSmoothing = "grayscale";
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // 左侧进场：从左滑入 + 淡入
+      gsap.to("#leftPanel", { x: 0, opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.1 });
+
+      // 右侧卡片：轻微上浮入场（滚动触发）
+      const cards = document.querySelectorAll(".arch-card");
+      console.log('Total cards:', cards.length);
+      
+      cards.forEach((card, index) => {
+        // 确保卡片默认是可见的
+        card.style.opacity = "1";
+        card.style.display = "block";
+        console.log('Card', index, 'display:', card.style.display);
+        
+        gsap.from(card, {
+          opacity: 0,
+          y: 18,
+          duration: 0.6,
+          ease: "power2.out",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: card,
+            start: "top 88%",
+            toggleActions: "play none none reverse",
+          },
+        });
+      });
+
+      // 分类筛选功能
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const masonryItems = document.querySelectorAll('.masonry-item');
+      const masonryEl = document.querySelector('.masonry');
+
+      // 根据“当前可见玉牌数量”做一次错落排版（避免使用 scale 破坏 3D 定位）
+      const layoutVisibleJades = () => {
+        if (!masonryEl || !masonryItems?.length) return;
+        const visibleItems = Array.from(masonryItems).filter((it) => it.style.display !== "none");
+        const n = Math.max(visibleItems.length, 1);
+
+        const w = masonryEl.clientWidth || window.innerWidth;
+        const span = Math.min(980, w * 0.9);
+        const baseTy = 4;
+
+        visibleItems.forEach((item, i) => {
+          const t = n === 1 ? 0.5 : i / (n - 1);
+          const tx = -span / 2 + t * span;
+          const ty = baseTy + (i % 2 === 0 ? -8 : 8);
+          const centerDist = Math.abs(i - (n - 1) / 2);
+          const tz = -18 - centerDist * 3;
+          const rx = i % 2 === 0 ? 1.6 : -1.6;
+          const ry = 0;
+          const rz = i % 2 === 0 ? -1 : 1;
+
+          item.style.setProperty("--tx", `${tx.toFixed(1)}px`);
+          item.style.setProperty("--ty", `${ty.toFixed(1)}px`);
+          item.style.setProperty("--tz", `${tz.toFixed(1)}px`);
+          item.style.setProperty("--rx", `${rx.toFixed(1)}deg`);
+          item.style.setProperty("--ry", `${ry.toFixed(1)}deg`);
+          item.style.setProperty("--rz", `${rz.toFixed(1)}deg`);
+
+          item.style.zIndex = String(2000 + Math.round(-tz));
+        });
+      };
+
+      // 为每个卡片添加data-category属性
+      const buildingCategories = {
+        '北京故宫': '皇宫',
+        '北京四合院': '民居',
+        '卢沟桥': '桥梁',
+        '乔家大院': '民居',
+        '霍州署': '官府',
+        '鱼沼飞梁': '桥梁',
+        '平遥古城墙': '官府',
+        '淮安府衙': '官府',
+        '宝带桥': '桥梁',
+        '周庄民居': '民居',
+        '阆中古城民居': '民居',
+        '泸州龙脑桥': '桥梁',
+        '泸定桥': '桥梁',
+        '陈家祠': '民居',
+        '潮州广济桥': '桥梁',
+        '开平碉楼': '民居'
+      };
+
+      console.log('masonryItems length:', masonryItems.length);
+
+      // 打印所有建筑名称
+      console.log('All buildings in buildingCategories:', Object.keys(buildingCategories));
+
+      masonryItems.forEach((item, index) => {
+        console.log('Item index:', index);
+        const buildingName = item.querySelector('.font-serifCN')?.textContent?.trim();
+        console.log('Building name:', buildingName);
+        if (buildingName && buildingCategories[buildingName]) {
+          item.setAttribute('data-category', buildingCategories[buildingName]);
+          console.log('Set category for', buildingName, 'to', buildingCategories[buildingName]);
+        } else {
+          console.log('No category found for:', buildingName);
+        }
+      });
+
+      // 检查默认显示逻辑
+      console.log('Default display logic - showing all items');
+      masonryItems.forEach((item, index) => {
+        console.log('Item', index, 'display:', item.style.display);
+      });
+
+      // 筛选按钮点击事件
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.getAttribute('data-category');
+          
+          // 更新按钮状态
+          filterBtns.forEach((b) => {
+            b.classList.remove("active", "border-amber-200/35", "bg-stone-700/70", "text-stone-100");
+            b.classList.add("border-transparent", "bg-transparent", "text-zinc-300");
+          });
+          btn.classList.add("active", "border-amber-200/35", "bg-stone-700/70", "text-stone-100");
+          btn.classList.remove("border-transparent", "bg-transparent", "text-zinc-300");
+          
+          // 筛选卡片
+          masonryItems.forEach(item => {
+            const itemCategory = item.getAttribute('data-category');
+            if (category === 'all' || itemCategory === category) {
+              gsap.to(item, { opacity: 1, duration: 0.3, display: 'block' });
+            } else {
+              gsap.to(item, { opacity: 0, duration: 0.3, display: 'none' });
+            }
+          });
+
+          // 筛选完成后重新排版（可见玉牌会变少/变多）
+          setTimeout(layoutVisibleJades, 330);
+        });
+      });
+
+      // URL参数处理：从首页点击省份跳转
+      const urlParams = new URLSearchParams(window.location.search);
+      const provinceParam = urlParams.get('province');
+      const categoryParam = urlParams.get('category');
+
+      if (provinceParam) {
+        // 建筑省份映射
+        const provinceBuildingMap = {
+          '北京市': ['北京故宫', '北京四合院', '卢沟桥'],
+          '山西省': ['乔家大院', '霍州署', '鱼沼飞梁', '平遥古城墙'],
+          '江苏省': ['淮安府衙', '宝带桥', '周庄民居'],
+          '四川省': ['阆中古城民居', '泸州龙脑桥', '泸定桥'],
+          '广东省': ['陈家祠', '潮州广济桥', '开平碉楼']
+        };
+        
+        // 只显示对应省份的建筑，不应用分类筛选
+        masonryItems.forEach(item => {
+          const buildingName = item.querySelector('.font-serifCN')?.textContent?.trim();
+          const provinceBuildings = provinceBuildingMap[provinceParam] || [];
+          if (provinceBuildings.includes(buildingName)) {
+            gsap.to(item, { opacity: 1, duration: 0.3, display: 'block' });
+          } else {
+            gsap.to(item, { opacity: 0, duration: 0.3, display: 'none' });
+          }
+        });
+
+        setTimeout(layoutVisibleJades, 330);
+        
+        // 隐藏分类筛选按钮或重置状态
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.classList.remove("active", "border-amber-200/35", "bg-stone-700/70", "text-stone-100");
+          btn.classList.add("border-transparent", "bg-transparent", "text-zinc-300");
+        });
+      } else if (categoryParam) {
+        // 如果有分类参数，自动点击对应分类按钮
+        const targetBtn = document.querySelector(`.filter-btn[data-category="${categoryParam}"]`);
+        if (targetBtn) {
+          targetBtn.click();
+        }
+      } else {
+        // 默认显示全部五省建筑并启用分类筛选
+        masonryItems.forEach(item => {
+          gsap.to(item, { opacity: 1, duration: 0.3, display: 'block' });
+        });
+
+        setTimeout(layoutVisibleJades, 330);
+      }
+
+      // ===============================
+      // 3D 玉牌翻面（点击翻动、背面按钮跳转）
+      // ===============================
+      // 背面配图：与正面同建筑、不同文件（均在 ./古建筑/…）
+      const CARD_BACK_IMAGES = {
+        北京故宫: "./古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528643317.jpg",
+        北京四合院: "./古建筑/计算机大赛-景点图片/北京市/北京四合院/image_1774528685020.jpg",
+        卢沟桥: "./古建筑/计算机大赛-景点图片/北京市/卢沟桥/image_1774528697128.jpg",
+        乔家大院: "./古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528723168.jpg",
+        霍州署: "./古建筑/计算机大赛-景点图片/山西省/霍州署/image_1774528746626.jpg",
+        鱼沼飞梁: "./古建筑/计算机大赛-景点图片/山西省/鱼沼飞梁/image_1774528761875.jpg",
+        平遥古城墙: "./古建筑/计算机大赛-景点图片/山西省/平遥古城墙/image_1774528772065.jpg",
+        淮安府衙: "./古建筑/计算机设计网页供图/淮安府4.jpg",
+        宝带桥: "./古建筑/计算机设计网页供图/宝带桥3.jpg",
+        周庄民居: "./古建筑/计算机设计网页供图/周庄民居3.jpg",
+        阆中古城民居: "./古建筑/计算机大赛-景点图片/四川省/阆中古城民居/c1532e7d64b2f9c12aaed222d98119cb.jpeg",
+        泸州龙脑桥: "./古建筑/计算机大赛-景点图片/四川省/泸州龙脑桥/f2d343637e96d4442b83caafa1f5f565.jpeg",
+        泸定桥: "./古建筑/计算机大赛-景点图片/四川省/泸定桥/fO7Y0VZUE.jpeg",
+        陈家祠: "./古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fhCxsD.jpeg",
+        潮州广济桥: "./古建筑/计算机大赛-景点图片/广东省/潮州广济桥/fO7g8FRkw.jpeg",
+        开平碉楼: "./古建筑/计算机设计网页供图/开平碉楼3.jpg",
+      };
+
+      const initJadeCards = () => {
+        document.querySelectorAll(".arch-card").forEach((card) => {
+          try {
+            if (card.dataset.jadeInited === "1") return;
+
+            const media = card.querySelector(".card-media");
+            const meta = card.querySelector(".card-meta");
+            if (!media || !meta) return;
+
+            const titleEl = meta.querySelector(".font-serifCN");
+            // 注意：Tailwind 类名里包含 "/"，不能直接用 ".text-qianbai/60" 这种 selector，
+            // 否则会抛出 SyntaxError（导致整页脚本中断）。
+            const subEl =
+              meta.querySelector('[class*="text-qianbai/60"]') ||
+              meta.querySelector('[class*="text-gray-800"]');
+            const engEl =
+              meta.querySelector('[class*="text-qianbai/55"]') ||
+              meta.querySelector('[class*="text-gray-700"]') ||
+              meta.querySelector('[class*="text-gray-800"]');
+
+            const buildingName = titleEl?.textContent?.trim() || "";
+            const subText = subEl?.textContent?.trim() || "";
+            const engText = engEl?.textContent?.trim() || "";
+
+            const detailUrl = `detail.html?building=${encodeURIComponent(buildingName)}`;
+            const backImgSrc = CARD_BACK_IMAGES[buildingName] || "";
+
+            const inner = document.createElement("div");
+            inner.className = "jade-inner";
+
+            const front = document.createElement("div");
+            front.className = "jade-face jade-front";
+
+            // 把原本的结构作为正面
+            front.appendChild(media);
+            front.appendChild(meta);
+
+            const back = document.createElement("div");
+            back.className = "jade-face jade-back";
+            const photoBlock = backImgSrc
+              ? `<div class="jade-back-photo-wrap"><img class="jade-back-photo" src="${backImgSrc}" alt="" loading="lazy" decoding="async" /></div>`
+              : "";
+            back.innerHTML = `
+              ${photoBlock}
+              <div class="jade-back-text">
+                <div class="jade-back-title">${buildingName}</div>
+                <div class="jade-back-sub">${subText || "—"}</div>
+                <div class="jade-back-sub" style="opacity: 0.85;">${engText || ""}</div>
+                <a class="detail-btn" href="${detailUrl}">查看详细介绍</a>
+              </div>
+            `;
+
+            const a = back.querySelector(".detail-btn");
+            if (a) {
+              a.addEventListener("click", (ev) => {
+                // 点击按钮只跳转，不触发玉牌翻面
+                ev.stopPropagation();
+              });
+            }
+
+            card.innerHTML = "";
+            inner.appendChild(front);
+            inner.appendChild(back);
+            card.appendChild(inner);
+            card.dataset.jadeInited = "1";
+          } catch (e) {
+            // 单卡失败不阻塞整页
+            console.error("initJadeCards failed:", e);
+          }
+        });
+      };
+
+      initJadeCards();
+
+      document.querySelectorAll(".arch-card").forEach((card) => {
+        card.classList.remove("is-flipped");
+        card.addEventListener("click", (e) => {
+          const link = e.target && e.target.closest ? e.target.closest(".detail-btn") : null;
+          if (link) return;
+
+          // 点击后：给当前卡片加“上浮”态（不影响翻面动画）
+          document.querySelectorAll(".arch-card").forEach((c) => c.classList.remove("is-active"));
+          card.classList.add("is-active");
+
+          card.classList.toggle("is-flipped");
+        });
+      });
+
+      // 重新排版一次（初始化翻面结构后）
+      layoutVisibleJades();
+
+      // 使用用户指定卷轴图片作为静态背景，不再生成/渲染 Three.js 卷轴纹理。
+    </script>
+  </body>
+</html>

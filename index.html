@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>首页 · 古建智寻</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              deep: "#050505",
+              nebula: "#1a1a2e",
+              gold: "#d4af37",
+            },
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --bg0: #1a1a2e;
+        --bg1: #050505;
+        --fg: rgba(240, 240, 240, 0.92);
+        --muted: rgba(240, 240, 240, 0.66);
+        --gold: #d4af37;
+        --panel: rgba(10, 11, 18, 0.55);
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: url('2.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: var(--fg);
+        overflow: hidden;
+      }
+
+      /* 半透明立体层 */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(2px);
+        z-index: 1;
+      }
+
+      /* Canvas 星空粒子：最底层 */
+      #starCanvas {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* 长城剪影：Canvas 与地图之间 */
+      .wall-silhouette {
+        position: absolute;
+        left: -10%;
+        top: 20%;
+        width: 60vw;
+        height: auto;
+        opacity: 0.15;
+        filter: blur(1px);
+        z-index: 1;
+        pointer-events: none;
+        transform: rotate(-14deg) perspective(900px) rotateX(18deg);
+        transform-origin: 0% 100%;
+        mix-blend-mode: screen;
+      }
+
+      /* 右侧详情竖排标题 */
+      .vertical-title {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        letter-spacing: 0.12em;
+      }
+
+      /* 占位“古建图”——用光影做出纸本与檐口感 */
+      .placeholder-arch {
+        position: relative;
+        border-radius: 18px;
+        background: radial-gradient(
+            120% 140% at 20% 10%,
+            rgba(22, 97, 171, 0.28),
+            transparent 55%
+          ),
+          radial-gradient(140% 120% at 80% 90%, rgba(255, 70, 31, 0.14), transparent 60%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+        border: 1px solid rgba(240, 240, 240, 0.10);
+        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.55);
+        overflow: hidden;
+      }
+
+      .placeholder-arch::before {
+        content: "";
+        position: absolute;
+        inset: -40% -30%;
+        background: conic-gradient(
+          from 230deg,
+          transparent,
+          rgba(22, 97, 171, 0.22),
+          transparent,
+          rgba(255, 70, 31, 0.12),
+          transparent
+        );
+        filter: blur(18px);
+        opacity: 0.55;
+      }
+
+      .placeholder-arch::after {
+        content: "";
+        position: absolute;
+        left: 12%;
+        right: 12%;
+        top: 16%;
+        bottom: 16%;
+        border-radius: 14px;
+        border: 1px dashed rgba(240, 240, 240, 0.14);
+        opacity: 0.55;
+      }
+
+      /* ECharts 容器在深色下更“融” */
+      #map {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: scale(1.15) translate(-3%, -7%);
+      }
+
+      /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
+      #app {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: transparent;
+      }
+
+      #layout {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      #spacer {
+        display: none;
+      }
+
+      #map {
+        width: 100%;
+        height: 100%;
+        transform: scale(1.1) translate(0, 5%);
+      }
+
+      #mapWrap {
+        width: 95vw;
+        height: 90vh;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3; /* 地图在长城剪影之上 */
+      }
+
+      #mapPanel {
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        overflow: hidden;
+        outline: 1px solid rgba(212, 175, 55, 0.22);
+        box-shadow: 0 40px 160px rgba(0, 0, 0, 0.55);
+        background: linear-gradient(180deg, rgba(12, 12, 20, 0.55), rgba(12, 12, 20, 0.25));
+      }
+
+      /* 插画地图：无底板；黑底 PNG 用 screen 与深色页面融合 */
+      #mapPanel.map-panel--illustration {
+        background: transparent !important;
+        box-shadow: none;
+        outline: none;
+        border: none;
+      }
+
+      #mapIllustration {
+        /* 黑(#000)区域透出网页背景，彩色地图保留 */
+        mix-blend-mode: screen;
+        filter: contrast(1.1) saturate(1.06);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      /* 左下角：浑天仪/罗盘线稿水印 */
+      .armillary {
+        position: fixed;
+        left: 5%;
+        bottom: 10%;
+        z-index: 3;
+        width: 260px;
+        height: 260px;
+        opacity: 0.05;
+        mix-blend-mode: screen;
+        pointer-events: none;
+        color: #f1c40f;
+        filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.12));
+      }
+
+      .armillary svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      #mapStatus {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(240, 240, 240, 0.65);
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        z-index: 5;
+      }
+
+      #detail {
+        position: absolute;
+        right: 48px;
+        top: 50%;
+        width: min(420px, 34vw);
+        transform: translateY(-50%);
+        display: block;
+        padding: 0;
+      }
+
+      .glass-card {
+        border-radius: 26px;
+        background: rgba(10, 11, 18, 0.55);
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      /* 增加一点“星云流光”，让画面更有纵深 */
+      .ink-wash {
+        pointer-events: none;
+        position: absolute;
+        inset: -20%;
+        background:
+          radial-gradient(900px 600px at 22% 26%, rgba(58, 12, 163, 0.14), transparent 62%),
+          radial-gradient(900px 600px at 78% 80%, rgba(212, 175, 55, 0.08), transparent 62%),
+          conic-gradient(from 210deg at 50% 50%, rgba(26, 26, 46, 0.25), transparent 35%, rgba(212, 175, 55, 0.05), transparent 70%);
+        filter: blur(24px);
+        opacity: 0.55;
+        mix-blend-mode: screen;
+      }
+    </style>
+  </head>
+
+  <body class="font-sansCN">
+    <!-- 半透明立体层 -->
+    <div class="overlay"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+      <div class="container mx-auto flex items-center justify-between px-4 py-4">
+        <!-- 网页名称 -->
+        <div class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</div>
+
+        <!-- 导航项 -->
+        <div class="flex items-center space-x-8 font-flow text-[17px] tracking-[0.22em] md:text-lg">
+          <!-- 首页 -->
+          <div class="group relative">
+            <a href="#" class="text-zinc-200 transition-colors hover:text-amber-100/95">首页</a>
+            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
+              <a href="#" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">地图</a>
+            </div>
+          </div>
+
+          <!-- 建筑分类 -->
+          <div class="group relative">
+            <a href="./list.html" class="text-zinc-200 transition-colors hover:text-amber-100/95">建筑分类</a>
+            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
+              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">民居</a>
+              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">皇宫</a>
+              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">桥梁</a>
+              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">官府</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 搜索框 -->
+        <div class="flex items-center">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="搜索建筑名"
+            class="rounded-l-md border border-white/15 bg-white/90 px-4 py-2 text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/60"
+          />
+          <button id="searchBtn" class="rounded-r-md bg-stone-700/95 px-4 py-2 font-flow text-stone-100 tracking-[0.12em] transition-colors hover:bg-stone-600">
+            搜索
+          </button>
+        </div>
+      </div>
+    </nav>
+    
+    <main id="app" class="relative h-screen w-screen bg-xuans pt-20">
+      <canvas id="starCanvas" aria-hidden="true"></canvas>
+      
+      <!-- 地图背景图片 -->
+      <div class="map-background" style="position: absolute; inset: 0; width: 100%; height: 100%; background-image: url('./background.jpg'); background-size: cover; background-position: center; opacity: 0.6; z-index: 0; pointer-events: none;"></div>
+      
+      <img class="wall-silhouette" src="./tiananmen.png" alt="长城剪影（占位）" loading="eager" />
+
+      <!-- 古建筑简笔画动画 -->
+      <canvas id="archCanvas" class="absolute inset-0 w-full h-full z-1 pointer-events-none" aria-hidden="true"></canvas>
+
+      <div class="armillary" aria-hidden="true">
+        <svg viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="210" cy="210" r="160" opacity="0.9" />
+            <circle cx="210" cy="210" r="118" opacity="0.75" />
+            <circle cx="210" cy="210" r="78" opacity="0.6" />
+            <path d="M50 210 H370" opacity="0.65" />
+            <path d="M210 50 V370" opacity="0.65" />
+            <path d="M96 96 L324 324" opacity="0.45" />
+            <path d="M324 96 L96 324" opacity="0.45" />
+            <ellipse cx="210" cy="210" rx="150" ry="70" transform="rotate(-22 210 210)" opacity="0.7" />
+            <ellipse cx="210" cy="210" rx="150" ry="70" transform="rotate(22 210 210)" opacity="0.55" />
+            <path d="M210 50 L210 66" />
+            <path d="M210 354 L210 370" />
+            <path d="M50 210 L66 210" />
+            <path d="M354 210 L370 210" />
+            <circle cx="210" cy="210" r="6" opacity="0.9" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- 主体布局：大地图居中 + 右侧悬浮详情 -->
+      <section id="layout" class="h-full w-full flex items-stretch">
+        <div id="spacer" class="w-[10%]"></div>
+
+        <div id="mapCol" class="w-[60%] flex items-center justify-center">
+          <div id="mapWrap" class="w-full h-[78%]">
+            <div id="mapPanel" class="h-full w-full rounded-[28px] map-panel--illustration">
+              <div class="relative h-full w-full">
+                <img
+                  id="mapIllustration"
+                  class="pointer-events-none absolute inset-0 z-0 h-full w-full max-h-full max-w-full select-none object-contain"
+                  src="./china-map-isometric.png"
+                  alt=""
+                  decoding="async"
+                  fetchpriority="high"
+                />
+                <div id="map" class="relative z-[1] h-full w-full"></div>
+                <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center text-white/75">
+                  <div>加载地图中</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 详情展示区：默认透明不可见 -->
+        <aside
+          id="detail"
+          class="w-[42%] pr-8 py-8 flex items-start justify-end"
+          style="opacity: 0; pointer-events: none; z-index: 10; top: 15%; transform: translateY(0)"
+          aria-hidden="true"
+        >
+          <div class="glass-card w-full max-w-xl p-9">
+            <div class="flex items-start justify-end">
+              <div class="h-px w-20 bg-gradient-to-r from-qianbai/0 via-qianbai/30 to-qianbai/0"></div>
+            </div>
+
+            <div class="mt-2 relative h-[400px] rounded-lg overflow-hidden">
+              <!-- 轮播图容器 -->
+              <div id="carouselContainer" class="absolute inset-0">
+                <!-- 轮播图片将通过JavaScript动态添加 -->
+              </div>
+
+              <!-- 内容叠加层 -->
+              <div class="absolute inset-0 bg-black/20 flex items-end p-6">
+                <div class="w-full">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex flex-col items-start justify-between py-3">
+                      <div id="provinceName" class="font-serifCN text-white text-4xl leading-none">
+                        广东
+                      </div>
+                      <div class="text-white/90 text-base tracking-wide">
+                        <span class="text-white">代表</span>
+                        <span class="mx-1 text-white/60">·</span>
+                        <span id="buildingName" class="text-white">陈家祠</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div id="buildingDesc" class="mt-4 text-white/95 text-base leading-relaxed">
+                    陈家祠是清代岭南建筑代表，以砖雕、陶塑、灰塑等装饰工艺闻名，是岭南民间建筑艺术巅峰，始建于清光绪十四年（1888年）。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <!-- China map data (registers 'china') -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/map/js/china.js"></script>
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+
+    <script>
+      // 全局：确保字体渲染更细腻
+      document.documentElement.style.webkitFontSmoothing = "antialiased";
+      document.documentElement.style.mozOsxFontSmoothing = "grayscale";
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Canvas 星空粒子（随机位置、随机大小、随机透明度波动）
+      (() => {
+        const canvas = document.getElementById("starCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d", { alpha: true });
+        if (!ctx) return;
+
+        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        let w = 0;
+        let h = 0;
+        let stars = [];
+        let raf = 0;
+
+        const rand = (min, max) => min + Math.random() * (max - min);
+
+        const resize = () => {
+          w = Math.max(1, Math.floor(window.innerWidth));
+          h = Math.max(1, Math.floor(window.innerHeight));
+          canvas.width = Math.floor(w * DPR);
+          canvas.height = Math.floor(h * DPR);
+          canvas.style.width = w + "px";
+          canvas.style.height = h + "px";
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+          const density = (w * h) / 14000;
+          const count = Math.max(180, Math.min(560, Math.floor(density)));
+          stars = Array.from({ length: count }).map(() => ({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: rand(0.4, 1.8),
+            baseA: rand(0.06, 0.9),
+            speed: rand(0.6, 2.2),
+            phase: rand(0, Math.PI * 2),
+            warm: Math.random() < 0.07,
+          }));
+        };
+
+        const draw = (t) => {
+          const time = (t || 0) * 0.001;
+          ctx.clearRect(0, 0, w, h);
+
+          // 轻微雾化层，避免“死黑”
+          const g = ctx.createRadialGradient(w * 0.5, h * 0.42, 0, w * 0.5, h * 0.42, Math.max(w, h) * 0.65);
+          g.addColorStop(0, "rgba(26,26,46,0.10)");
+          g.addColorStop(1, "rgba(5,5,5,0.0)");
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
+
+          for (const s of stars) {
+            const tw = 0.55 + 0.45 * Math.sin(time * s.speed + s.phase);
+            const a = Math.max(0, Math.min(1, s.baseA * tw));
+            ctx.beginPath();
+            ctx.fillStyle = s.warm ? `rgba(243,156,18,${a * 0.55})` : `rgba(255,255,255,${a})`;
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          raf = window.requestAnimationFrame(draw);
+        };
+
+        window.addEventListener("resize", resize, { passive: true });
+        resize();
+        raf = window.requestAnimationFrame(draw);
+      })();
+
+      // 古建筑简笔画动画
+      (() => {
+        const canvas = document.getElementById('archCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        if (!ctx) return;
+
+        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        let w = 0;
+        let h = 0;
+        let raf = 0;
+
+        // 古建筑简笔画路径数据
+        const architectures = [
+          {
+            name: 'temple',
+            path: 'M100,150 L150,100 L200,150 L200,250 L100,250 Z M120,200 L180,200',
+            position: { x: 0.2, y: 0.4 },
+            size: 0.15
+          },
+          {
+            name: 'pagoda',
+            path: 'M150,100 L175,125 L200,100 L187,125 L187,150 L162,150 L162,125 Z M150,150 L200,150 L200,200 L150,200 Z',
+            position: { x: 0.7, y: 0.3 },
+            size: 0.1
+          },
+          {
+            name: 'bridge',
+            path: 'M50,200 L250,200 M50,200 Q150,150 250,200',
+            position: { x: 0.5, y: 0.7 },
+            size: 0.2
+          },
+          {
+            name: 'palace',
+            path: 'M80,180 L220,180 L220,250 L80,250 Z M100,150 L200,150 L220,180 L80,180 Z M120,200 L180,200 M120,225 L180,225',
+            position: { x: 0.3, y: 0.6 },
+            size: 0.18
+          }
+        ];
+
+        const resize = () => {
+          w = Math.max(1, Math.floor(window.innerWidth));
+          h = Math.max(1, Math.floor(window.innerHeight));
+          canvas.width = Math.floor(w * DPR);
+          canvas.height = Math.floor(h * DPR);
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        };
+
+        const drawArchitecture = (arch, time) => {
+          const x = arch.position.x * w;
+          const y = arch.position.y * h;
+          const size = Math.min(w, h) * arch.size;
+          
+          ctx.save();
+          ctx.translate(x - 100, y - 100); // 调整中心点
+          ctx.scale(size / 200, size / 200);
+          
+          // 绘制金色轮廓
+          ctx.strokeStyle = '#d4af37';
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.8 + 0.2 * Math.sin(time * 0.001 + architectures.indexOf(arch));
+          
+          // 解析路径
+          const commands = arch.path.split(' ');
+          let currentX = 0;
+          let currentY = 0;
+          
+          ctx.beginPath();
+          for (let i = 0; i < commands.length; i++) {
+            const cmd = commands[i];
+            if (cmd === 'M') {
+              currentX = parseFloat(commands[++i]);
+              currentY = parseFloat(commands[++i]);
+              ctx.moveTo(currentX, currentY);
+            } else if (cmd === 'L') {
+              currentX = parseFloat(commands[++i]);
+              currentY = parseFloat(commands[++i]);
+              ctx.lineTo(currentX, currentY);
+            } else if (cmd === 'Q') {
+              const ctrlX = parseFloat(commands[++i]);
+              const ctrlY = parseFloat(commands[++i]);
+              currentX = parseFloat(commands[++i]);
+              currentY = parseFloat(commands[++i]);
+              ctx.quadraticCurveTo(ctrlX, ctrlY, currentX, currentY);
+            } else if (cmd === 'Z') {
+              ctx.closePath();
+            }
+          }
+          ctx.stroke();
+          
+          ctx.restore();
+        };
+
+        const draw = (t) => {
+          const time = (t || 0);
+          ctx.clearRect(0, 0, w, h);
+
+          // 绘制所有古建筑
+          architectures.forEach(arch => {
+            drawArchitecture(arch, time);
+          });
+
+          raf = window.requestAnimationFrame(draw);
+        };
+
+        window.addEventListener('resize', resize, { passive: true });
+        resize();
+        raf = window.requestAnimationFrame(draw);
+      })();
+
+      const detailEl = document.getElementById("detail");
+      const provinceNameEl = document.getElementById("provinceName");
+      const buildingNameEl = document.getElementById("buildingName");
+      const buildingDescEl = document.getElementById("buildingDesc");
+      const carouselContainer = document.getElementById("carouselContainer");
+
+      // 详情卡片初始位移（避免和 CSS transform 叠加）
+      gsap.set(detailEl, { y: 0, opacity: 0 });
+
+      // 建筑数据库 - 按省份分类
+      const BUILDINGS_DB = {
+        "北京": [
+          { name: "北京故宫", category: "皇宫", desc: "明清两代皇家宫殿，世界现存规模最大的木质结构古建筑群，始建于明永乐四年（1406年），体现中国古代皇家建筑最高成就。" },
+          { name: "北京四合院", category: "民居", desc: "典型北方民居，中轴对称、院落围合，承载传统礼制与市井生活文化，元代定型，明清成熟。" },
+          { name: "卢沟桥", category: "桥梁", desc: "始建于金大定二十九年（1189年），华北地区现存最古老的石拱桥，桥身雕刻精美，见证多段历史。" },
+          { name: "颐和园", category: "官府", desc: "清代皇家园林，集南北造园艺术之大成，属于皇家行宫建筑，始建于清乾隆十五年（1750年）。" }
+        ],
+        "山西": [
+          { name: "乔家大院", category: "民居", desc: "清代晋商大院代表，高墙深院、砖雕精美，体现晋商文化与家族聚居形态，始建于清乾隆年间（1756年）。" },
+          { name: "霍州署", category: "官府", desc: "我国现存最完整的古代州级衙署，与故宫、直隶总督署、内乡县衙并称中国四大古代官衙，始建于唐。" },
+          { name: "鱼沼飞梁", category: "桥梁", desc: "晋祠内十字形石桥，始建于北魏，是中国现存最早的十字形桥梁，展现古代桥梁工程智慧。" },
+          { name: "平遥古城墙", category: "官府", desc: "明代城墙，是中国现存最完整的古代县城城墙，体现古代城市防御与官府规划智慧。" }
+        ],
+        "江苏": [
+          { name: "苏州拙政园", category: "民居", desc: "明代江南园林代表，以水为核心，亭台楼阁错落，是文人写意山水园的典范，始建于明正德初年（1509年）。" },
+          { name: "淮安府衙", category: "官府", desc: "明清府级官署，现存建筑保存完整，展现古代地方行政机构布局，始建于明洪武三年（1370年）。" },
+          { name: "宝带桥", category: "桥梁", desc: "唐代多孔连拱石桥，是中国现存最长的古代石桥之一，为大运河重要遗产点，始建于唐元和十一年（816年）。" },
+          { name: "周庄民居", category: "民居", desc: "江南水乡民居代表，粉墙黛瓦、依水而建，体现江南市井生活与建筑美学。" }
+        ],
+        "四川": [
+          { name: "阆中古城民居", category: "民居", desc: "明清川北民居代表，融合北方四合院与南方吊脚楼特点，依山傍水布局，古城格局形成于唐宋。" },
+          { name: "泸州龙脑桥", category: "桥梁", desc: "明代石雕桥，以龙首雕刻为特色，是四川地区古代桥梁艺术精品，始建于明洪武年间（1378年）。" },
+          { name: "泸定桥", category: "桥梁", desc: "清代铁索桥，横跨大渡河，是中国古代索桥建筑的杰出代表，始建于清康熙四十四年（1705年）。" }
+        ],
+        "广东": [
+          { name: "陈家祠", category: "民居", desc: "清代岭南建筑代表，以砖雕、陶塑、灰塑等装饰工艺闻名，是岭南民间建筑艺术巅峰，始建于清光绪十四年（1888年）。" },
+          { name: "潮州广济桥", category: "桥梁", desc: "南宋启闭式石桥，集梁桥、浮桥、拱桥于一体，被誉为世界上最早的启闭式桥梁，始建于南宋乾道七年（1171年）。" },
+          { name: "开平碉楼", category: "民居", desc: "明清至民国时期防御性民居，融合中西建筑元素，是岭南侨乡建筑代表，最早建于明，现存大量清代碉楼。" }
+        ]
+      };
+
+      const BUILDING_IMAGE_MAP = {
+        "北京故宫": [
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/1200px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Forbidden_City_Beijing_Shenwumen.jpg/1200px-Forbidden_City_Beijing_Shenwumen.jpg",
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Palace_Museum%2C_Beijing.jpg/1200px-Palace_Museum%2C_Beijing.jpg"
+        ],
+        "北京四合院": ["https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"],
+        "卢沟桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/1200px-Marco_Polo_Bridge_1.jpg"],
+        "颐和园": ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Summer_Palace_Beijing_2019.jpg/1200px-Summer_Palace_Beijing_2019.jpg"],
+        "乔家大院": [
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1200px-Qiao_Family_Compound_2013.jpg",
+          "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
+          "https://images.unsplash.com/photo-1549897164-7c6978e9d9de?w=1200"
+        ],
+        "霍州署": ["https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"],
+        "鱼沼飞梁": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/1200px-Jinci_Temple_Taiyuan_2013.jpg"],
+        "平遥古城墙": ["https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/1200px-Pingyao_city_wall_2012.jpg"],
+        "苏州拙政园": ["https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/1200px-Zhuozheng_Garden_Suzhou_2012.jpg"],
+        "淮安府衙": [
+          "https://images.unsplash.com/photo-1605774088793-fc32f88d1a33?w=1200",
+          "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=1200",
+          "https://images.unsplash.com/photo-1470004914212-05527e49370b?w=1200"
+        ],
+        "宝带桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Suzhou_Precious_Belt_Bridge_2013.jpg/1200px-Suzhou_Precious_Belt_Bridge_2013.jpg"],
+        "周庄民居": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/1200px-Zhouzhuang_2012.jpg"],
+        "阆中古城民居": [
+          "https://images.unsplash.com/photo-1586339949129-1e4a5b87b0f4?w=1200",
+          "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?w=1200",
+          "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200"
+        ],
+        "泸州龙脑桥": ["https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"],
+        "泸定桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/1200px-Luding_Bridge_2016.jpg"],
+        "陈家祠": [
+          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/1200px-Chen_Clan_Academy_2012.jpg",
+          "https://images.unsplash.com/photo-1536421469767-80559bb6f5e1?w=1200",
+          "https://images.unsplash.com/photo-1565967511849-76a60a516170?w=1200"
+        ],
+        "潮州广济桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/1200px-Guangji_Bridge_Chaozhou_2012.jpg"],
+        "开平碉楼": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/1200px-Kaiping_Diaolou_2012.jpg"]
+      };
+
+      // 省份首页展示：固定一个代表建筑，并按用户指定序号轮播本地图片
+      const PROVINCE_SPOTLIGHT = {
+        "北京": "北京故宫",
+        "山西": "乔家大院",
+        "江苏": "淮安府衙",
+        "四川": "阆中古城民居",
+        "广东": "陈家祠"
+      };
+
+      // 约定：如“第134张”按 [1,3,4] 处理；如你想改为 [134]，只改这里即可
+      const LOCAL_IMAGE_RULES = {
+        "陈家祠": {
+          baseDir: "古建筑/计算机大赛-景点图片/广东省/陈家祠",
+          picks: [1, 3, 4]
+        },
+        "乔家大院": {
+          baseDir: "古建筑/计算机大赛-景点图片/山西省/乔家大院",
+          picks: [1, 2, 7]
+        },
+        "阆中古城民居": {
+          baseDir: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居",
+          picks: [1, 2, 4]
+        },
+        "北京故宫": {
+          baseDir: "古建筑/计算机大赛-景点图片/北京市/北京故宫",
+          picks: [2, 5, 8]
+        },
+        "淮安府衙": {
+          baseDir: "古建筑/计算机设计网页供图",
+          picks: [1, 2, 4]
+        }
+      };
+
+      const LOCAL_IMAGE_EXTS = ["jpg", "jpeg", "png", "webp", "JPG", "JPEG", "PNG", "WEBP"];
+      const localImageCache = new Map();
+
+      const preloadImage = (src) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+
+      const resolveLocalImagesByRule = async (rule) => {
+        if (!rule || !rule.baseDir || !Array.isArray(rule.picks) || !rule.picks.length) return [];
+        const resolved = [];
+        
+        // 实际的图片文件路径映射
+        const actualImagePaths = {
+          "古建筑/计算机大赛-景点图片/广东省/陈家祠": {
+            1: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fabr9A.jpeg",
+            3: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fT1Iov.jpeg",
+            4: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fvmuIe.jpeg"
+          },
+          "古建筑/计算机大赛-景点图片/山西省/乔家大院": {
+            1: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528720101.jpg",
+            2: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528723168.jpg",
+            7: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528739670.jpg"
+          },
+          "古建筑/计算机大赛-景点图片/四川省/阆中古城民居": {
+            1: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/837b22cd5023687d788ce02d57d2303a.jpeg",
+            2: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/c1532e7d64b2f9c12aaed222d98119cb.jpeg",
+            4: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/fO7X94Sai.jpeg"
+          },
+          "古建筑/计算机大赛-景点图片/北京市/北京故宫": {
+            2: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528643317.jpg",
+            5: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528653390.jpg",
+            8: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528677873.jpg"
+          },
+          "古建筑/计算机设计网页供图": {
+            1: "古建筑/计算机设计网页供图/淮安府1.jpg",
+            2: "古建筑/计算机设计网页供图/淮安府2.jpg",
+            4: "古建筑/计算机设计网页供图/淮安府4.jpg"
+          }
+        };
+        
+        for (const n of rule.picks) {
+          if (actualImagePaths[rule.baseDir] && actualImagePaths[rule.baseDir][n]) {
+            const candidate = actualImagePaths[rule.baseDir][n];
+            // eslint-disable-next-line no-await-in-loop
+            const ok = await preloadImage(candidate);
+            if (ok) {
+              resolved.push(candidate);
+            }
+          }
+        }
+        return resolved;
+      };
+
+      const getBuildingImages = async (buildingName) => {
+        if (localImageCache.has(buildingName)) return localImageCache.get(buildingName);
+        const rule = LOCAL_IMAGE_RULES[buildingName];
+        const localImgs = await resolveLocalImagesByRule(rule);
+        const imgs = localImgs.length ? localImgs : (BUILDING_IMAGE_MAP[buildingName] || []);
+        localImageCache.set(buildingName, imgs);
+        return imgs;
+      };
+
+      // 省份名称映射
+      const provinceMap = {
+        "北京市": "北京",
+        "山西省": "山西",
+        "江苏省": "江苏",
+        "四川省": "四川",
+        "广东省": "广东"
+      };
+
+      // 根据省份获取建筑列表
+      const getBuildingsByProvince = (province) => {
+        const mappedProvince = provinceMap[province] || province;
+        return BUILDINGS_DB[mappedProvince] || [];
+      };
+
+      let detailVisible = false;
+      let hideTimer = null;
+      let detailCarouselTimer = null;
+      let activeProvince = "";
+      let activeBuildingIndex = 0;
+      let activeImageIndex = 0;
+      let detailRenderToken = 0;
+
+      // 创建轮播图
+      const createCarousel = (images) => {
+        if (!carouselContainer) return;
+        carouselContainer.innerHTML = '';
+        images.forEach((imgSrc, index) => {
+          const img = document.createElement('div');
+          img.className = 'absolute inset-0 transition-opacity duration-500';
+          img.style.backgroundImage = `url('${imgSrc}')`;
+          img.style.backgroundSize = 'cover';
+          img.style.backgroundPosition = 'center';
+          img.style.opacity = index === 0 ? '1' : '0';
+          carouselContainer.appendChild(img);
+        });
+      };
+
+      // 更新轮播图
+      const updateCarousel = (index) => {
+        if (!carouselContainer) return;
+        const images = carouselContainer.children;
+        if (!images.length) return;
+        const safeIndex = ((index % images.length) + images.length) % images.length;
+        for (let i = 0; i < images.length; i++) {
+          images[i].style.opacity = i === safeIndex ? '1' : '0';
+        }
+      };
+
+      const updateDetailByIndex = async (province, index) => {
+        const renderToken = ++detailRenderToken;
+        const mappedProvince = provinceMap[province] || province;
+        const list = getBuildingsByProvince(province);
+        if (!list.length) return;
+        const spotlight = PROVINCE_SPOTLIGHT[mappedProvince];
+        const it = list.find((b) => b.name === spotlight) || list[0];
+        const imgList = await getBuildingImages(it.name);
+        if (renderToken !== detailRenderToken) return; // 防止异步加载后覆盖新 hover 的内容
+
+        provinceNameEl.textContent = mappedProvince;
+        buildingNameEl.textContent = it.name;
+        buildingDescEl.textContent = it.desc;
+        
+        // 创建并更新轮播图
+        createCarousel(imgList);
+        const safeIndex = imgList.length ? ((index % imgList.length) + imgList.length) % imgList.length : 0;
+        updateCarousel(safeIndex);
+      };
+
+      const stopDetailCarousel = () => {
+        if (detailCarouselTimer) {
+          window.clearInterval(detailCarouselTimer);
+          detailCarouselTimer = null;
+        }
+      };
+
+      const startDetailCarousel = (province) => {
+        stopDetailCarousel();
+        const mappedProvince = provinceMap[province] || province;
+        if (!PROVINCE_SPOTLIGHT[mappedProvince]) return;
+        detailCarouselTimer = window.setInterval(() => {
+          activeImageIndex += 1;
+          updateCarousel(activeImageIndex);
+        }, 2600);
+      };
+
+      const showDetail = (province) => {
+        if (!province) return;
+        const mappedProvince = provinceMap[province] || province;
+        if (!PROVINCE_SPOTLIGHT[mappedProvince]) return; // 仅五省展示
+        const list = getBuildingsByProvince(province);
+        if (!list.length) return;
+
+        if (activeProvince !== province) {
+          activeProvince = province;
+          activeBuildingIndex = 0;
+          activeImageIndex = 0;
+        }
+        updateDetailByIndex(activeProvince, activeImageIndex);
+        startDetailCarousel(activeProvince);
+
+        if (hideTimer) {
+          window.clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+
+        if (!detailVisible) {
+          detailVisible = true;
+          detailEl.style.pointerEvents = "auto";
+          detailEl.setAttribute("aria-hidden", "false");
+          gsap.killTweensOf(detailEl);
+          gsap.to(detailEl, { duration: 0.55, opacity: 1, y: 0, ease: "power3.out" });
+        } else {
+          // 已显示时，轻微“呼吸”刷新（保持丝滑）
+          gsap.killTweensOf(detailEl);
+          gsap.fromTo(
+            detailEl,
+            { opacity: 1, y: 6 },
+            { duration: 0.32, opacity: 1, y: 0, ease: "power2.out" }
+          );
+        }
+      };
+
+      const hideDetail = () => {
+        if (!detailVisible) return;
+        stopDetailCarousel();
+        activeProvince = "";
+        activeBuildingIndex = 0;
+        gsap.killTweensOf(detailEl);
+        gsap.to(detailEl, {
+          duration: 0.45,
+          opacity: 0,
+          y: 20,
+          ease: "power3.inOut",
+          onComplete: () => {
+            detailVisible = false;
+            detailEl.style.pointerEvents = "none";
+            detailEl.setAttribute("aria-hidden", "true");
+          },
+        });
+      };
+
+      const mapEl = document.getElementById("map");
+      const mapStatusEl = document.getElementById("mapStatus");
+      const chart = echarts.init(mapEl, null, { renderer: "canvas" });
+
+      const ensureChinaMap = async () => {
+        // 如果 CDN 的 china.js 加载失败，则自动拉取 GeoJSON 并注册
+        const hasChina = !!(echarts.getMap && echarts.getMap("china"));
+        if (hasChina) return;
+        const url = "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json";
+        const res = await fetch(url, { cache: "force-cache" });
+        if (!res.ok) throw new Error("地图数据加载失败");
+        const geojson = await res.json();
+        echarts.registerMap("china", geojson);
+      };
+
+      const renderChina = async () => {
+        try {
+          if (mapStatusEl) mapStatusEl.style.opacity = "1";
+        await ensureChinaMap();
+
+        // 底图：china-map-isometric.png；透明省份 + 悬停/点击高亮（交互与五省卡片、跳转不变）
+        const transparent = "rgba(0,0,0,0)";
+        const hoverStyle = {
+          areaColor: "rgba(255, 210, 120, 0.48)",
+          borderColor: "rgba(212, 175, 55, 0.95)",
+          borderWidth: 2.5,
+          shadowColor: "rgba(255, 220, 140, 0.55)",
+          shadowBlur: 22,
+          shadowOffsetY: 4,
+        };
+        const option = {
+          backgroundColor: "transparent",
+          animation: true,
+          animationDuration: 480,
+          animationEasing: "cubicOut",
+          geo: {
+            map: "china",
+            roam: false,
+            silent: false,
+            layoutCenter: ["50%", "65%"],
+            layoutSize: "120%",
+            aspectScale: 0.75,
+            show: true,
+            itemStyle: {
+              areaColor: transparent,
+              borderColor: transparent,
+              borderWidth: 0,
+              shadowBlur: 0,
+            },
+            emphasis: {
+              itemStyle: hoverStyle,
+              label: { show: false },
+            },
+            select: { disabled: true },
+          },
+          series: [
+            {
+              type: "map",
+              map: "china",
+              geoIndex: 0,
+              data: [],
+              silent: false,
+              label: { show: false },
+              tooltip: { show: false },
+              itemStyle: {
+                areaColor: transparent,
+                borderColor: transparent,
+                borderWidth: 0,
+                shadowBlur: 0,
+              },
+              emphasis: {
+                itemStyle: hoverStyle,
+                label: { show: false },
+              },
+            },
+          ],
+        };
+
+          chart.setOption(option);
+          if (mapStatusEl) {
+            gsap.to(mapStatusEl, { opacity: 0, duration: 0.35, ease: "power2.out" });
+          }
+        } catch (e) {
+          if (mapStatusEl) {
+            mapStatusEl.innerHTML =
+              "<div class='text-sm leading-relaxed text-center px-6 text-white/80'>" +
+              "地图资源未能加载。<br/>请确认当前网络可访问 CDN，或稍后重试。" +
+              "</div>";
+          }
+          // 控制台保留错误，便于排查
+          console.error(e);
+        }
+      };
+
+      renderChina();
+
+      const mapIllustrationEl = document.getElementById("mapIllustration");
+      if (mapIllustrationEl) {
+        mapIllustrationEl.addEventListener("load", () => chart.resize());
+      }
+      requestAnimationFrame(() => chart.resize());
+
+      // 交互：hover 省份 -> 显示详情区（GSAP）
+      chart.on("mouseover", (params) => {
+        if (!params) return;
+        // ECharts 的地图 hover 事件在不同配置下可能来自 geo 或 series
+        const isMapHover = 
+          (params.componentType === "geo" && params.name) ||
+          (params.componentType === "series" && params.seriesType === "map" && params.name);
+        if (!isMapHover) return;
+        
+        // 只对五个省份显示卡片
+        const validProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
+        if (validProvinces.includes(params.name)) {
+          showDetail(params.name);
+        }
+      });
+
+      // 点击跳转：北京市进入故宫探秘长卷页；其余四省仍进列表页
+      chart.on("click", (params) => {
+        if (!params || !params.name) return;
+        if (params.name === "北京市") {
+          window.location.href = "./gugong-explore.html";
+          return;
+        }
+        const validProvinces = ["山西省", "江苏省", "四川省", "广东省"];
+        if (validProvinces.includes(params.name)) {
+          window.location.href = "list.html?province=" + encodeURIComponent(params.name);
+        }
+      });
+
+      // 鼠标离开地图区域：延迟隐藏，避免闪烁
+      chart.on("globalout", () => {
+        if (hideTimer) window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(() => hideDetail(), 140);
+      });
+
+      // 视口变化：自适应
+      window.addEventListener("resize", () => chart.resize());
+
+      // 初始微动：让画面更“呼吸”
+      gsap.fromTo(
+        mapEl,
+        { opacity: 0, filter: "blur(6px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.9, ease: "power2.out" }
+      );
+
+      // 搜索功能
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+
+      // 收集所有建筑数据
+      const allBuildings = [];
+      for (const province in BUILDINGS_DB) {
+        BUILDINGS_DB[province].forEach(building => {
+          allBuildings.push(building);
+        });
+      }
+
+      // 搜索函数
+      const searchBuilding = () => {
+        const searchTerm = searchInput.value.trim();
+        if (!searchTerm) return;
+
+        // 查找匹配的建筑
+        const matchedBuilding = allBuildings.find(building => 
+          building.name.includes(searchTerm)
+        );
+
+        if (matchedBuilding) {
+          // 跳转到详情页
+          window.location.href = `detail.html?building=${encodeURIComponent(matchedBuilding.name)}`;
+        } else {
+          alert('未找到匹配的建筑');
+        }
+      };
+
+      // 搜索按钮点击事件
+      if (searchBtn) {
+        searchBtn.addEventListener('click', searchBuilding);
+      }
+
+      // 回车键搜索
+      if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            searchBuilding();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

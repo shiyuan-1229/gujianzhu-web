@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>探索发现 · 古建智寻</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { deep: "#050505", gold: "#d4af37" },
+            fontFamily: {
+              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
+              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
+              serifCN: ["Noto Serif SC", "SimSun", "serif"],
+              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --ink: #060608;
+        --paper: #e9dfc8;
+        --paper-mid: #f3ead4;
+        --gold: #e8c96b;
+        --gold-dim: rgba(232, 201, 107, 0.45);
+        --wood: #4a3224;
+        --wood-dark: #2c1d14;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        color: #f6f4ef;
+        background: var(--ink);
+        overflow-x: hidden;
+      }
+
+      /* 背景：暗色 + 右上光束 + 仙鹤 */
+      .explore-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(ellipse 120% 80% at 100% 0%, rgba(180, 140, 60, 0.12), transparent 55%),
+          radial-gradient(ellipse 80% 50% at 20% 100%, rgba(40, 50, 80, 0.2), transparent 50%),
+          linear-gradient(165deg, #0a0c12 0%, #050508 45%, #080a10 100%);
+        pointer-events: none;
+      }
+
+      .explore-bg__rays {
+        position: absolute;
+        inset: -20% -30% 40% 20%;
+        background: conic-gradient(
+          from -35deg at 95% 5%,
+          transparent 0deg,
+          rgba(255, 230, 180, 0.04) 25deg,
+          transparent 55deg,
+          rgba(255, 240, 200, 0.03) 80deg,
+          transparent 120deg
+        );
+        filter: blur(20px);
+        opacity: 0.9;
+      }
+
+      .crane {
+        position: absolute;
+        opacity: 0.14;
+        color: #fff;
+        animation: crane-float 18s ease-in-out infinite;
+      }
+      .crane:nth-child(1) {
+        top: 12%;
+        left: 8%;
+        width: clamp(48px, 10vw, 100px);
+        animation-delay: 0s;
+      }
+      .crane:nth-child(2) {
+        top: 28%;
+        right: 12%;
+        width: clamp(40px, 8vw, 80px);
+        animation-delay: -4s;
+      }
+      .crane:nth-child(3) {
+        top: 52%;
+        left: 4%;
+        width: clamp(36px, 7vw, 72px);
+        animation-delay: -8s;
+      }
+      .crane:nth-child(4) {
+        bottom: 18%;
+        right: 18%;
+        width: clamp(44px, 9vw, 90px);
+        animation-delay: -12s;
+      }
+
+      @keyframes crane-float {
+        0%,
+        100% {
+          transform: translate(0, 0) rotate(-6deg);
+        }
+        50% {
+          transform: translate(12px, -20px) rotate(4deg);
+        }
+      }
+
+      .explore-main {
+        position: relative;
+        z-index: 1;
+        padding: 5.5rem 1rem 4rem;
+        max-width: 1120px;
+        margin: 0 auto;
+      }
+
+      .page-eyebrow {
+        text-align: center;
+        font-size: 0.75rem;
+        letter-spacing: 0.35em;
+        color: var(--gold-dim);
+        margin-bottom: 0.5rem;
+      }
+
+      .page-title {
+        text-align: center;
+        font-family: "Noto Serif SC", serif;
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 700;
+        color: #fdfaf3;
+        text-shadow: 0 2px 24px rgba(0, 0, 0, 0.5);
+        margin-bottom: 2.5rem;
+      }
+
+      /* 卷轴外框 */
+      .scroll-frame {
+        position: relative;
+        margin: 0 auto;
+        width: min(920px, 100%);
+        filter: drop-shadow(0 28px 60px rgba(0, 0, 0, 0.55));
+      }
+
+      .scroll-roller {
+        height: clamp(22px, 4vw, 32px);
+        border-radius: 10px;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            var(--wood) 0px,
+            var(--wood) 3px,
+            var(--wood-dark) 3px,
+            var(--wood-dark) 7px
+          ),
+          linear-gradient(180deg, #6b4a36, #3d2818);
+        box-shadow:
+          inset 0 2px 0 rgba(255, 255, 255, 0.08),
+          0 8px 24px rgba(0, 0, 0, 0.45);
+      }
+
+      .scroll-roller--top {
+        margin-bottom: -2px;
+      }
+      .scroll-roller--bottom {
+        margin-top: -2px;
+      }
+
+      .scroll-paper {
+        position: relative;
+        min-height: 200vh;
+        padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1rem, 3vw, 2rem) clamp(3rem, 6vw, 4.5rem);
+        background:
+          linear-gradient(90deg, rgba(90, 70, 45, 0.08), transparent 15%, transparent 85%, rgba(90, 70, 45, 0.08)),
+          linear-gradient(180deg, #efe4cc 0%, var(--paper-mid) 35%, var(--paper) 70%, #e0d4bc 100%);
+        box-shadow:
+          inset 0 0 0 1px rgba(139, 90, 43, 0.18),
+          inset 0 0 100px rgba(139, 90, 43, 0.12);
+        border-left: 3px solid rgba(101, 67, 33, 0.35);
+        border-right: 3px solid rgba(101, 67, 33, 0.35);
+      }
+
+      /* 蜿蜒路径 SVG */
+      .scroll-path {
+        position: absolute;
+        left: 50%;
+        top: 4%;
+        bottom: 4%;
+        width: min(88%, 720px);
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.85;
+      }
+
+      .scroll-path path {
+        fill: none;
+        stroke: rgba(180, 140, 60, 0.55);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 8 12;
+      }
+
+      .stops {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(2.5rem, 6vw, 4rem);
+      }
+
+      .stop {
+        display: grid;
+        grid-template-columns: 1fr min(140px, 22vw) 1fr;
+        gap: clamp(0.75rem, 2vw, 1.25rem);
+        align-items: center;
+        opacity: 0;
+        transform: translateY(36px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+
+      .stop.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .stop__copy {
+        padding: 0.25rem 0;
+      }
+
+      .stop__year {
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        color: #8a6a2a;
+        font-weight: 600;
+      }
+
+      .stop__name {
+        margin-top: 0.35rem;
+        font-family: "Noto Serif SC", serif;
+        font-size: clamp(1.25rem, 2.8vw, 1.65rem);
+        font-weight: 700;
+        color: #2a2418;
+        line-height: 1.25;
+      }
+
+      .stop__desc {
+        margin-top: 0.5rem;
+        font-size: clamp(0.8rem, 1.9vw, 0.95rem);
+        line-height: 1.75;
+        color: rgba(42, 36, 24, 0.82);
+        max-width: 38ch;
+      }
+
+      .stop__connector {
+        justify-self: center;
+        width: 3px;
+        height: 48px;
+        background: linear-gradient(180deg, rgba(180, 140, 60, 0.2), rgba(180, 140, 60, 0.75));
+        border-radius: 2px;
+      }
+
+      .stop__model-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .mini-model {
+        width: clamp(100px, 22vw, 140px);
+        height: clamp(88px, 18vw, 120px);
+        filter: drop-shadow(0 12px 20px rgba(42, 30, 20, 0.25));
+        transform: perspective(400px) rotateX(6deg) rotateY(-8deg);
+        transition: transform 0.35s ease;
+      }
+
+      .stop:hover .mini-model {
+        transform: perspective(400px) rotateX(4deg) rotateY(4deg) translateY(-4px);
+      }
+
+      /* 左右交替 */
+      .stop--left .stop__copy {
+        grid-column: 1;
+        text-align: right;
+        justify-self: end;
+      }
+      .stop--left .stop__connector {
+        grid-column: 2;
+      }
+      .stop--left .stop__model-wrap {
+        grid-column: 3;
+        justify-self: start;
+      }
+
+      .stop--right .stop__copy {
+        grid-column: 3;
+        text-align: left;
+        justify-self: start;
+      }
+      .stop--right .stop__connector {
+        grid-column: 2;
+      }
+      .stop--right .stop__model-wrap {
+        grid-column: 1;
+        justify-self: end;
+      }
+
+      /* 故宫：唯一可点击 */
+      .gugong-hit {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        border-radius: 20px;
+        padding: 0.5rem;
+        margin: -0.5rem;
+        transition:
+          box-shadow 0.35s ease,
+          transform 0.35s ease;
+        outline: none;
+      }
+
+      .gugong-hit:hover,
+      .gugong-hit:focus-visible {
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.65), 0 20px 50px rgba(122, 30, 30, 0.25);
+        transform: translateY(-2px);
+      }
+
+      .gugong-hit:focus-visible {
+        outline: 2px solid #f5d26f;
+        outline-offset: 4px;
+      }
+
+      .badge-360 {
+        position: relative;
+        margin: 0.65rem auto 0;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, rgba(255, 248, 220, 0.95), rgba(212, 175, 55, 0.35));
+        border: 2px solid rgba(212, 175, 55, 0.85);
+        box-shadow:
+          0 0 32px rgba(245, 210, 111, 0.55),
+          inset 0 0 20px rgba(255, 255, 255, 0.35);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Noto Serif SC", serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #5c1a1a;
+        animation: pulse-glow 2.8s ease-in-out infinite;
+      }
+
+      .badge-360 span {
+        font-size: 0.6rem;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+        margin-top: 2px;
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow:
+            0 0 28px rgba(245, 210, 111, 0.45),
+            inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        50% {
+          box-shadow:
+            0 0 44px rgba(245, 210, 111, 0.75),
+            inset 0 0 24px rgba(255, 255, 255, 0.45);
+        }
+      }
+
+      .gugong-cta {
+        margin-top: 0.75rem;
+        font-size: 0.82rem;
+        color: #6b2a2a;
+        font-weight: 600;
+        text-align: center;
+        max-width: 200px;
+        line-height: 1.5;
+      }
+
+      .stop--gugong .stop__name {
+        color: #5c1a1a;
+      }
+
+      /* 蜿蜒感：每站水平偏移 */
+      .stop:nth-child(1) {
+        margin-left: 0;
+      }
+      .stop:nth-child(2) {
+        margin-left: clamp(0px, 8vw, 72px);
+      }
+      .stop:nth-child(3) {
+        margin-left: clamp(0px, 3vw, 28px);
+      }
+      .stop:nth-child(4) {
+        margin-left: clamp(0px, 10vw, 88px);
+      }
+      .stop:nth-child(5) {
+        margin-left: clamp(0px, 5vw, 40px);
+      }
+      .stop:nth-child(6) {
+        margin-left: clamp(0px, 12vw, 100px);
+      }
+      .stop:nth-child(7) {
+        margin-left: clamp(0px, 4vw, 32px);
+      }
+
+      /* 响应式：窄屏单列 */
+      @media (max-width: 720px) {
+        .stop {
+          grid-template-columns: 1fr;
+          margin-left: 0 !important;
+        }
+
+        .stop__copy {
+          grid-column: 1 !important;
+          text-align: center !important;
+          justify-self: center !important;
+          max-width: 100%;
+        }
+
+        .stop__desc {
+          max-width: 100%;
+        }
+
+        .stop__connector {
+          grid-column: 1 !important;
+          height: 32px;
+          width: 3px;
+        }
+
+        .stop__model-wrap {
+          grid-column: 1 !important;
+          justify-self: center !important;
+          order: -1;
+        }
+
+        .scroll-path {
+          opacity: 0.35;
+          width: 96%;
+        }
+      }
+    </style>
+  </head>
+  <body class="font-sansCN">
+    <div class="explore-bg" aria-hidden="true">
+      <div class="explore-bg__rays"></div>
+      <!-- 仙鹤剪影 -->
+      <svg class="crane" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path
+          d="M20 55 Q40 20 95 25 L100 22 L98 30 Q70 28 55 45 Q45 60 25 58 Z M30 52 L15 48 L12 55 Z M85 26 L108 18 L105 28 Z"
+        />
+      </svg>
+      <svg class="crane" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path
+          d="M25 50 Q45 18 92 22 L98 20 L96 28 Q68 26 52 42 Q42 58 22 56 Z M28 48 L12 46 L10 52 Z M82 24 L110 15 L106 26 Z"
+        />
+      </svg>
+      <svg class="crane" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path
+          d="M18 58 Q38 22 98 28 L102 25 L100 33 Q72 30 58 48 Q46 62 24 60 Z M22 55 L8 50 L6 56 Z M88 28 L112 20 L108 30 Z"
+        />
+      </svg>
+      <svg class="crane" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path
+          d="M22 52 Q42 16 96 24 L100 21 L98 29 Q70 27 54 44 Q44 60 24 57 Z M26 50 L10 47 L8 54 Z M86 26 L115 17 L110 28 Z"
+        />
+      </svg>
+    </div>
+
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+      <div class="container mx-auto flex flex-wrap items-center justify-between gap-y-3 px-4 py-4">
+        <div class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</div>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-flow text-base tracking-[0.22em] md:space-x-8">
+          <div class="group relative">
+            <a href="./index.html" class="text-zinc-200 transition-colors hover:text-amber-100/95">首页</a>
+            <div
+              class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100"
+            >
+              <a href="./index.html" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">地图</a>
+            </div>
+          </div>
+          <div class="group relative">
+            <a href="./list.html" class="text-zinc-200 transition-colors hover:text-amber-100/95">建筑分类</a>
+            <div
+              class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100"
+            >
+              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">民居</a>
+              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">皇宫</a>
+              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">桥梁</a>
+              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">官府</a>
+            </div>
+          </div>
+          <div>
+            <span class="text-amber-100/90">探索发现</span>
+          </div>
+        </div>
+        <div class="flex w-full items-center justify-end sm:w-auto">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="搜索建筑名"
+            class="max-w-[200px] rounded-l-md border border-white/15 bg-white/90 px-4 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/60"
+          />
+          <button
+            type="button"
+            id="searchBtn"
+            class="rounded-r-md bg-stone-700/95 px-4 py-2 font-flow text-sm tracking-[0.12em] text-stone-100 transition-colors hover:bg-stone-600"
+          >
+            搜索
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="explore-main">
+      <p class="page-eyebrow">GU JIAN · TAN MI</p>
+      <h1 class="page-title">古建探秘 · 年代长卷</h1>
+
+      <div class="scroll-frame">
+        <div class="scroll-roller scroll-roller--top" aria-hidden="true"></div>
+        <div class="scroll-paper">
+          <svg class="scroll-path" viewBox="0 0 400 1600" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d="M200 40 C 320 120, 80 220, 200 300 C 320 380, 100 480, 200 560 C 300 660, 120 760, 200 860 C 280 960, 140 1060, 200 1160 C 260 1280, 160 1380, 200 1500"
+            />
+          </svg>
+
+          <div class="stops">
+            <!-- 1 佛光寺 -->
+            <article class="stop stop--left" data-index="0">
+              <div class="stop__copy">
+                <div class="stop__year">1044</div>
+                <h2 class="stop__name">佛光寺东大殿</h2>
+                <p class="stop__desc">唐代木构遗珍，斗栱与梁架比例保存完整，是研究中国早期木构建筑的重要实物。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#7a1e1e" d="M20 45 L60 22 L100 45 V88 H20Z" />
+                  <path fill="#c9a227" d="M28 45 L60 28 L92 45" stroke="#8b6914" stroke-width="1" />
+                  <rect x="38" y="55" width="16" height="28" fill="#3d2818" opacity="0.85" />
+                  <rect x="66" y="55" width="16" height="28" fill="#3d2818" opacity="0.85" />
+                </svg>
+              </div>
+            </article>
+
+            <!-- 2 独乐寺 -->
+            <article class="stop stop--right" data-index="1">
+              <div class="stop__copy">
+                <div class="stop__year">1113</div>
+                <h2 class="stop__name">独乐寺观音阁</h2>
+                <p class="stop__desc">辽代高阁与塑像同构一体，空间与构件比例极具代表性，展现早期寺观营造智慧。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="35" y="48" width="50" height="62" rx="2" fill="#5c3d2e" />
+                  <path fill="#8b2323" d="M25 48 L60 25 L95 48" />
+                  <path fill="#b8860b" d="M32 48 L60 32 L88 48" />
+                  <rect x="48" y="62" width="24" height="36" fill="#2a1810" opacity="0.9" />
+                </svg>
+              </div>
+            </article>
+
+            <!-- 3 平遥城墙 -->
+            <article class="stop stop--left" data-index="2">
+              <div class="stop__copy">
+                <div class="stop__year">1373</div>
+                <h2 class="stop__name">山西平遥古城墙</h2>
+                <p class="stop__desc">明代县城防御体系与街巷肌理共同构成完整古城样本，是明清县城规划的重要案例。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="10" y="38" width="120" height="22" fill="#6b5344" />
+                  <path fill="#8b7355" d="M8 38 L20 28 H120 L132 38 V60 H8Z" />
+                  <rect x="58" y="42" width="24" height="30" fill="#4a3224" />
+                  <path fill="none" stroke="#5c4a3a" stroke-width="2" d="M15 50 H125" />
+                </svg>
+              </div>
+            </article>
+
+            <!-- 4 故宫 · 唯一链接 -->
+            <article class="stop stop--right stop--gugong" data-index="3">
+              <div class="stop__copy">
+                <div class="stop__year">1406</div>
+                <h2 class="stop__name">北京故宫（样例）</h2>
+                <p class="stop__desc">中国皇家建筑的巅峰代表。点击旁侧建筑示意或 360 徽标，进入故宫博物院官方全景，沉浸式探索。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <a
+                  class="gugong-hit"
+                  href="https://pano.dpm.org.cn/#/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="进入故宫博物院 3D 全景探索"
+                >
+                  <svg class="mini-model" viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="58" width="120" height="40" fill="#7a1a1a" />
+                    <path fill="#c9a227" d="M15 58 L80 30 L145 58" />
+                    <path fill="#e8d4a8" d="M25 58 L80 38 L135 58" opacity="0.9" />
+                    <rect x="35" y="65" width="22" height="28" fill="#4a1515" />
+                    <rect x="68" y="65" width="22" height="28" fill="#4a1515" />
+                    <rect x="101" y="65" width="22" height="28" fill="#4a1515" />
+                    <circle cx="128" cy="42" r="6" fill="#333" opacity="0.5" />
+                  </svg>
+                  <div class="badge-360" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 2px">
+                      <path
+                        d="M4 9h2l1.5-2h5L14 9h6a1 1 0 011 1v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1z"
+                        stroke="#5c1a1a"
+                        stroke-width="1.4"
+                        fill="rgba(255,255,255,0.35)"
+                      />
+                      <circle cx="12" cy="14" r="3.2" stroke="#5c1a1a" stroke-width="1.2" fill="none" />
+                    </svg>
+                    360
+                    <span>全景</span>
+                  </div>
+                  <p class="gugong-cta">点击体验 3D 全景 →</p>
+                </a>
+              </div>
+            </article>
+
+            <!-- 5 应县木塔 -->
+            <article class="stop stop--left" data-index="4">
+              <div class="stop__copy">
+                <div class="stop__year">1579</div>
+                <h2 class="stop__name">应县木塔</h2>
+                <p class="stop__desc">辽代木塔经典，结构层次复杂，展现古代木构抗震与榫卯工艺的高度成熟。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="50,15 72,38 28,38" fill="#8b4513" />
+                  <rect x="32" y="38" width="36" height="18" fill="#a0522d" />
+                  <rect x="30" y="56" width="40" height="20" fill="#8b4513" />
+                  <rect x="28" y="76" width="44" height="22" fill="#a0522d" />
+                  <rect x="26" y="98" width="48" height="24" fill="#654321" />
+                </svg>
+              </div>
+            </article>
+
+            <!-- 6 泸定桥 -->
+            <article class="stop stop--right" data-index="5">
+              <div class="stop__copy">
+                <div class="stop__year">1705</div>
+                <h2 class="stop__name">泸定桥</h2>
+                <p class="stop__desc">清代铁索桥代表，横跨激流，是古代交通工程与险要地形相结合的典范。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#4a90a8" opacity="0.65" d="M0 70 Q35 55 70 70 T140 70 V90 H0Z" />
+                  <line x1="15" y1="38" x2="125" y2="38" stroke="#5c4033" stroke-width="3" />
+                  <line x1="20" y1="42" x2="120" y2="42" stroke="#333" stroke-width="0.8" stroke-dasharray="2 3" />
+                  <rect x="12" y="28" width="14" height="22" fill="#6b5344" />
+                  <rect x="114" y="28" width="14" height="22" fill="#6b5344" />
+                </svg>
+              </div>
+            </article>
+
+            <!-- 7 颐和园 -->
+            <article class="stop stop--left" data-index="6">
+              <div class="stop__copy">
+                <div class="stop__year">1750</div>
+                <h2 class="stop__name">颐和园</h2>
+                <p class="stop__desc">山水园林与宫苑礼制相融，长廊、湖山、殿宇形成完整叙事空间，体现皇家园林审美高峰。</p>
+              </div>
+              <div class="stop__connector" aria-hidden="true"></div>
+              <div class="stop__model-wrap">
+                <svg class="mini-model" viewBox="0 0 140 95" xmlns="http://www.w3.org/2000/svg">
+                  <ellipse cx="70" cy="72" rx="55" ry="14" fill="#5a8a9e" opacity="0.5" />
+                  <path fill="none" stroke="#8b7355" stroke-width="3" d="M25 55 Q70 40 115 55" />
+                  <path fill="#c9a227" d="M55 52 L70 38 L85 52" />
+                  <rect x="62" y="52" width="16" height="18" fill="#7a1e1e" />
+                </svg>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="scroll-roller scroll-roller--bottom" aria-hidden="true"></div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+
+        // 滚动渐入
+        var stops = document.querySelectorAll(".stop");
+        if ("IntersectionObserver" in window) {
+          var io = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                }
+              });
+            },
+            { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+          );
+          stops.forEach(function (el) {
+            io.observe(el);
+          });
+        } else {
+          stops.forEach(function (el) {
+            el.classList.add("is-visible");
+          });
+        }
+
+        // 与首页搜索行为一致（仅本页内建名称表，不修改 index.html）
+        var ALL_BUILDING_NAMES = [
+          "北京故宫",
+          "北京四合院",
+          "卢沟桥",
+          "颐和园",
+          "乔家大院",
+          "霍州署",
+          "鱼沼飞梁",
+          "平遥古城墙",
+          "苏州拙政园",
+          "淮安府衙",
+          "宝带桥",
+          "周庄民居",
+          "阆中古城民居",
+          "泸州龙脑桥",
+          "泸定桥",
+          "陈家祠",
+          "潮州广济桥",
+          "开平碉楼",
+        ];
+        var btn = document.getElementById("searchBtn");
+        var input = document.getElementById("searchInput");
+        if (btn && input) {
+          function searchBuilding() {
+            var term = (input.value || "").trim();
+            if (!term) return;
+            var matched = ALL_BUILDING_NAMES.find(function (name) {
+              return name.indexOf(term) !== -1;
+            });
+            if (matched) {
+              window.location.href = "./detail.html?building=" + encodeURIComponent(matched);
+            } else {
+              window.alert("未找到匹配的建筑");
+            }
+          }
+          btn.addEventListener("click", searchBuilding);
+          input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") searchBuilding();
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

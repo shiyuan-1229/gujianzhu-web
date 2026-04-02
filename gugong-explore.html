@@ -35,6 +35,9 @@
         color: #f5f0e6;
         overflow-x: hidden;
       }
+      body.is-gugong-transition {
+        overflow: hidden;
+      }
 
       /* 长卷地标：玉佩式按钮；仅 .palace-link--nav 可跳转 */
       .palace-link {
@@ -122,21 +125,256 @@
         max-width: none;
         height: auto;
         vertical-align: middle;
+        filter: brightness(1.08) contrast(1.04) saturate(1.06);
+        animation: slowDrift 12s ease-in-out infinite alternate;
+      }
+
+      .scene-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(980px 460px at 50% 34%, rgba(255, 236, 182, 0.12), transparent 64%),
+          linear-gradient(180deg, rgba(7, 8, 14, 0.02), rgba(7, 8, 14, 0.13));
+      }
+
+      .transition-mask {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        opacity: 0;
+        pointer-events: none;
+        background: radial-gradient(900px 500px at 50% 42%, rgba(36, 24, 14, 0.45), rgba(6, 6, 8, 0.96));
+        overflow: hidden;
+        transition: opacity 520ms ease;
+      }
+
+      .transition-mask--play {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .transition-door {
+        position: absolute;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        background:
+          linear-gradient(180deg, rgba(103, 16, 16, 0.95), rgba(40, 8, 8, 0.96)),
+          repeating-linear-gradient(
+            90deg,
+            rgba(212, 175, 55, 0.08) 0px,
+            rgba(212, 175, 55, 0.08) 2px,
+            rgba(0, 0, 0, 0) 2px,
+            rgba(0, 0, 0, 0) 22px
+          );
+        border-top: 4px solid rgba(212, 175, 55, 0.62);
+        border-bottom: 4px solid rgba(212, 175, 55, 0.62);
+        box-shadow: inset 0 0 0 2px rgba(212, 175, 55, 0.22);
+      }
+      .transition-door::before {
+        content: "";
+        position: absolute;
+        inset: 8%;
+        border: 2px solid rgba(212, 175, 55, 0.46);
+        box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.2);
+      }
+      .transition-door::after {
+        content: "";
+        position: absolute;
+        inset: 16% 14%;
+        background:
+          radial-gradient(circle, rgba(212, 175, 55, 0.42) 0 2px, transparent 2.5px) 0 0 / 22px 22px,
+          linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.14));
+        opacity: 0.95;
+      }
+
+      .transition-door--left {
+        left: 0;
+        border-right: 2px solid rgba(212, 175, 55, 0.65);
+      }
+
+      .transition-door--right {
+        right: 0;
+        border-left: 2px solid rgba(212, 175, 55, 0.65);
+      }
+
+      .transition-scroll {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(72vw, 700px);
+        height: min(58vh, 540px);
+        transform: translate(-50%, -50%) scaleY(0.03);
+        transform-origin: center top;
+        opacity: 0;
+        border-radius: 20px;
+        background:
+          linear-gradient(180deg, rgba(245, 226, 187, 0.95), rgba(216, 194, 152, 0.94)),
+          repeating-linear-gradient(
+            0deg,
+            rgba(110, 82, 41, 0.05) 0px,
+            rgba(110, 82, 41, 0.05) 2px,
+            rgba(0, 0, 0, 0) 2px,
+            rgba(0, 0, 0, 0) 7px
+          );
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+      }
+      .transition-scroll .scroll-ornament {
+        position: absolute;
+        inset: 18% 9% 22%;
+        border: 1px solid rgba(118, 83, 38, 0.28);
+        border-radius: 14px;
+        background:
+          radial-gradient(460px 180px at 50% 0%, rgba(188, 142, 74, 0.18), transparent 62%),
+          repeating-linear-gradient(
+            90deg,
+            rgba(118, 83, 38, 0.04) 0px,
+            rgba(118, 83, 38, 0.04) 1px,
+            transparent 1px,
+            transparent 8px
+          );
+      }
+      .transition-scroll .scroll-seal {
+        position: absolute;
+        right: 7%;
+        bottom: 12%;
+        width: 58px;
+        height: 58px;
+        border-radius: 8px;
+        background: linear-gradient(165deg, #8f1a1a, #5e0f0f);
+        border: 2px solid rgba(212, 175, 55, 0.62);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28);
+        display: grid;
+        place-items: center;
+        font-family: "Noto Serif SC", "SimSun", serif;
+        font-size: 15px;
+        color: rgba(247, 228, 193, 0.92);
+        letter-spacing: 0.08em;
+      }
+
+      .transition-scroll::before,
+      .transition-scroll::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        width: calc(100% + 20px);
+        height: 16px;
+        transform: translateX(-50%);
+        border-radius: 9999px;
+        background: linear-gradient(180deg, #9b6f2d, #6d4a1f);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+      }
+
+      .transition-scroll::before {
+        top: -8px;
+      }
+
+      .transition-scroll::after {
+        bottom: -8px;
+      }
+
+      .transition-text {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        transform: translate(-50%, -50%);
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(26px, 4.4vw, 52px);
+        letter-spacing: 0.16em;
+        color: #4a2e16;
+        opacity: 0;
+        text-shadow: 0 2px 0 rgba(255, 255, 255, 0.22);
+      }
+      .transition-subtext {
+        position: absolute;
+        left: 50%;
+        top: 60%;
+        transform: translate(-50%, -50%);
+        font-family: "Noto Serif SC", "SimSun", serif;
+        font-size: clamp(14px, 1.5vw, 20px);
+        letter-spacing: 0.22em;
+        color: rgba(84, 55, 20, 0.78);
+        opacity: 0;
+      }
+
+      .transition-mask--play .transition-door--left {
+        animation: doorOpenLeft 2000ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+      }
+
+      .transition-mask--play .transition-door--right {
+        animation: doorOpenRight 2000ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+      }
+
+      .transition-mask--play .transition-scroll {
+        animation: scrollUnroll 2100ms 560ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+      }
+
+      .transition-mask--play .transition-text {
+        animation: textReveal 620ms 980ms ease forwards, textFadeOut 720ms 2200ms ease forwards;
+      }
+      .transition-mask--play .transition-subtext {
+        animation: textReveal 620ms 1120ms ease forwards, textFadeOut 720ms 2200ms ease forwards;
+      }
+
+      @keyframes doorOpenLeft {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-102%); }
+      }
+
+      @keyframes doorOpenRight {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(102%); }
+      }
+
+      @keyframes scrollUnroll {
+        0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.03); }
+        24% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+        70% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scaleY(1.02); }
+      }
+
+      @keyframes textReveal {
+        0% { opacity: 0; transform: translate(-50%, -42%); }
+        100% { opacity: 0.92; transform: translate(-50%, -50%); }
+      }
+
+      @keyframes textFadeOut {
+        0% { opacity: 0.92; }
+        100% { opacity: 0; }
+      }
+
+      @keyframes slowDrift {
+        0% { transform: scale(1) translateY(0px); }
+        100% { transform: scale(1.015) translateY(-6px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .scene-img {
+          animation: none;
+        }
+        .transition-mask,
+        .transition-door,
+        .transition-scroll,
+        .transition-text {
+          animation: none !important;
+          transition: none !important;
+        }
       }
 
     </style>
   </head>
   <body class="font-sansCN">
-    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/15 bg-stone-900/40 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.22)] backdrop-blur-xl">
       <div class="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <a href="./index.html" class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</a>
-        <div class="flex flex-wrap items-center gap-6 font-flow text-lg tracking-[0.22em] md:text-xl">
+        <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
           <a href="./index.html" class="text-amber-100/90">首页</a>
           <a href="./list.html" class="text-zinc-300 transition-colors hover:text-amber-100/95">建筑分类</a>
         </div>
         <a
           href="./index.html"
-          class="rounded-md border border-white/15 bg-stone-800/60 px-4 py-2 font-flow text-base tracking-[0.16em] text-stone-100 transition-colors hover:bg-stone-700/80 md:text-lg"
+          class="rounded-md border border-white/20 bg-stone-800/55 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-stone-100 transition-colors hover:bg-stone-700/75 md:text-xl md:tracking-[0.16em]"
         >
           返回首页
         </a>
@@ -153,6 +391,7 @@
           loading="eager"
           decoding="async"
         />
+        <div class="scene-overlay" aria-hidden="true"></div>
         <!--
           自上而下：恭王府 → 万宁桥 → 宛平城 → 卢沟桥 → 四合院 → 故宫（仅故宫可点进内景）
           定位：left/top 为百分比，锚点在按钮中心（translate -50% -50%）。若与插图有偏差可微调 style。
@@ -160,7 +399,7 @@
         <button
           type="button"
           class="palace-link palace-link--static"
-          style="left: 26%; top: 14%"
+          style="left: 64%; top: 26%"
           aria-label="恭王府（示意）"
           title="敬请期待"
         >
@@ -213,5 +452,42 @@
         </a>
       </section>
     </main>
+    <div id="gugongTransition" class="transition-mask" aria-hidden="true">
+      <div class="transition-door transition-door--left"></div>
+      <div class="transition-door transition-door--right"></div>
+      <div class="transition-scroll">
+        <div class="scroll-ornament" aria-hidden="true"></div>
+        <div class="scroll-seal" aria-hidden="true">故宫</div>
+      </div>
+      <div class="transition-text">启卷入宫</div>
+      <div class="transition-subtext">沿中轴，入紫禁</div>
+    </div>
+    <script>
+      (function () {
+        var trigger = document.getElementById("jadeGugong");
+        var mask = document.getElementById("gugongTransition");
+        var transitioning = false;
+        if (!trigger || !mask) return;
+
+        trigger.addEventListener("click", function (e) {
+          var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (prefersReducedMotion) return;
+          if (transitioning) {
+            e.preventDefault();
+            return;
+          }
+          e.preventDefault();
+          transitioning = true;
+          document.body.classList.add("is-gugong-transition");
+          mask.classList.add("transition-mask--play");
+          window.setTimeout(function () {
+            mask.style.opacity = "0";
+          }, 2550);
+          window.setTimeout(function () {
+            window.location.href = trigger.getAttribute("href");
+          }, 2860);
+        });
+      })();
+    </script>
   </body>
 </html>

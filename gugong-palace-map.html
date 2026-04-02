@@ -32,6 +32,9 @@
         color: #f5f0e6;
         overflow-x: hidden;
       }
+      body.is-detail-transition {
+        overflow: hidden;
+      }
       .scene-img {
         display: block;
         width: 100%;
@@ -44,36 +47,311 @@
         width: 100%;
         height: calc(100vh - 5.25rem);
         overflow: hidden;
+        position: relative;
+      }
+      /* 与长卷页同系：绛红底 + 金边，改为竖向标签与竖排文字 */
+      .map-pill {
+        position: absolute;
+        z-index: 20;
+        left: 0;
+        top: 0;
+        box-sizing: border-box;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 10px;
+        background: linear-gradient(165deg, #6b1414 0%, #4a0c0c 38%, #3d0a0a 72%, #2a0606 100%);
+        border: 2px solid rgba(212, 175, 55, 0.85);
+        box-shadow:
+          0 0 0 1px rgba(139, 0, 0, 0.35),
+          0 8px 24px rgba(0, 0, 0, 0.42),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-weight: 400;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        line-height: 1.22;
+        color: #f5e6c8;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+        user-select: none;
+        white-space: normal;
+        writing-mode: vertical-rl;
+        text-orientation: upright;
+        cursor: default;
+        text-decoration: none;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      }
+      .map-pill::before {
+        content: "";
+        position: absolute;
+        inset: 3px;
+        border-radius: 8px;
+        border: 1px solid rgba(212, 175, 55, 0.22);
+        pointer-events: none;
+      }
+      .map-pill--static {
+        opacity: 0.96;
+        pointer-events: none;
+      }
+      .map-pill--link {
+        cursor: pointer;
+        pointer-events: auto;
+      }
+      .map-pill--link:hover,
+      .map-pill--link:focus-visible {
+        transform: translate(-50%, -50%) scale(1.04);
+        filter: brightness(1.08);
+        box-shadow:
+          0 0 0 1px rgba(212, 175, 55, 0.65),
+          0 12px 32px rgba(0, 0, 0, 0.48),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        outline: none;
+      }
+      .map-pill--link:focus-visible {
+        outline: 2px solid rgba(212, 175, 55, 0.85);
+        outline-offset: 3px;
+      }
+
+      .detail-transition {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        opacity: 0;
+        pointer-events: none;
+        background: radial-gradient(860px 420px at 50% 45%, rgba(58, 39, 20, 0.34), rgba(4, 4, 6, 0.9));
+      }
+      .detail-transition--play {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .detail-scroll {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(64vw, 620px);
+        height: min(46vh, 420px);
+        transform: translate(-50%, -50%) scaleY(0.08);
+        transform-origin: center top;
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(245, 226, 188, 0.96), rgba(214, 192, 148, 0.95)),
+          repeating-linear-gradient(
+            0deg,
+            rgba(110, 82, 41, 0.06) 0px,
+            rgba(110, 82, 41, 0.06) 2px,
+            rgba(0, 0, 0, 0) 2px,
+            rgba(0, 0, 0, 0) 7px
+          );
+        box-shadow: 0 16px 46px rgba(0, 0, 0, 0.45);
+        opacity: 0;
+      }
+      .detail-scroll::before,
+      .detail-scroll::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        width: calc(100% + 14px);
+        height: 14px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: linear-gradient(180deg, #986e2c, #68481f);
+      }
+      .detail-scroll::before { top: -7px; }
+      .detail-scroll::after { bottom: -7px; }
+      .detail-title {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(24px, 3.5vw, 44px);
+        letter-spacing: 0.16em;
+        color: #4d3118;
+        opacity: 0;
+      }
+      .detail-transition--play .detail-scroll {
+        animation: detailUnroll 760ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+      }
+      .detail-transition--play .detail-title {
+        animation: detailFade 520ms 340ms ease forwards;
+      }
+      @keyframes detailUnroll {
+        0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.08); }
+        35% { opacity: 1; }
+        100% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+      }
+      @keyframes detailFade {
+        0% { opacity: 0; transform: translate(-50%, -44%); }
+        100% { opacity: 0.94; transform: translate(-50%, -50%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .detail-transition,
+        .detail-scroll,
+        .detail-title {
+          animation: none !important;
+          transition: none !important;
+        }
       }
     </style>
   </head>
   <body>
-    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/15 bg-stone-900/40 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.22)] backdrop-blur-xl">
       <div class="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <a href="./index.html" class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</a>
-        <div class="flex flex-wrap items-center gap-6 font-flow text-lg tracking-[0.22em]">
+        <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
           <a href="./index.html" class="text-zinc-300 transition-colors hover:text-amber-100/95">首页</a>
           <a href="./gugong-explore.html" class="text-amber-100/90">故宫探秘</a>
         </div>
-        <a
-          href="./gugong-explore.html"
-          class="rounded-md border border-white/15 bg-stone-800/60 px-4 py-2 font-flow text-base tracking-[0.16em] text-stone-100 transition-colors hover:bg-stone-700/80"
-        >
-          返回上一页
-        </a>
+        <div class="flex flex-wrap items-center justify-end gap-2 md:gap-3">
+          <a
+            href="./gugong-explore.html"
+            class="rounded-md border border-white/20 bg-stone-800/55 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-stone-100 transition-colors hover:bg-stone-700/75 md:px-5 md:text-lg md:tracking-[0.16em]"
+          >
+            返回上一页
+          </a>
+          <a
+            href="./index.html"
+            class="rounded-md border border-white/20 bg-stone-800/55 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-stone-100 transition-colors hover:bg-stone-700/75 md:px-5 md:text-lg md:tracking-[0.16em]"
+          >
+            返回首页
+          </a>
+        </div>
       </div>
     </nav>
 
     <main class="w-full max-w-none pt-[5.25rem]">
       <section class="scene-stage relative">
         <img
+          id="gugongMapImg"
           class="scene-img"
           src="./assets/gugong-journey-2.png"
           alt="故宫建筑群鸟瞰"
           loading="eager"
           decoding="async"
         />
+        <!-- data-map-cx/cy：中心在原图比例；rw/rh：横排按钮宽、高占原图比例。仅太和殿、御花园可点。 -->
+        <span class="map-pill map-pill--static" data-map-cx="0.118" data-map-cy="0.445" data-map-rw="0.032" data-map-rh="0.102">慈宁宫</span>
+        <span class="map-pill map-pill--static" data-map-cx="0.345" data-map-cy="0.415" data-map-rw="0.032" data-map-rh="0.098">养心殿</span>
+        <a
+          class="map-pill map-pill--link"
+          href="./detail.html?building=故宫御花园"
+          aria-label="查看御花园详情"
+          data-map-cx="0.63"
+          data-map-cy="0.235"
+          data-map-rw="0.033"
+          data-map-rh="0.108"
+        >
+          御花园
+        </a>
+        <span class="map-pill map-pill--static" data-map-cx="0.52" data-map-cy="0.358" data-map-rw="0.032" data-map-rh="0.102">乾清宫</span>
+        <span class="map-pill map-pill--static" data-map-cx="0.745" data-map-cy="0.425" data-map-rw="0.032" data-map-rh="0.098">延禧宫</span>
+        <span class="map-pill map-pill--static" data-map-cx="0.905" data-map-cy="0.435" data-map-rw="0.031" data-map-rh="0.097">皇极殿</span>
+        <a
+          class="map-pill map-pill--link"
+          href="./detail.html?building=故宫太和殿"
+          aria-label="查看太和殿详情"
+          data-map-cx="0.53"
+          data-map-cy="0.592"
+          data-map-rw="0.034"
+          data-map-rh="0.112"
+        >
+          太和殿
+        </a>
+        <span class="map-pill map-pill--static" data-map-cx="0.365" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">武英殿</span>
+        <span class="map-pill map-pill--static" data-map-cx="0.655" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">文华殿</span>
       </section>
     </main>
+    <div id="detailTransition" class="detail-transition" aria-hidden="true">
+      <div class="detail-scroll" aria-hidden="true"></div>
+      <div id="detailTransitionTitle" class="detail-title">入殿细览</div>
+    </div>
+    <script>
+      (function () {
+        function placeGugongHotspots() {
+          var img = document.getElementById("gugongMapImg");
+          var stage = img && img.closest(".scene-stage");
+          if (!img || !stage || !img.naturalWidth) return;
+
+          var iw = img.naturalWidth;
+          var ih = img.naturalHeight;
+          var cw = stage.clientWidth;
+          var ch = stage.clientHeight;
+          var imgAspect = iw / ih;
+          var boxAspect = cw / ch;
+          var scale;
+          var offsetX;
+          var offsetY;
+          if (imgAspect > boxAspect) {
+            scale = ch / ih;
+            offsetX = (cw - iw * scale) / 2;
+            offsetY = 0;
+          } else {
+            scale = cw / iw;
+            offsetX = 0;
+            offsetY = (ch - ih * scale) / 2;
+          }
+
+          stage.querySelectorAll("[data-map-cx]").forEach(function (el) {
+            var cx = parseFloat(el.getAttribute("data-map-cx"));
+            var cy = parseFloat(el.getAttribute("data-map-cy"));
+            var rw = parseFloat(el.getAttribute("data-map-rw") || "0.032");
+            var rh = parseFloat(el.getAttribute("data-map-rh") || "0.1");
+            if (Number.isNaN(cx) || Number.isNaN(cy)) return;
+            var w = rw * iw * scale;
+            var h = rh * ih * scale;
+            var left = offsetX + cx * iw * scale;
+            var top = offsetY + cy * ih * scale;
+            el.style.left = left + "px";
+            el.style.top = top + "px";
+            el.style.width = Math.max(30, w) + "px";
+            el.style.height = Math.max(76, h) + "px";
+            var fs = Math.max(13, Math.min(20, Math.round(w * 0.52)));
+            el.style.fontSize = fs + "px";
+          });
+        }
+
+        var img = document.getElementById("gugongMapImg");
+        if (img) {
+          if (img.complete && img.naturalWidth) placeGugongHotspots();
+          else img.addEventListener("load", placeGugongHotspots, { once: true });
+        }
+        window.addEventListener("resize", placeGugongHotspots);
+        if (window.ResizeObserver && img && img.parentElement) {
+          var ro = new ResizeObserver(placeGugongHotspots);
+          ro.observe(img.parentElement);
+        }
+      })();
+    </script>
+    <script>
+      (function () {
+        var transition = document.getElementById("detailTransition");
+        var title = document.getElementById("detailTransitionTitle");
+        if (!transition || !title) return;
+        var locking = false;
+        document.querySelectorAll(".map-pill--link").forEach(function (link) {
+          link.addEventListener("click", function (e) {
+            var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+            if (locking) {
+              e.preventDefault();
+              return;
+            }
+            e.preventDefault();
+            locking = true;
+            var label = (link.textContent || "").trim();
+            title.textContent = label ? "入" + label + "细览" : "入殿细览";
+            document.body.classList.add("is-detail-transition");
+            transition.classList.add("detail-transition--play");
+            window.setTimeout(function () {
+              window.location.href = link.getAttribute("href");
+            }, 920);
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

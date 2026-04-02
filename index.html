@@ -48,8 +48,8 @@
       html,
       body {
         height: 100%;
-        background: url('2.jpg') no-repeat center center fixed;
-        background-size: cover;
+        /* 与山水底图衔接，避免导航与首屏之间出现死黑条 */
+        background: radial-gradient(1200px 900px at 50% 18%, #2d3d34, #141c18 55%, #0d1210 100%);
         color: var(--fg);
         overflow: hidden;
       }
@@ -58,8 +58,8 @@
       .overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.05);
-        backdrop-filter: blur(2px);
+        background: rgba(0, 0, 0, 0.02);
+        backdrop-filter: blur(1px);
         z-index: 1;
       }
 
@@ -73,20 +73,9 @@
         pointer-events: none;
       }
 
-      /* 长城剪影：Canvas 与地图之间 */
+      /* 单图首页不再需要旧的长城剪影层 */
       .wall-silhouette {
-        position: absolute;
-        left: -10%;
-        top: 20%;
-        width: 60vw;
-        height: auto;
-        opacity: 0.15;
-        filter: blur(1px);
-        z-index: 1;
-        pointer-events: none;
-        transform: rotate(-14deg) perspective(900px) rotateX(18deg);
-        transform-origin: 0% 100%;
-        mix-blend-mode: screen;
+        display: none;
       }
 
       /* 右侧详情竖排标题 */
@@ -140,14 +129,16 @@
         opacity: 0.55;
       }
 
-      /* ECharts 容器在深色下更“融” */
-      #map {
-        width: 100%;
-        height: 100%;
+      /* 与插画同坐标系的热区层（百分比相对 #mapHotspots，随容器缩放） */
+      #mapHotspots {
         position: absolute;
-        left: 0;
-        top: 0;
-        transform: scale(1.15) translate(-3%, -7%);
+        inset: 0;
+        z-index: 4;
+        pointer-events: none;
+      }
+
+      #mapHotspots .map-hotspot {
+        pointer-events: auto;
       }
 
       /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
@@ -168,62 +159,88 @@
         display: none;
       }
 
-      #map {
+      /* 全屏铺满视口（底图延至导航栏下缘，导航单独 z-50 浮于其上） */
+      #mapWrap {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
-        transform: scale(1.1) translate(0, 5%);
-      }
-
-      #mapWrap {
-        width: 95vw;
-        height: 90vh;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 3; /* 地图在长城剪影之上 */
+        z-index: 3;
       }
 
       #mapPanel {
         width: 100%;
         height: 100%;
-        border-radius: 28px;
+        border-radius: 0;
         overflow: hidden;
-        outline: 1px solid rgba(212, 175, 55, 0.22);
-        box-shadow: 0 40px 160px rgba(0, 0, 0, 0.55);
-        background: linear-gradient(180deg, rgba(12, 12, 20, 0.55), rgba(12, 12, 20, 0.25));
+        outline: none;
+        box-shadow: none;
+        background: transparent;
       }
 
-      /* 插画地图：无底板；黑底 PNG 用 screen 与深色页面融合 */
+      /* 双层：底层山水全屏铺底，上层中国地图（透明底）与热区同坐标系 */
       #mapPanel.map-panel--illustration {
         background: transparent !important;
-        box-shadow: none;
-        outline: none;
-        border: none;
       }
 
-      #mapIllustration {
-        /* 黑(#000)区域透出网页背景，彩色地图保留 */
-        mix-blend-mode: screen;
-        filter: contrast(1.1) saturate(1.06);
+      #mapHeroBg {
+        mix-blend-mode: normal;
+        object-fit: cover;
+        object-position: center center;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform: translateZ(0);
       }
 
+      /* 地图与省份高亮、图标热区同层平移，避免只挪地图导致错位 */
+      .map-china-layer {
+        position: absolute;
+        inset: 0;
+        transform: translateY(-1.2vh);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+
+      #mapChinaMap {
+        mix-blend-mode: normal;
+        filter: brightness(1.04) saturate(1.02) contrast(1.02)
+          drop-shadow(0 12px 40px rgba(20, 35, 25, 0.35));
+        object-fit: cover;
+        object-position: center 44%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      /* 与地图同裁切：xMidYMid slice ≈ object-fit:cover + center */
+      .map-province-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .map-province-svg .map-province-highlight {
+        pointer-events: visibleFill;
+        cursor: pointer;
+        fill: rgba(255, 200, 90, 0.38);
+        stroke: rgba(212, 175, 55, 0.85);
+        stroke-width: 0.35;
+        opacity: 0;
+        transition: opacity 0.22s ease, fill 0.22s ease;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .map-province-svg .map-province-highlight.is-active {
+        opacity: 1;
+        fill: rgba(255, 220, 130, 0.52);
+      }
+
       /* 左下角：浑天仪/罗盘线稿水印 */
       .armillary {
-        position: fixed;
-        left: 5%;
-        bottom: 10%;
-        z-index: 3;
-        width: 260px;
-        height: 260px;
-        opacity: 0.05;
-        mix-blend-mode: screen;
-        pointer-events: none;
-        color: #f1c40f;
-        filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.12));
+        display: none;
       }
 
       .armillary svg {
@@ -238,44 +255,86 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: rgba(240, 240, 240, 0.65);
+        color: rgba(250, 240, 220, 0.72);
         font-size: 12px;
         letter-spacing: 0.22em;
         text-transform: uppercase;
         z-index: 5;
+        pointer-events: none;
+      }
+
+      /* 建筑图标热区：圆心对齐插画上的图标，点击有脉冲反馈 */
+      .map-hotspot {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .map-hotspot.map-hotspot--icon {
+        width: clamp(40px, 5.8vmin, 72px);
+        height: clamp(40px, 5.8vmin, 72px);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+      }
+
+      .map-hotspot--icon .map-hotspot__ring {
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        transform-origin: center center;
+        border: 2px solid rgba(212, 175, 55, 0.55);
+        background: radial-gradient(
+          circle at 50% 38%,
+          rgba(255, 230, 160, 0.42) 0%,
+          rgba(255, 200, 100, 0.12) 55%,
+          rgba(255, 200, 100, 0) 72%
+        );
+        box-shadow: 0 0 0 0 rgba(255, 210, 120, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease, box-shadow 0.22s ease;
+      }
+
+      .map-hotspot--icon:hover .map-hotspot__ring,
+      .map-hotspot--icon:focus-visible .map-hotspot__ring,
+      .map-hotspot--icon.is-active .map-hotspot__ring {
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(255, 210, 120, 0.55);
+      }
+
+      .map-hotspot--icon:focus-visible {
+        outline: 2px solid rgba(212, 175, 55, 0.9);
+        outline-offset: 3px;
       }
 
       #detail {
         position: absolute;
-        right: 48px;
+        right: clamp(12px, 2.5vw, 48px);
         top: 50%;
-        width: min(420px, 34vw);
+        width: min(420px, 38vw);
         transform: translateY(-50%);
         display: block;
         padding: 0;
+        z-index: 10;
       }
 
       .glass-card {
         border-radius: 26px;
-        background: rgba(10, 11, 18, 0.55);
-        border: 1px solid rgba(212, 175, 55, 0.28);
-        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+        background: rgba(10, 11, 18, 0.44);
+        border: 1px solid rgba(212, 175, 55, 0.24);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
       }
 
       /* 增加一点“星云流光”，让画面更有纵深 */
       .ink-wash {
-        pointer-events: none;
-        position: absolute;
-        inset: -20%;
-        background:
-          radial-gradient(900px 600px at 22% 26%, rgba(58, 12, 163, 0.14), transparent 62%),
-          radial-gradient(900px 600px at 78% 80%, rgba(212, 175, 55, 0.08), transparent 62%),
-          conic-gradient(from 210deg at 50% 50%, rgba(26, 26, 46, 0.25), transparent 35%, rgba(212, 175, 55, 0.05), transparent 70%);
-        filter: blur(24px);
-        opacity: 0.55;
-        mix-blend-mode: screen;
+        display: none;
       }
     </style>
   </head>
@@ -285,7 +344,7 @@
     <div class="overlay"></div>
     
     <!-- 导航栏 -->
-    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-gray-900/50 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-md">
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="container mx-auto flex items-center justify-between px-4 py-4">
         <!-- 网页名称 -->
         <div class="font-ancient text-[1.85rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[2.15rem]">古建智寻</div>
@@ -294,20 +353,20 @@
         <div class="flex items-center space-x-8 font-flow text-[17px] tracking-[0.22em] md:text-lg">
           <!-- 首页 -->
           <div class="group relative">
-            <a href="#" class="text-zinc-200 transition-colors hover:text-amber-100/95">首页</a>
-            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a href="#" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">地图</a>
+            <a href="#" class="text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
+              <a href="#" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
             </div>
           </div>
 
           <!-- 建筑分类 -->
           <div class="group relative">
-            <a href="./list.html" class="text-zinc-200 transition-colors hover:text-amber-100/95">建筑分类</a>
-            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-white/10 bg-gray-900/90 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">民居</a>
-              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">皇宫</a>
-              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">桥梁</a>
-              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-zinc-200 hover:bg-white/10">官府</a>
+            <a href="./list.html" class="text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
+            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
+              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
+              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
+              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
+              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
             </div>
           </div>
         </div>
@@ -318,20 +377,17 @@
             type="text"
             id="searchInput"
             placeholder="搜索建筑名"
-            class="rounded-l-md border border-white/15 bg-white/90 px-4 py-2 text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/60"
+            class="rounded-l-md border border-amber-200/35 bg-amber-50/90 px-4 py-2 text-[#4a2c1a] placeholder:text-[#8a6a4a] focus:outline-none focus:ring-2 focus:ring-amber-300/70"
           />
-          <button id="searchBtn" class="rounded-r-md bg-stone-700/95 px-4 py-2 font-flow text-stone-100 tracking-[0.12em] transition-colors hover:bg-stone-600">
+          <button id="searchBtn" class="rounded-r-md border border-amber-200/40 bg-[#6b1a1a]/82 px-4 py-2 font-flow text-amber-50 tracking-[0.12em] transition-colors hover:bg-[#7b1f1f]/90">
             搜索
           </button>
         </div>
       </div>
     </nav>
     
-    <main id="app" class="relative h-screen w-screen bg-xuans pt-20">
+    <main id="app" class="fixed inset-0 z-[3] bg-transparent">
       <canvas id="starCanvas" aria-hidden="true"></canvas>
-      
-      <!-- 地图背景图片 -->
-      <div class="map-background" style="position: absolute; inset: 0; width: 100%; height: 100%; background-image: url('./background.jpg'); background-size: cover; background-position: center; opacity: 0.6; z-index: 0; pointer-events: none;"></div>
       
       <img class="wall-silhouette" src="./tiananmen.png" alt="长城剪影（占位）" loading="eager" />
 
@@ -359,26 +415,33 @@
         </svg>
       </div>
 
-      <!-- 主体布局：大地图居中 + 右侧悬浮详情 -->
-      <section id="layout" class="h-full w-full flex items-stretch">
-        <div id="spacer" class="w-[10%]"></div>
-
-        <div id="mapCol" class="w-[60%] flex items-center justify-center">
-          <div id="mapWrap" class="w-full h-[78%]">
-            <div id="mapPanel" class="h-full w-full rounded-[28px] map-panel--illustration">
-              <div class="relative h-full w-full">
+      <!-- 主体：全屏底图 + 右侧悬浮详情（详情叠在图上） -->
+      <section id="layout" class="relative h-full w-full">
+        <div id="mapWrap">
+          <div id="mapPanel" class="h-full w-full map-panel--illustration">
+            <div class="relative h-full w-full">
+              <img
+                id="mapHeroBg"
+                class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
+                src="./assets/背景.png"
+                alt=""
+                decoding="async"
+                fetchpriority="high"
+              />
+              <div class="map-china-layer">
                 <img
-                  id="mapIllustration"
-                  class="pointer-events-none absolute inset-0 z-0 h-full w-full max-h-full max-w-full select-none object-contain"
-                  src="./china-map-isometric.png"
+                  id="mapChinaMap"
+                  class="pointer-events-none absolute inset-0 z-[1] h-full w-full select-none object-cover"
+                  src="./assets/地图.png"
                   alt=""
                   decoding="async"
                   fetchpriority="high"
                 />
-                <div id="map" class="relative z-[1] h-full w-full"></div>
-                <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[2] flex items-center justify-center text-white/75">
-                  <div>加载地图中</div>
-                </div>
+                <!-- 热区与省份高亮与地图同坐标系（MAP_BUILDING_ICONS / MAP_PROVINCE_REGIONS 均为容器内百分比） -->
+                <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
+              </div>
+              <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center text-white/75 opacity-0">
+                <div>加载地图中</div>
               </div>
             </div>
           </div>
@@ -387,8 +450,8 @@
         <!-- 详情展示区：默认透明不可见 -->
         <aside
           id="detail"
-          class="w-[42%] pr-8 py-8 flex items-start justify-end"
-          style="opacity: 0; pointer-events: none; z-index: 10; top: 15%; transform: translateY(0)"
+          class="flex items-start justify-end pr-4 py-6 md:pr-8 md:py-8"
+          style="opacity: 0; pointer-events: none; top: 50%; transform: translateY(-50%)"
           aria-hidden="true"
         >
           <div class="glass-card w-full max-w-xl p-9">
@@ -428,11 +491,6 @@
         </aside>
       </section>
     </main>
-
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-    <!-- China map data (registers 'china') -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5/map/js/china.js"></script>
 
     <!-- GSAP + ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
@@ -931,6 +989,7 @@
         stopDetailCarousel();
         activeProvince = "";
         activeBuildingIndex = 0;
+        clearHotspotActive();
         gsap.killTweensOf(detailEl);
         gsap.to(detailEl, {
           duration: 0.45,
@@ -945,149 +1004,181 @@
         });
       };
 
-      const mapEl = document.getElementById("map");
-      const mapStatusEl = document.getElementById("mapStatus");
-      const chart = echarts.init(mapEl, null, { renderer: "canvas" });
+      /**
+       * 建筑图标热区：cx/cy 为图标中心在容器中的百分比，与 assets/地图.png 上绘制的图标对齐后微调即可。
+       */
+      const MAP_BUILDING_ICONS = [
+        { province: "北京市", cx: 52, cy: 28 },
+        { province: "山西省", cx: 44, cy: 36 },
+        { province: "江苏省", cx: 62, cy: 44 },
+        { province: "四川省", cx: 36, cy: 52 },
+        { province: "广东省", cx: 56, cy: 72 },
+      ];
 
-      const ensureChinaMap = async () => {
-        // 如果 CDN 的 china.js 加载失败，则自动拉取 GeoJSON 并注册
-        const hasChina = !!(echarts.getMap && echarts.getMap("china"));
-        if (hasChina) return;
-        const url = "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json";
-        const res = await fetch(url, { cache: "force-cache" });
-        if (!res.ok) throw new Error("地图数据加载失败");
-        const geojson = await res.json();
-        echarts.registerMap("china", geojson);
-      };
+      /**
+       * 五省示意高亮区（viewBox 0–100，与 object-fit:cover 裁切一致），可按 assets/地图.png 微调 path/ellipse。
+       */
+      const MAP_PROVINCE_REGIONS = [
+        { province: "北京市", kind: "ellipse", cx: 52, cy: 28, rx: 4.2, ry: 3.4 },
+        { province: "山西省", kind: "path", d: "M35.5,30.5 L48,28.5 L50.5,38 L44.5,44.5 L35.5,41 Z" },
+        { province: "江苏省", kind: "path", d: "M55,37 L67,35 L69.5,46.5 L63,51 L56.5,47.5 Z" },
+        { province: "四川省", kind: "path", d: "M27.5,42.5 L41,38.5 L44.5,53 L37,62.5 L28,56 Z" },
+        { province: "广东省", kind: "path", d: "M49,61.5 L60.5,59 L63.5,75 L57,83 L50,79.5 L47,68.5 Z" },
+      ];
 
-      const renderChina = async () => {
-        try {
-          if (mapStatusEl) mapStatusEl.style.opacity = "1";
-        await ensureChinaMap();
+      const validHoverProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
+      const validClickNav = ["山西省", "江苏省", "四川省", "广东省"];
 
-        // 底图：china-map-isometric.png；透明省份 + 悬停/点击高亮（交互与五省卡片、跳转不变）
-        const transparent = "rgba(0,0,0,0)";
-        const hoverStyle = {
-          areaColor: "rgba(255, 210, 120, 0.48)",
-          borderColor: "rgba(212, 175, 55, 0.95)",
-          borderWidth: 2.5,
-          shadowColor: "rgba(255, 220, 140, 0.55)",
-          shadowBlur: 22,
-          shadowOffsetY: 4,
-        };
-        const option = {
-          backgroundColor: "transparent",
-          animation: true,
-          animationDuration: 480,
-          animationEasing: "cubicOut",
-          geo: {
-            map: "china",
-            roam: false,
-            silent: false,
-            layoutCenter: ["50%", "65%"],
-            layoutSize: "120%",
-            aspectScale: 0.75,
-            show: true,
-            itemStyle: {
-              areaColor: transparent,
-              borderColor: transparent,
-              borderWidth: 0,
-              shadowBlur: 0,
-            },
-            emphasis: {
-              itemStyle: hoverStyle,
-              label: { show: false },
-            },
-            select: { disabled: true },
-          },
-          series: [
-            {
-              type: "map",
-              map: "china",
-              geoIndex: 0,
-              data: [],
-              silent: false,
-              label: { show: false },
-              tooltip: { show: false },
-              itemStyle: {
-                areaColor: transparent,
-                borderColor: transparent,
-                borderWidth: 0,
-                shadowBlur: 0,
-              },
-              emphasis: {
-                itemStyle: hoverStyle,
-                label: { show: false },
-              },
-            },
-          ],
-        };
+      const mapHotspotsEl = document.getElementById("mapHotspots");
+      const mapWrapEl = document.getElementById("mapWrap");
 
-          chart.setOption(option);
-          if (mapStatusEl) {
-            gsap.to(mapStatusEl, { opacity: 0, duration: 0.35, ease: "power2.out" });
-          }
-        } catch (e) {
-          if (mapStatusEl) {
-            mapStatusEl.innerHTML =
-              "<div class='text-sm leading-relaxed text-center px-6 text-white/80'>" +
-              "地图资源未能加载。<br/>请确认当前网络可访问 CDN，或稍后重试。" +
-              "</div>";
-          }
-          // 控制台保留错误，便于排查
-          console.error(e);
-        }
-      };
-
-      renderChina();
-
-      const mapIllustrationEl = document.getElementById("mapIllustration");
-      if (mapIllustrationEl) {
-        mapIllustrationEl.addEventListener("load", () => chart.resize());
+      function clearHotspotActive() {
+        const root = document.getElementById("mapHotspots");
+        if (!root) return;
+        root.querySelectorAll(".map-hotspot.is-active").forEach((el) => {
+          el.classList.remove("is-active");
+        });
+        root.querySelectorAll(".map-province-highlight.is-active").forEach((el) => {
+          el.classList.remove("is-active");
+        });
       }
-      requestAnimationFrame(() => chart.resize());
 
-      // 交互：hover 省份 -> 显示详情区（GSAP）
-      chart.on("mouseover", (params) => {
-        if (!params) return;
-        // ECharts 的地图 hover 事件在不同配置下可能来自 geo 或 series
-        const isMapHover = 
-          (params.componentType === "geo" && params.name) ||
-          (params.componentType === "series" && params.seriesType === "map" && params.name);
-        if (!isMapHover) return;
-        
-        // 只对五个省份显示卡片
-        const validProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
-        if (validProvinces.includes(params.name)) {
-          showDetail(params.name);
+      function setHotspotActive(province) {
+        clearHotspotActive();
+        const root = document.getElementById("mapHotspots");
+        if (!root || !province) return;
+        const btn = root.querySelector(`.map-hotspot[data-province="${province}"]`);
+        if (btn) btn.classList.add("is-active");
+        const hl = root.querySelector(`.map-province-highlight[data-province="${province}"]`);
+        if (hl) hl.classList.add("is-active");
+      }
+
+      const pulseBuildingIcon = (btn) => {
+        const ring = btn && btn.querySelector(".map-hotspot__ring");
+        if (!ring || typeof gsap === "undefined") return;
+        gsap.killTweensOf(ring);
+        gsap
+          .timeline()
+          .fromTo(
+            ring,
+            { scale: 0.82, opacity: 0.45 },
+            { scale: 1.2, opacity: 1, duration: 0.12, ease: "power2.out" }
+          )
+          .to(ring, {
+            scale: 1,
+            duration: 0.32,
+            ease: "elastic.out(1, 0.55)",
+          });
+      };
+
+      if (mapHotspotsEl) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const provinceSvg = document.createElementNS(svgNS, "svg");
+        provinceSvg.setAttribute("class", "map-province-svg");
+        provinceSvg.setAttribute("viewBox", "0 0 100 100");
+        provinceSvg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+        provinceSvg.setAttribute("aria-hidden", "true");
+        MAP_PROVINCE_REGIONS.forEach((r) => {
+          let shape;
+          if (r.kind === "ellipse") {
+            shape = document.createElementNS(svgNS, "ellipse");
+            shape.setAttribute("cx", String(r.cx));
+            shape.setAttribute("cy", String(r.cy));
+            shape.setAttribute("rx", String(r.rx));
+            shape.setAttribute("ry", String(r.ry));
+          } else {
+            shape = document.createElementNS(svgNS, "path");
+            shape.setAttribute("d", r.d);
+          }
+          shape.setAttribute("class", "map-province-highlight");
+          shape.dataset.province = r.province;
+          provinceSvg.appendChild(shape);
+        });
+        mapHotspotsEl.appendChild(provinceSvg);
+
+        const attachPreviewHandlers = (el, p) => {
+          const openPreview = () => {
+            if (!validHoverProvinces.includes(p)) return;
+            setHotspotActive(p);
+            showDetail(p);
+          };
+          el.addEventListener("mouseenter", openPreview);
+          if (el.tagName === "BUTTON") {
+            el.addEventListener("focus", openPreview);
+          }
+          el.addEventListener("touchstart", openPreview, { passive: true });
+        };
+
+        MAP_BUILDING_ICONS.forEach(({ province, cx, cy }) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "map-hotspot map-hotspot--icon";
+          b.dataset.province = province;
+          b.setAttribute("aria-label", `${province}建筑图标，点击查看`);
+          b.style.left = `${cx}%`;
+          b.style.top = `${cy}%`;
+          const ring = document.createElement("span");
+          ring.className = "map-hotspot__ring";
+          ring.setAttribute("aria-hidden", "true");
+          b.appendChild(ring);
+          mapHotspotsEl.appendChild(b);
+          attachPreviewHandlers(b, province);
+        });
+
+        mapHotspotsEl.querySelectorAll(".map-province-highlight").forEach((el) => {
+          attachPreviewHandlers(el, el.dataset.province);
+        });
+
+        mapHotspotsEl.addEventListener("mouseout", (e) => {
+          const to = e.relatedTarget;
+          if (to && mapHotspotsEl.contains(to)) return;
+          if (to && detailEl && detailEl.contains(to)) return;
+          if (hideTimer) window.clearTimeout(hideTimer);
+          hideTimer = window.setTimeout(() => {
+            clearHotspotActive();
+            hideDetail();
+          }, 140);
+        });
+
+        if (detailEl) {
+          detailEl.addEventListener("mouseenter", () => {
+            if (hideTimer) {
+              window.clearTimeout(hideTimer);
+              hideTimer = null;
+            }
+          });
+          detailEl.addEventListener("mouseout", (e) => {
+            const to = e.relatedTarget;
+            if (to && mapHotspotsEl.contains(to)) return;
+            if (to && detailEl.contains(to)) return;
+            if (hideTimer) window.clearTimeout(hideTimer);
+            hideTimer = window.setTimeout(() => {
+              clearHotspotActive();
+              hideDetail();
+            }, 140);
+          });
         }
-      });
 
-      // 点击跳转：北京市进入故宫探秘长卷页；其余四省仍进列表页
-      chart.on("click", (params) => {
-        if (!params || !params.name) return;
-        if (params.name === "北京市") {
-          window.location.href = "./gugong-explore.html";
-          return;
-        }
-        const validProvinces = ["山西省", "江苏省", "四川省", "广东省"];
-        if (validProvinces.includes(params.name)) {
-          window.location.href = "list.html?province=" + encodeURIComponent(params.name);
-        }
-      });
-
-      // 鼠标离开地图区域：延迟隐藏，避免闪烁
-      chart.on("globalout", () => {
-        if (hideTimer) window.clearTimeout(hideTimer);
-        hideTimer = window.setTimeout(() => hideDetail(), 140);
-      });
-
-      // 视口变化：自适应
-      window.addEventListener("resize", () => chart.resize());
+        mapHotspotsEl.addEventListener("click", (e) => {
+          const btn = e.target.closest(".map-hotspot");
+          const hl = e.target.closest(".map-province-highlight");
+          const p = (btn && btn.dataset.province) || (hl && hl.dataset.province);
+          if (!p) return;
+          const iconBtn = mapHotspotsEl.querySelector(`.map-hotspot[data-province="${p}"]`);
+          pulseBuildingIcon(iconBtn);
+          if (p === "北京市") {
+            window.location.href = "./gugong-explore.html";
+            return;
+          }
+          if (validClickNav.includes(p)) {
+            window.location.href = "list.html?province=" + encodeURIComponent(p);
+          }
+        });
+      }
 
       // 初始微动：让画面更“呼吸”
       gsap.fromTo(
-        mapEl,
+        mapWrapEl,
         { opacity: 0, filter: "blur(6px)" },
         { opacity: 1, filter: "blur(0px)", duration: 0.9, ease: "power2.out" }
       );

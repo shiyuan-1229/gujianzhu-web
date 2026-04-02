@@ -81,10 +81,10 @@
         opacity: 0.12;
       }
 
-      /* Hero：背景图容器，使用 transform 做视差 */
+      /* Hero：背景图容器；顶栏压缩后约 3rem 高，与 mt-12 对齐 */
       .hero {
         position: relative;
-        height: 100vh;
+        height: calc(100vh - 3rem);
         overflow: hidden;
         background: #000;
       }
@@ -157,7 +157,6 @@
         display: none;
       }
 
-      /* 视频模式：顶栏保持透明，仅保留右上角按钮可见 */
       header.header-over-video {
         background: transparent !important;
         border-bottom-color: transparent !important;
@@ -166,13 +165,146 @@
         -webkit-backdrop-filter: none !important;
       }
 
-      .detail-back-nav a {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(8, 8, 8, 0.32);
-        color: rgba(245, 240, 230, 0.92);
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+      /* 极简详情模式（仅太和殿/御花园启用） */
+      .body--minimal-detail .grain,
+      .body--minimal-detail .hero-vignette,
+      .body--minimal-detail #heroCopy,
+      .body--minimal-detail #heroScrollCue,
+      .body--minimal-detail .paper-bridge,
+      .body--minimal-detail .paper {
+        display: none !important;
+      }
+
+      .body--minimal-detail .hero-bg,
+      .body--minimal-detail .hero-video {
+        filter: none !important;
+      }
+
+      #heroHoverHighlight {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #heroHoverHighlight.is-lit {
+        opacity: 1;
+      }
+
+      #heroHoverHotspot {
+        position: absolute;
+        z-index: 4;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      /* 下滑拼贴区：与上方照片同色底，避免断层 */
+      #mosaicSection {
+        display: none;
+        background: var(--mosaic-bg, #e8e0cf);
+        padding: 2.2rem 1rem 3.2rem;
+      }
+
+      #mosaicSection.is-visible {
+        display: block;
+      }
+
+      .mosaic-wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      .mosaic-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .mosaic-card {
+        border-radius: 18px;
+        background: rgba(247, 242, 232, 0.92);
+        border: 1px solid rgba(125, 82, 36, 0.22);
+        box-shadow: 0 10px 28px rgba(60, 40, 18, 0.16);
+        overflow: hidden;
+      }
+
+      .mosaic-card__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .mosaic-card--tall {
+        grid-column: span 4;
+        min-height: 500px;
+      }
+      .mosaic-card--wide {
+        grid-column: span 8;
+        min-height: 280px;
+      }
+      .mosaic-card--half {
+        grid-column: span 4;
+        min-height: 220px;
+      }
+      .mosaic-card--text {
+        grid-column: span 4;
+        min-height: 220px;
+        padding: 1rem 1.1rem;
+      }
+
+      /* 御花园：左侧高卡跨两行，第三行文字卡左侧占位时右侧用宽卡补满 */
+      .mosaic-grid--yuhua .mosaic-card--tall {
+        grid-row: span 2;
+      }
+      .mosaic-grid--yuhua .mosaic-card--wide-lower,
+      /* 太和殿：第三行仅左半宽卡时，右侧用宽卡补满 */
+      .mosaic-grid--taihe .mosaic-card--wide-lower {
+        grid-column: 5 / span 8;
+        min-height: 260px;
+      }
+
+      .mosaic-card__title {
+        font-family: "Noto Serif SC", "SimSun", serif;
+        font-size: 1.06rem;
+        color: #5f2c2c;
+        letter-spacing: 0.06em;
+      }
+      .mosaic-card__desc {
+        margin-top: 0.6rem;
+        font-size: 0.95rem;
+        line-height: 1.78;
+        color: rgba(58, 42, 25, 0.86);
+      }
+
+      @media (max-width: 980px) {
+        .mosaic-card--tall,
+        .mosaic-card--wide,
+        .mosaic-card--half,
+        .mosaic-card--text {
+          grid-column: span 12;
+          min-height: 220px;
+        }
+        .mosaic-grid--yuhua .mosaic-card--tall {
+          grid-row: span 1;
+        }
+        .mosaic-grid--yuhua .mosaic-card--wide-lower,
+        .mosaic-grid--taihe .mosaic-card--wide-lower {
+          grid-column: span 12;
+        }
+      }
+
+      .hero.hero--cinematic .hero-video.is-active {
+        filter: none !important;
+        min-width: 100%;
+        min-height: 100%;
+        transform: translate(-50%, -50%);
+        object-position: center center;
       }
 
       .hero-scroll-cue {
@@ -284,6 +416,27 @@
         background: rgba(255, 249, 236, 0.7);
       }
 
+      /* 御花园：叠放高亮图，热区内悬停立即显示（无过渡） */
+      #detailPlateWrap {
+        position: relative;
+      }
+
+      #detailPlateHighlight {
+        opacity: 0;
+        transition: none;
+        pointer-events: none;
+      }
+
+      #detailPlateHighlight.is-lit {
+        opacity: 1;
+      }
+
+      #detailPlateHotspot {
+        position: absolute;
+        background: transparent;
+        cursor: pointer;
+      }
+
       /* 线框区：墨线与纸张的对比 */
       .wireframe-shell {
         border-radius: 28px;
@@ -324,39 +477,42 @@
   <body class="font-sansCN">
     <div class="grain" aria-hidden="true"></div>
 
-    <!-- 顶部导航：灰色半透明 + 古风字 -->
-    <header
-      id="siteHeader"
-      class="fixed left-0 top-0 z-20 w-full bg-transparent text-zinc-200"
+    <!-- 顶栏：与首页 / 列表页同系故宫红金渐变 -->
+    <nav
+      id="detailTopNav"
+      class="fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_6px_18px_rgba(44,8,8,0.38)] backdrop-blur-xl"
+      style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52))"
+      aria-label="主导航"
     >
-      <div class="mx-auto flex max-w-6xl items-center justify-end px-4 py-2.5 md:px-6 md:py-3">
-        <div class="detail-back-nav flex items-center gap-2 md:gap-3">
+      <div class="container mx-auto flex flex-nowrap items-center justify-between gap-3 px-3 py-1 md:px-4 md:py-1.5">
+        <div class="select-none leading-tight">
+          <a href="./index.html" class="font-ancient text-[1.2rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.35rem]">古建智寻</a>
+          <div class="mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-x-4 md:gap-x-6 font-flow text-lg font-medium tracking-[0.14em] text-amber-50/95 md:text-xl md:tracking-[0.16em]">
           <a
             href="javascript:void(0)"
             onclick="if (history.length > 1) { history.back(); } else { location.href='./list.html'; }"
-            class="rounded-md px-3 py-1.5 font-flow text-sm tracking-[0.14em] transition-colors hover:bg-stone-700/70 md:px-4 md:py-2 md:text-base"
+            class="whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100"
+            >返回上一页</a
           >
-            返回上一页
-          </a>
-          <a
-            href="./index.html"
-            class="rounded-md px-3 py-1.5 font-flow text-sm tracking-[0.14em] transition-colors hover:bg-stone-700/70 md:px-4 md:py-2 md:text-base"
-          >
-            返回首页
-          </a>
+          <a href="./index.html" class="whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
         </div>
       </div>
-    </header>
+    </nav>
 
-    <!-- Hero：100vh 视差 -->
-    <section class="hero" id="heroSection">
+    <!-- Hero：视口减去顶栏高度 -->
+    <section class="hero mt-12" id="heroSection">
       <div
         id="heroBg"
         class="hero-bg"
-        style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg');"
+        style="background-image: url('./assets/taihedian-hero.jpg')"
         role="img"
         aria-label="古建筑背景图"
       ></div>
+      <img id="heroHoverHighlight" src="" alt="" aria-hidden="true" hidden />
+      <div id="heroHoverHotspot" hidden aria-label="建筑主殿悬浮高亮区域"></div>
       <div class="hero-video-shell" id="heroVideoShell" aria-hidden="true">
         <video
           id="heroVideo"
@@ -404,6 +560,13 @@
       </div>
     </section>
 
+    <!-- 下滑拼贴区（先放占位图文，后续可按你给的素材替换） -->
+    <section id="mosaicSection" aria-label="建筑图文拼贴">
+      <div class="mosaic-wrap">
+        <div id="mosaicGrid" class="mosaic-grid"></div>
+      </div>
+    </section>
+
     <div class="paper-bridge" aria-hidden="true"></div>
 
     <!-- 内容区：米白画册 -->
@@ -426,15 +589,34 @@
 
         <div class="mt-14 md:mt-16 grid grid-cols-12 gap-8 items-start">
           <div class="col-span-12 md:col-span-5">
-            <div class="plate">
+            <div class="plate relative" id="detailPlateWrap">
               <img
-                class="w-full h-[520px] object-cover"
+                id="detailPlateBase"
+                class="relative z-0 w-full h-[520px] object-cover"
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1600px-Forbidden_City_Beijing_detail_2019.jpg"
                 alt="太和殿细节图"
                 loading="lazy"
               />
+              <img
+                id="detailPlateHighlight"
+                class="absolute inset-0 z-[1] h-full w-full object-cover"
+                src=""
+                alt=""
+                aria-hidden="true"
+                hidden
+              />
+              <div
+                id="detailPlateHotspot"
+                class="absolute z-[2]"
+                hidden
+                aria-label="钦安殿区域，悬停显示建筑高亮"
+              ></div>
             </div>
-            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+            <div
+              id="detailPlateCaption"
+              class="mt-4 text-xs tracking-[0.24em]"
+              style="color: rgba(224,224,224,0.55)"
+            >
               PLATE 01 · 屋面与出檐的层次
             </div>
           </div>
@@ -599,11 +781,12 @@
           province: "北京",
           year: "明永乐十八年（1420年）",
           desc: "太和殿位于紫禁城中轴线核心，是明清皇帝举行大典的最高礼制空间，以高台基、重檐庑殿顶和金龙和玺彩画体现皇家建筑等级。",
-          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
-          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Hall_of_Supreme_Harmony_Forbidden_City_2014.jpg/1600px-Hall_of_Supreme_Harmony_Forbidden_City_2014.jpg",
+          pageBg: "#e6e0d0",
+          heroImage: "./assets/taihedian-hero.jpg",
+          detailImage: "./assets/taihedian-hero.jpg",
           subImages: [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/1200px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1200px-Forbidden_City_Beijing_detail_2019.jpg"
+            "./assets/taihedian-hero.jpg",
+            "./assets/taihedian-hero.jpg"
           ]
         },
         "故宫御花园": {
@@ -612,11 +795,16 @@
           province: "北京",
           year: "明永乐十八年（1420年）",
           desc: "御花园位于乾清宫后方，是明清宫廷休憩赏景之所。园内以亭、石、柏与曲径组织空间，在中轴秩序中形成精巧而层次丰富的园林节点。",
-          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Imperial_Garden_Forbidden_City_Beijing_2017.jpg/2560px-Imperial_Garden_Forbidden_City_Beijing_2017.jpg",
-          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Forbidden_City_Imperial_Garden.jpg/1600px-Forbidden_City_Imperial_Garden.jpg",
+          pageBg: "#e8e2d3",
+          heroImage: "./assets/yuhuayuan-plate-base.png",
+          heroHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
+          heroHotspot: { left: 40, top: 48, width: 22, height: 24 },
+          detailImage: "./assets/yuhuayuan-plate-base.png",
+          detailHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
+          detailPlateHotspot: { left: 37, top: 48, width: 26, height: 32 },
           subImages: [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Imperial_Garden_Forbidden_City_Beijing_2017.jpg/1200px-Imperial_Garden_Forbidden_City_Beijing_2017.jpg",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Forbidden_City_rockery.jpg/1200px-Forbidden_City_rockery.jpg"
+            "./assets/yuhuayuan-plate-base.png",
+            "./assets/yuhuayuan-plate-highlight.png"
           ]
         },
         "北京四合院": {
@@ -845,25 +1033,155 @@
       // 从URL获取建筑名称
       const getBuildingFromUrl = () => {
         const params = new URLSearchParams(window.location.search);
-        return params.get('building') || '北京故宫';
+        const raw = (params.get("building") || "").trim();
+        if (!raw) return "故宫太和殿";
+
+        const name = decodeURIComponent(raw).trim();
+        if (BUILDINGS_DB[name]) return name;
+
+        // 常见别名容错，避免参数稍有差异导致回退黑屏
+        const aliasMap = {
+          "御花园": "故宫御花园",
+          "太和殿": "故宫太和殿",
+          "故宫": "故宫太和殿",
+        };
+        if (aliasMap[name] && BUILDINGS_DB[aliasMap[name]]) return aliasMap[name];
+
+        const fuzzy = Object.keys(BUILDINGS_DB).find((k) => k.includes(name) || name.includes(k));
+        return fuzzy || "故宫太和殿";
+      };
+
+      const MOSAIC_CONTENT = {
+        "故宫太和殿": [
+          {
+            cls: "mosaic-card mosaic-card--tall",
+            image: "./assets/taihedian-mosaic-board.png",
+            alt: "太和殿图文板",
+          },
+          {
+            cls: "mosaic-card mosaic-card--half",
+            image: "./assets/taihedian-hero.jpg",
+            alt: "太和殿主殿全景",
+          },
+          {
+            cls: "mosaic-card mosaic-card--text",
+            title: "礼制空间与中轴构图",
+            desc:
+              "太和殿位于紫禁城中轴核心，承担朝会与庆典礼仪。此卡片先用占位文案，后续可替换为你提供的正式图文。",
+          },
+          {
+            cls: "mosaic-card mosaic-card--wide",
+            image: "./assets/gugong-journey-2.png",
+            alt: "太和殿局部图",
+          },
+          {
+            cls: "mosaic-card mosaic-card--half",
+            image: "./assets/gugong-journey-3.png",
+            alt: "太和殿细节图",
+          },
+          {
+            cls: "mosaic-card mosaic-card--half",
+            image: "./assets/gugong-journey-1.png",
+            alt: "太和殿广场视角",
+          },
+          {
+            cls: "mosaic-card mosaic-card--wide-lower",
+            image: "./assets/taihedian-mosaic-corner.png",
+            alt: "太和殿景观延伸",
+          },
+        ],
+        "故宫御花园": [
+          {
+            cls: "mosaic-card mosaic-card--tall",
+            image: "./assets/yuhuayuan-plate-base.png",
+            alt: "御花园总览",
+          },
+          {
+            cls: "mosaic-card mosaic-card--wide",
+            image: "./assets/yuhuayuan-plate-highlight.png",
+            alt: "御花园高亮示意",
+          },
+          {
+            cls: "mosaic-card mosaic-card--half",
+            image: "./assets/gugong-journey-1.png",
+            alt: "御花园景观卡片",
+          },
+          {
+            cls: "mosaic-card mosaic-card--half",
+            image: "./assets/gugong-journey-2.png",
+            alt: "御花园细部卡片",
+          },
+          {
+            cls: "mosaic-card mosaic-card--text",
+            title: "园林节点与空间层次",
+            desc:
+              "御花园由亭台、太湖石与古柏组织空间，形成由中轴向两侧展开的观赏序列。此卡片为占位内容，等你给素材后可逐条替换。",
+          },
+          {
+            cls: "mosaic-card mosaic-card--wide-lower",
+            image: "./assets/yuhuayuan-mosaic-corner.png",
+            alt: "御花园景观延伸",
+          },
+        ],
+      };
+
+      const renderMosaicCards = (cards, variant) => {
+        const grid = document.getElementById("mosaicGrid");
+        if (!grid) return;
+        grid.className =
+          variant === "yuhua"
+            ? "mosaic-grid mosaic-grid--yuhua"
+            : variant === "taihe"
+              ? "mosaic-grid mosaic-grid--taihe"
+              : "mosaic-grid";
+        if (!cards || cards.length === 0) {
+          grid.innerHTML = "";
+          return;
+        }
+        grid.innerHTML = "";
+        cards.forEach((card) => {
+          const el = document.createElement("article");
+          el.className = card.cls;
+          if (card.image) {
+            const img = document.createElement("img");
+            img.className = "mosaic-card__img";
+            img.src = card.image;
+            img.alt = card.alt || "";
+            img.loading = "lazy";
+            el.appendChild(img);
+          } else {
+            const t = document.createElement("h3");
+            t.className = "mosaic-card__title";
+            t.textContent = card.title || "图文卡片";
+            const p = document.createElement("p");
+            p.className = "mosaic-card__desc";
+            p.textContent = card.desc || "";
+            el.appendChild(t);
+            el.appendChild(p);
+          }
+          grid.appendChild(el);
+        });
       };
 
       // 更新页面内容
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
-        const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB['北京故宫'];
+        const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB["故宫太和殿"];
 
         // 更新标题
         document.title = `${building.name} · 华夏建筑选集`;
         document.getElementById('heroTitle').textContent = building.name;
         
-        // 更新 Hero：北京故宫用本地视频，其余用背景图
+        const isMosaicDetail = building.name === "故宫太和殿" || building.name === "故宫御花园";
+
+        // 更新 Hero：北京故宫保留视频，太和殿/御花园与其他页走图片
         const heroBg = document.getElementById("heroBg");
         const heroVideo = document.getElementById("heroVideo");
-        const videoSrc = building.heroVideo;
+        const heroHoverHighlight = document.getElementById("heroHoverHighlight");
+        const heroHoverHotspot = document.getElementById("heroHoverHotspot");
         const heroSection = document.getElementById("heroSection");
-        const siteHeader = document.getElementById("siteHeader");
-        if (videoSrc && heroVideo) {
+        const videoSrc = building.heroVideo;
+        if (videoSrc && heroVideo && !isMosaicDetail) {
           heroVideo.classList.add("is-active");
           if (heroVideo.getAttribute("src") !== videoSrc) {
             heroVideo.src = videoSrc;
@@ -872,18 +1190,73 @@
           heroBg.style.backgroundImage = "none";
           heroBg.style.backgroundColor = "#000";
           heroSection?.classList.add("hero--cinematic");
-          siteHeader?.classList.add("header-over-video");
           document.body.classList.add("body--cinematic-hero");
         } else {
-          heroVideo.classList.remove("is-active");
-          heroVideo.pause();
-          heroVideo.removeAttribute("src");
-          heroVideo.load();
+          if (heroVideo) {
+            heroVideo.classList.remove("is-active");
+            heroVideo.pause();
+            heroVideo.removeAttribute("src");
+            heroVideo.load();
+          }
           heroBg.style.backgroundColor = "";
           heroBg.style.backgroundImage = `url('${building.heroImage}')`;
           heroSection?.classList.remove("hero--cinematic");
-          siteHeader?.classList.remove("header-over-video");
           document.body.classList.remove("body--cinematic-hero");
+        }
+
+        // 下滑拼贴区：太和殿 / 御花园启用；背景与首屏底色一致，避免断层
+        const mosaicSection = document.getElementById("mosaicSection");
+        const cards = isMosaicDetail ? MOSAIC_CONTENT[building.name] : null;
+        if (mosaicSection && cards) {
+          document.body.classList.add("body--minimal-detail");
+          mosaicSection.classList.add("is-visible");
+          renderMosaicCards(
+            cards,
+            building.name === "故宫御花园"
+              ? "yuhua"
+              : building.name === "故宫太和殿"
+                ? "taihe"
+                : undefined
+          );
+          document.documentElement.style.setProperty("--mosaic-bg", building.pageBg || "#e8e2d3");
+          document.body.style.background = building.pageBg || "#e8e2d3";
+          heroSection.style.backgroundColor = building.pageBg || "#e8e2d3";
+        } else if (mosaicSection) {
+          document.body.classList.remove("body--minimal-detail");
+          mosaicSection.classList.remove("is-visible");
+          renderMosaicCards([], undefined);
+          document.body.style.background = "";
+          heroSection.style.backgroundColor = "";
+        }
+
+        // Hero 悬浮高亮（御花园主图）：进入热区立即显示高亮图，离开立即恢复
+        if (heroHoverHighlight && heroHoverHotspot) {
+          const lightOn = () => heroHoverHighlight.classList.add("is-lit");
+          const lightOff = () => heroHoverHighlight.classList.remove("is-lit");
+
+          if (building.heroHighlightImage && building.heroHotspot) {
+            heroHoverHighlight.src = building.heroHighlightImage;
+            heroHoverHighlight.hidden = false;
+            heroHoverHotspot.hidden = false;
+            const r = building.heroHotspot;
+            heroHoverHotspot.style.left = `${r.left}%`;
+            heroHoverHotspot.style.top = `${r.top}%`;
+            heroHoverHotspot.style.width = `${r.width}%`;
+            heroHoverHotspot.style.height = `${r.height}%`;
+            heroHoverHotspot.onmouseenter = lightOn;
+            heroHoverHotspot.onmouseleave = lightOff;
+            heroHoverHotspot.ontouchstart = lightOn;
+            heroHoverHotspot.ontouchend = lightOff;
+          } else {
+            lightOff();
+            heroHoverHighlight.hidden = true;
+            heroHoverHighlight.removeAttribute("src");
+            heroHoverHotspot.hidden = true;
+            heroHoverHotspot.onmouseenter = null;
+            heroHoverHotspot.onmouseleave = null;
+            heroHoverHotspot.ontouchstart = null;
+            heroHoverHotspot.ontouchend = null;
+          }
         }
         
         // 更新副标题
@@ -904,11 +1277,51 @@
           introEl.textContent = building.desc;
         }
 
-        // 更新详情图片
-        const detailImg = document.querySelector('.paper img[alt="太和殿细节图"]');
-        if (detailImg) {
-          detailImg.src = building.detailImage;
-          detailImg.alt = `${building.name}细节图`;
+        // 更新详情主图（御花园：底层 + 悬停高亮层 + 热区）
+        const detailPlateBase = document.getElementById("detailPlateBase");
+        const detailPlateHighlight = document.getElementById("detailPlateHighlight");
+        const detailPlateHotspot = document.getElementById("detailPlateHotspot");
+        const detailPlateCaption = document.getElementById("detailPlateCaption");
+
+        if (detailPlateBase) {
+          detailPlateBase.src = building.detailImage;
+          detailPlateBase.alt = `${building.name}细节图`;
+        }
+
+        if (detailPlateHighlight && detailPlateHotspot) {
+          const lit = () => detailPlateHighlight.classList.add("is-lit");
+          const unlit = () => detailPlateHighlight.classList.remove("is-lit");
+
+          if (building.detailHighlightImage && building.detailPlateHotspot) {
+            detailPlateHighlight.src = building.detailHighlightImage;
+            detailPlateHighlight.hidden = false;
+            detailPlateHotspot.hidden = false;
+            const r = building.detailPlateHotspot;
+            detailPlateHotspot.style.left = `${r.left}%`;
+            detailPlateHotspot.style.top = `${r.top}%`;
+            detailPlateHotspot.style.width = `${r.width}%`;
+            detailPlateHotspot.style.height = `${r.height}%`;
+            detailPlateHotspot.onmouseenter = lit;
+            detailPlateHotspot.onmouseleave = unlit;
+            detailPlateHotspot.ontouchstart = () => lit();
+            detailPlateHotspot.ontouchend = () => unlit();
+            if (detailPlateCaption) {
+              detailPlateCaption.textContent =
+                "PLATE 01 · 将鼠标移入中轴主殿（钦安殿）区域以查看高亮示意";
+            }
+          } else {
+            unlit();
+            detailPlateHighlight.removeAttribute("src");
+            detailPlateHighlight.hidden = true;
+            detailPlateHotspot.hidden = true;
+            detailPlateHotspot.onmouseenter = null;
+            detailPlateHotspot.onmouseleave = null;
+            detailPlateHotspot.ontouchstart = null;
+            detailPlateHotspot.ontouchend = null;
+            if (detailPlateCaption) {
+              detailPlateCaption.textContent = "PLATE 01 · 屋面与出檐的层次";
+            }
+          }
         }
 
         // 更新小图
@@ -964,27 +1377,29 @@
         },
       });
 
-      // 线框"画笔"动画：进入视口自动勾勒
+      // 线框"画笔"动画：进入视口自动勾勒（内容区隐藏时跳过）
       const wireBlock = document.getElementById("wireframeBlock");
-      const paths = wireBlock.querySelectorAll("path");
+      if (wireBlock) {
+        const paths = wireBlock.querySelectorAll("path");
 
-      paths.forEach((p) => {
-        const len = p.getTotalLength();
-        p.style.strokeDasharray = String(len);
-        p.style.strokeDashoffset = String(len);
-      });
+        paths.forEach((p) => {
+          const len = p.getTotalLength();
+          p.style.strokeDasharray = String(len);
+          p.style.strokeDashoffset = String(len);
+        });
 
-      gsap.to(paths, {
-        strokeDashoffset: 0,
-        duration: 1.6,
-        ease: "power2.out",
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: wireBlock,
-          start: "top 72%",
-          once: true,
-        },
-      });
+        gsap.to(paths, {
+          strokeDashoffset: 0,
+          duration: 1.6,
+          ease: "power2.out",
+          stagger: 0.08,
+          scrollTrigger: {
+            trigger: wireBlock,
+            start: "top 72%",
+            once: true,
+          },
+        });
+      }
     </script>
   </body>
 </html>

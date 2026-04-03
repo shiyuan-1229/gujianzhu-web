@@ -137,7 +137,7 @@
         pointer-events: none;
       }
 
-      #mapHotspots .map-hotspot {
+      #mapHotspots .map-province-rail {
         pointer-events: auto;
       }
 
@@ -212,30 +212,60 @@
         transform: translateZ(0);
       }
 
-      /* 与地图同裁切：xMidYMid slice ≈ object-fit:cover + center */
-      .map-province-svg {
+      /* 五省入口：竖排在地图左侧，不叠右侧详情卡 */
+      .map-province-rail {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
+        left: clamp(8px, 2.2vw, 22px);
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 6;
+        display: flex;
+        flex-direction: column;
+        gap: 0.42rem;
+        pointer-events: auto;
       }
 
-      .map-province-svg .map-province-highlight {
-        pointer-events: visibleFill;
+      .map-province-rail__btn {
+        margin: 0;
+        padding: 0.38rem 0.62rem;
+        min-width: 3.1rem;
+        transform-origin: center center;
+        border-radius: 999px;
+        border: 1px solid rgba(212, 175, 55, 0.42);
+        background: rgba(36, 10, 10, 0.58);
+        color: rgba(255, 248, 230, 0.94);
+        font-size: 0.78rem;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        line-height: 1.2;
         cursor: pointer;
-        fill: rgba(255, 200, 90, 0.38);
-        stroke: rgba(212, 175, 55, 0.85);
-        stroke-width: 0.35;
-        opacity: 0;
-        transition: opacity 0.22s ease, fill 0.22s ease;
-        vector-effect: non-scaling-stroke;
+        -webkit-tap-highlight-color: transparent;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition:
+          background 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          color 0.2s ease;
       }
 
-      .map-province-svg .map-province-highlight.is-active {
-        opacity: 1;
-        fill: rgba(255, 220, 130, 0.52);
+      .map-province-rail__btn:hover,
+      .map-province-rail__btn:focus-visible {
+        background: rgba(80, 22, 22, 0.75);
+        border-color: rgba(255, 210, 120, 0.55);
+        box-shadow: 0 0 18px rgba(255, 210, 120, 0.22);
+        outline: none;
+      }
+
+      .map-province-rail__btn:focus-visible {
+        outline: 2px solid rgba(212, 175, 55, 0.85);
+        outline-offset: 2px;
+      }
+
+      .map-province-rail__btn.is-active {
+        background: rgba(100, 32, 32, 0.82);
+        border-color: rgba(255, 220, 140, 0.65);
+        box-shadow: 0 0 22px rgba(255, 210, 120, 0.35);
       }
 
       /* 左下角：浑天仪/罗盘线稿水印 */
@@ -261,55 +291,6 @@
         text-transform: uppercase;
         z-index: 5;
         pointer-events: none;
-      }
-
-      /* 建筑图标热区：圆心对齐插画上的图标，点击有脉冲反馈 */
-      .map-hotspot {
-        position: absolute;
-        margin: 0;
-        padding: 0;
-        border: 0;
-        background: transparent;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .map-hotspot.map-hotspot--icon {
-        width: clamp(40px, 5.8vmin, 72px);
-        height: clamp(40px, 5.8vmin, 72px);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 2;
-      }
-
-      .map-hotspot--icon .map-hotspot__ring {
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        transform-origin: center center;
-        border: 2px solid rgba(212, 175, 55, 0.55);
-        background: radial-gradient(
-          circle at 50% 38%,
-          rgba(255, 230, 160, 0.42) 0%,
-          rgba(255, 200, 100, 0.12) 55%,
-          rgba(255, 200, 100, 0) 72%
-        );
-        box-shadow: 0 0 0 0 rgba(255, 210, 120, 0.45);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.22s ease, box-shadow 0.22s ease;
-      }
-
-      .map-hotspot--icon:hover .map-hotspot__ring,
-      .map-hotspot--icon:focus-visible .map-hotspot__ring,
-      .map-hotspot--icon.is-active .map-hotspot__ring {
-        opacity: 1;
-        box-shadow: 0 0 20px rgba(255, 210, 120, 0.55);
-      }
-
-      .map-hotspot--icon:focus-visible {
-        outline: 2px solid rgba(212, 175, 55, 0.9);
-        outline-offset: 3px;
       }
 
       #detail {
@@ -419,15 +400,15 @@
       <section id="layout" class="relative h-full w-full">
         <div id="mapWrap">
           <div id="mapPanel" class="h-full w-full map-panel--illustration">
-            <div class="relative h-full w-full">
-              <img
+              <div class="relative h-full w-full">
+                <img
                 id="mapHeroBg"
                 class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
                 src="./assets/背景.png"
-                alt=""
-                decoding="async"
-                fetchpriority="high"
-              />
+                  alt=""
+                  decoding="async"
+                  fetchpriority="high"
+                />
               <div class="map-china-layer">
                 <img
                   id="mapChinaMap"
@@ -437,11 +418,11 @@
                   decoding="async"
                   fetchpriority="high"
                 />
-                <!-- 热区与省份高亮与地图同坐标系（MAP_BUILDING_ICONS / MAP_PROVINCE_REGIONS 均为容器内百分比） -->
+                <!-- 省份交互：左侧竖排按钮（JS 注入），悬停详情 / 点击跳转逻辑不变 -->
                 <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
               </div>
               <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center text-white/75 opacity-0">
-                <div>加载地图中</div>
+                  <div>加载地图中</div>
               </div>
             </div>
           </div>
@@ -1004,26 +985,13 @@
         });
       };
 
-      /**
-       * 建筑图标热区：cx/cy 为图标中心在容器中的百分比，与 assets/地图.png 上绘制的图标对齐后微调即可。
-       */
-      const MAP_BUILDING_ICONS = [
-        { province: "北京市", cx: 52, cy: 28 },
-        { province: "山西省", cx: 44, cy: 36 },
-        { province: "江苏省", cx: 62, cy: 44 },
-        { province: "四川省", cx: 36, cy: 52 },
-        { province: "广东省", cx: 56, cy: 72 },
-      ];
-
-      /**
-       * 五省示意高亮区（viewBox 0–100，与 object-fit:cover 裁切一致），可按 assets/地图.png 微调 path/ellipse。
-       */
-      const MAP_PROVINCE_REGIONS = [
-        { province: "北京市", kind: "ellipse", cx: 52, cy: 28, rx: 4.2, ry: 3.4 },
-        { province: "山西省", kind: "path", d: "M35.5,30.5 L48,28.5 L50.5,38 L44.5,44.5 L35.5,41 Z" },
-        { province: "江苏省", kind: "path", d: "M55,37 L67,35 L69.5,46.5 L63,51 L56.5,47.5 Z" },
-        { province: "四川省", kind: "path", d: "M27.5,42.5 L41,38.5 L44.5,53 L37,62.5 L28,56 Z" },
-        { province: "广东省", kind: "path", d: "M49,61.5 L60.5,59 L63.5,75 L57,83 L50,79.5 L47,68.5 Z" },
+      /** 地图左侧竖排省份按钮（文案为简称，data-province 仍为全称以对接详情与列表） */
+      const MAP_PROVINCE_RAIL = [
+        { province: "北京市", label: "北京" },
+        { province: "山西省", label: "山西" },
+        { province: "江苏省", label: "江苏" },
+        { province: "四川省", label: "四川" },
+        { province: "广东省", label: "广东" },
       ];
 
       const validHoverProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
@@ -1035,10 +1003,7 @@
       function clearHotspotActive() {
         const root = document.getElementById("mapHotspots");
         if (!root) return;
-        root.querySelectorAll(".map-hotspot.is-active").forEach((el) => {
-          el.classList.remove("is-active");
-        });
-        root.querySelectorAll(".map-province-highlight.is-active").forEach((el) => {
+        root.querySelectorAll(".map-province-rail__btn.is-active").forEach((el) => {
           el.classList.remove("is-active");
         });
       }
@@ -1047,54 +1012,26 @@
         clearHotspotActive();
         const root = document.getElementById("mapHotspots");
         if (!root || !province) return;
-        const btn = root.querySelector(`.map-hotspot[data-province="${province}"]`);
+        const btn = root.querySelector(`.map-province-rail__btn[data-province="${province}"]`);
         if (btn) btn.classList.add("is-active");
-        const hl = root.querySelector(`.map-province-highlight[data-province="${province}"]`);
-        if (hl) hl.classList.add("is-active");
       }
 
-      const pulseBuildingIcon = (btn) => {
-        const ring = btn && btn.querySelector(".map-hotspot__ring");
-        if (!ring || typeof gsap === "undefined") return;
-        gsap.killTweensOf(ring);
-        gsap
-          .timeline()
-          .fromTo(
-            ring,
-            { scale: 0.82, opacity: 0.45 },
-            { scale: 1.2, opacity: 1, duration: 0.12, ease: "power2.out" }
-          )
-          .to(ring, {
-            scale: 1,
-            duration: 0.32,
-            ease: "elastic.out(1, 0.55)",
-          });
+      const pulseProvinceBtn = (btn) => {
+        if (!btn || typeof gsap === "undefined") return;
+        gsap.killTweensOf(btn);
+        gsap.fromTo(
+          btn,
+          { scale: 0.92 },
+          { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.52)" }
+        );
       };
 
       if (mapHotspotsEl) {
-        const svgNS = "http://www.w3.org/2000/svg";
-        const provinceSvg = document.createElementNS(svgNS, "svg");
-        provinceSvg.setAttribute("class", "map-province-svg");
-        provinceSvg.setAttribute("viewBox", "0 0 100 100");
-        provinceSvg.setAttribute("preserveAspectRatio", "xMidYMid slice");
-        provinceSvg.setAttribute("aria-hidden", "true");
-        MAP_PROVINCE_REGIONS.forEach((r) => {
-          let shape;
-          if (r.kind === "ellipse") {
-            shape = document.createElementNS(svgNS, "ellipse");
-            shape.setAttribute("cx", String(r.cx));
-            shape.setAttribute("cy", String(r.cy));
-            shape.setAttribute("rx", String(r.rx));
-            shape.setAttribute("ry", String(r.ry));
-          } else {
-            shape = document.createElementNS(svgNS, "path");
-            shape.setAttribute("d", r.d);
-          }
-          shape.setAttribute("class", "map-province-highlight");
-          shape.dataset.province = r.province;
-          provinceSvg.appendChild(shape);
-        });
-        mapHotspotsEl.appendChild(provinceSvg);
+        const rail = document.createElement("div");
+        rail.id = "mapProvinceRail";
+        rail.className = "map-province-rail";
+        rail.setAttribute("role", "toolbar");
+        rail.setAttribute("aria-label", "选择省份");
 
         const attachPreviewHandlers = (el, p) => {
           const openPreview = () => {
@@ -1109,25 +1046,18 @@
           el.addEventListener("touchstart", openPreview, { passive: true });
         };
 
-        MAP_BUILDING_ICONS.forEach(({ province, cx, cy }) => {
+        MAP_PROVINCE_RAIL.forEach(({ province, label }) => {
           const b = document.createElement("button");
           b.type = "button";
-          b.className = "map-hotspot map-hotspot--icon";
+          b.className = "map-province-rail__btn";
           b.dataset.province = province;
-          b.setAttribute("aria-label", `${province}建筑图标，点击查看`);
-          b.style.left = `${cx}%`;
-          b.style.top = `${cy}%`;
-          const ring = document.createElement("span");
-          ring.className = "map-hotspot__ring";
-          ring.setAttribute("aria-hidden", "true");
-          b.appendChild(ring);
-          mapHotspotsEl.appendChild(b);
+          b.textContent = label;
+          b.setAttribute("aria-label", `${province}，悬停查看代表建筑，点击进入`);
+          rail.appendChild(b);
           attachPreviewHandlers(b, province);
         });
 
-        mapHotspotsEl.querySelectorAll(".map-province-highlight").forEach((el) => {
-          attachPreviewHandlers(el, el.dataset.province);
-        });
+        mapHotspotsEl.appendChild(rail);
 
         mapHotspotsEl.addEventListener("mouseout", (e) => {
           const to = e.relatedTarget;
@@ -1160,12 +1090,11 @@
         }
 
         mapHotspotsEl.addEventListener("click", (e) => {
-          const btn = e.target.closest(".map-hotspot");
-          const hl = e.target.closest(".map-province-highlight");
-          const p = (btn && btn.dataset.province) || (hl && hl.dataset.province);
+          const trigger = e.target.closest(".map-province-rail__btn");
+          if (!trigger) return;
+          const p = trigger.dataset.province;
           if (!p) return;
-          const iconBtn = mapHotspotsEl.querySelector(`.map-hotspot[data-province="${p}"]`);
-          pulseBuildingIcon(iconBtn);
+          pulseProvinceBtn(trigger);
           if (p === "北京市") {
             window.location.href = "./gugong-explore.html";
             return;

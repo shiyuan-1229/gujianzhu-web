@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>故宫太和殿 · 古建智寻</title>
+    <title>古建智寻</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
 
@@ -30,8 +30,10 @@
             fontFamily: {
               ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
               flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
-              serifCN: ["Noto Serif SC", "SimSun", "serif"],
-              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
+              /* 标题 / 大字：小魏体 + 宋体回退 */
+              serifCN: ["ZCOOL XiaoWei", "Noto Serif SC", "SimSun", "serif"],
+              /* 正文：宋体系，书卷气；无字库时回退无衬线 */
+              sansCN: ["Noto Serif SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "sans-serif"],
             },
           },
         },
@@ -46,22 +48,41 @@
         --fg: #2f261d;
         --muted: rgba(63, 47, 33, 0.72);
         --gold: #a2701f;
+        /* 古风排版：小魏标题 / 宋体正文 / 书法点缀 */
+        --font-display: "ZCOOL XiaoWei", "Ma Shan Zheng", "Noto Serif SC", "SimSun", serif;
+        --font-body: "Noto Serif SC", "PingFang SC", "Microsoft YaHei", "SimSun", serif;
+        --font-brush: "Ma Shan Zheng", "ZCOOL XiaoWei", serif;
       }
 
       html,
       body {
         height: 100%;
+        font-family: var(--font-body);
         background: radial-gradient(1200px 820px at 50% 40%, var(--bg0), var(--bg1) 68%);
         color: var(--fg);
         line-height: 1.8;
         letter-spacing: 1px;
       }
 
+      /* 首屏：在 updatePageContent 跑完并加上 .detail-hydrated 之前不绘制主内容，
+         避免先闪出静态占位（黑底 +「故宫太和殿」等未替换文案） */
+      html:not(.detail-hydrated) #heroSection,
+      html:not(.detail-hydrated) #mosaicSection,
+      html:not(.detail-hydrated) .paper-bridge,
+      html:not(.detail-hydrated) #paperSection {
+        visibility: hidden;
+      }
+
       h1,
       h2,
       h3,
       .font-serifCN {
-        font-family: "Noto Serif SC", "SimSun", serif !important;
+        font-family: var(--font-display) !important;
+      }
+
+      /* 画册主标题：与正文里「紫」「当」等字一致，用正文宋体（思源宋体） */
+      .paper-frame h2.paper-heading-lead {
+        font-family: var(--font-body) !important;
       }
 
       /* 暗部颗粒：让 Hero 更有"胶片感" */
@@ -78,7 +99,8 @@
       }
 
       body.body--cinematic-hero .grain {
-        opacity: 0.12;
+        opacity: 0;
+        visibility: hidden;
       }
 
       /* Hero：背景图容器；顶栏压缩后约 3rem 高，与 mt-12 对齐 */
@@ -95,8 +117,24 @@
         z-index: 0;
         background-position: center;
         background-size: cover;
+        background-color: #0a0a0a;
         will-change: transform;
         transform: translate3d(0, 0, 0);
+      }
+
+      /* 御花园主图：略缩小并留白；比例介于「不挡字」与「不过窄」之间 */
+      .hero.hero--yuhua .hero-bg {
+        background-size: 89% auto;
+        background-repeat: no-repeat;
+        background-position: center 48%;
+      }
+
+      .hero.hero--yuhua #heroHoverHighlight {
+        inset: 3.5% 5.5%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        object-position: center center;
       }
 
       /* 视差作用在外壳上，内部视频用 translate 居中 + min 尺寸铺满，避免与 GSAP 抢 transform */
@@ -132,9 +170,9 @@
         visibility: visible;
       }
 
-      /* 故宫视频：源片常带左右/上下黑边与水印条，加大 min 尺寸并略上移构图，尽量全幅铺满 hero */
+      /* 故宫视频：提亮去灰；略放大裁切以去黑边；不在视频上叠「滤布」式重暗角 */
       .hero.hero--cinematic .hero-video.is-active {
-        filter: brightness(1.42) contrast(1.06) saturate(1.06);
+        filter: brightness(1.58) contrast(1.08) saturate(1.08);
         min-width: 148%;
         min-height: 142%;
         transform: translate(-50%, -56%);
@@ -149,8 +187,8 @@
       }
 
       .hero.hero--cinematic .hero-vignette {
-        background: radial-gradient(1200px 700px at 50% 38%, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.38)),
-          linear-gradient(180deg, rgba(10, 10, 10, 0.06), rgba(10, 10, 10, 0.42));
+        background: radial-gradient(1200px 700px at 50% 40%, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.12)),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.02), rgba(10, 10, 10, 0.14));
       }
 
       .hero.hero--cinematic .hero-copy {
@@ -207,7 +245,7 @@
       #mosaicSection {
         display: none;
         background: var(--mosaic-bg, #e8e0cf);
-        padding: 2.2rem 1rem 3.2rem;
+        padding: 2.2rem clamp(0.75rem, 3vw, 2rem) 3.2rem;
       }
 
       #mosaicSection.is-visible {
@@ -215,7 +253,7 @@
       }
 
       .mosaic-wrap {
-        max-width: 1180px;
+        max-width: min(94vw, 1420px);
         margin: 0 auto;
       }
 
@@ -270,7 +308,7 @@
       }
 
       .mosaic-card__title {
-        font-family: "Noto Serif SC", "SimSun", serif;
+        font-family: var(--font-display);
         font-size: 1.06rem;
         color: #5f2c2c;
         letter-spacing: 0.06em;
@@ -280,6 +318,11 @@
         font-size: 0.95rem;
         line-height: 1.78;
         color: rgba(58, 42, 25, 0.86);
+      }
+
+      .mosaic-card--text .mosaic-card__desc {
+        font-size: 0.92rem;
+        line-height: 1.82;
       }
 
       @media (max-width: 980px) {
@@ -297,14 +340,311 @@
         .mosaic-grid--taihe .mosaic-card--wide-lower {
           grid-column: span 12;
         }
+        .mosaic-grid--taihe-v2 .taihe-v2-loc,
+        .mosaic-grid--taihe-v2 .taihe-v2-feat-a,
+        .mosaic-grid--taihe-v2 .taihe-v2-time,
+        .mosaic-grid--taihe-v2 .taihe-v2-feat-b,
+        .mosaic-grid--taihe-v2 .taihe-v2-value {
+          grid-column: 1 !important;
+          grid-row: auto !important;
+        }
       }
 
-      .hero.hero--cinematic .hero-video.is-active {
-        filter: none !important;
-        min-width: 100%;
-        min-height: 100%;
-        transform: translate(-50%, -50%);
+      /* 太和殿 · 文档素材拼贴（左：历史位置 + 雕饰 B；右：雕饰 A + 沿革 + 价值） */
+      .mosaic-grid--taihe-v2 {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.88fr);
+        grid-template-rows: minmax(300px, auto) minmax(110px, auto) minmax(220px, auto);
+        align-items: stretch;
+      }
+      .taihe-v2-loc {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        min-height: 0;
+      }
+      .taihe-v2-feat-a {
+        grid-column: 2;
+        grid-row: 1;
+        min-height: 300px;
+      }
+      .taihe-v2-time {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .taihe-v2-feat-b {
+        grid-column: 1;
+        grid-row: 3;
+      }
+      .taihe-v2-value {
+        grid-column: 2;
+        grid-row: 3;
+      }
+
+      .taihe-card__inner {
+        padding: 1.05rem 1.12rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        height: 100%;
+        min-height: 0;
+        box-sizing: border-box;
+      }
+      .taihe-card__title {
+        font-family: var(--font-display);
+        font-size: 1.12rem;
+        font-weight: 700;
+        color: #5f2c2c;
+        letter-spacing: 0.08em;
+        margin: 0;
+      }
+      .taihe-card__desc {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.75;
+        color: rgba(58, 42, 25, 0.9);
+      }
+      .mosaic-card.taihe-card--red {
+        background: linear-gradient(165deg, #6e1818 0%, #4a0e12 55%, #3a0a0d 100%);
+        border-color: rgba(212, 175, 55, 0.42);
+      }
+      .taihe-card--red .taihe-card__title {
+        color: #f0e4a8;
+      }
+      .taihe-card--red .taihe-card__desc {
+        color: rgba(255, 250, 235, 0.92);
+      }
+      .taihe-card__figure {
+        margin: 0.2rem 0 0;
+        border-radius: 12px;
+        overflow: hidden;
+        flex: 1 1 auto;
+        min-height: 140px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .taihe-card--red .taihe-card__figure {
+        border-color: rgba(212, 175, 55, 0.25);
+      }
+      .taihe-card__img {
+        width: 100%;
+        height: 100%;
+        min-height: 140px;
+        object-fit: cover;
+        display: block;
+      }
+      .taihe-triple {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.45rem;
+        margin-top: 0.15rem;
+      }
+      .taihe-triple figure {
+        margin: 0;
+        text-align: center;
+      }
+      .taihe-triple img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 8px;
+        display: block;
+      }
+      .taihe-triple figcaption {
+        font-size: 0.68rem;
+        line-height: 1.35;
+        margin-top: 0.2rem;
+        color: rgba(58, 42, 25, 0.82);
+      }
+      .taihe-section-label {
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #6b2a2a;
+        margin: 0.35rem 0 0.1rem;
+        letter-spacing: 0.06em;
+      }
+      .taihe-section-label--sm {
+        font-size: 0.78rem;
+        margin-top: 0.5rem;
+      }
+      /* 屋脊兽 + 石雕龙头：两列并排，上图下文，压低右侧卡总高度 */
+      .taihe-twin-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        margin-top: 0.25rem;
+        align-items: start;
+      }
+      .taihe-twin-col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-width: 0;
+      }
+      .taihe-twin-col .taihe-section-label {
+        margin: 0;
+      }
+      .taihe-twin-col .taihe-card__desc {
+        margin: 0;
+        font-size: 0.82rem;
+        line-height: 1.65;
+      }
+      .taihe-twin-figure {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        max-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .taihe-twin-figure .taihe-card__img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: 200px;
+        min-height: 0;
+        object-fit: contain;
+      }
+      @media (max-width: 640px) {
+        .taihe-twin-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .taihe-paint-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem;
+        margin-top: 0.25rem;
+      }
+      .taihe-paint-pair figure {
+        margin: 0;
+        text-align: center;
+      }
+      .taihe-paint-pair img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: block;
+      }
+      .taihe-paint-pair figcaption {
+        font-size: 0.68rem;
+        margin-top: 0.2rem;
+        color: rgba(58, 42, 25, 0.82);
+      }
+      .taihe-timeline-row {
+        display: flex;
+        align-items: stretch;
+        gap: 0.65rem;
+        min-height: 0;
+        flex: 1;
+      }
+      .taihe-vertical-label {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        color: #5f2c2c;
+        padding: 0.25rem 0;
+        flex-shrink: 0;
+      }
+      .taihe-timeline-row img {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        object-position: left center;
+        border-radius: 10px;
+      }
+
+      .taihe-timeline-img-wrap {
+        flex: 1;
+        min-width: 0;
+        max-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .taihe-timeline-img-wrap img {
+        max-height: 200px;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 10px;
+      }
+
+      /* 红卡：两张示意上下排列，控制单张高度避免过长 */
+      .taihe-card--red .taihe-figure-red-block {
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        margin: 0.15rem 0 0 !important;
+        max-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.1);
+      }
+      .taihe-card--red .taihe-figure-red-block .taihe-card__img {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+        min-height: 0;
+        object-fit: contain;
+      }
+
+      /* 历史沿革：棕黄底，时间轴图尽量占满横向空间 */
+      .mosaic-card.taihe-card--timeline-ochre {
+        background: linear-gradient(165deg, #e6d2a8 0%, #d2b87a 42%, #c4a86a 100%);
+        border-color: rgba(120, 80, 40, 0.35);
+      }
+      .taihe-card--timeline-ochre .taihe-vertical-label {
+        color: #3d2812;
+      }
+      .taihe-v2-time.taihe-card--timeline-ochre .taihe-card__inner {
+        padding: 0.55rem 0.45rem 0.65rem 0.7rem;
+      }
+      .taihe-v2-time.taihe-card--timeline-ochre .taihe-timeline-img-wrap {
+        max-height: none;
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        align-items: center;
+      }
+      .taihe-v2-time.taihe-card--timeline-ochre .taihe-timeline-img-wrap img {
+        max-height: min(42vh, 300px);
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
         object-position: center center;
+        border-radius: 8px;
+      }
+
+      /* 历史价值：实景图 + 正文（可与红卡同色） */
+      .taihe-value-figure {
+        margin: 0.4rem 0 0;
+        border-radius: 12px;
+        overflow: hidden;
+        flex: 0 0 auto;
+        border: 1px solid rgba(125, 82, 36, 0.2);
+      }
+      .taihe-card--red .taihe-value-figure {
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+      .taihe-value-figure .taihe-card__img {
+        width: 100%;
+        height: auto;
+        max-height: min(38vh, 300px);
+        object-fit: cover;
+        object-position: center 42%;
+        display: block;
       }
 
       .hero-scroll-cue {
@@ -327,8 +667,8 @@
         position: absolute;
         inset: 0;
         z-index: 2;
-        background: radial-gradient(1200px 700px at 50% 38%, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.45)),
-          linear-gradient(180deg, rgba(10, 10, 10, 0.12), rgba(10, 10, 10, 0.38));
+        background: radial-gradient(1200px 700px at 50% 38%, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.28)),
+          linear-gradient(180deg, rgba(10, 10, 10, 0.08), rgba(10, 10, 10, 0.22));
         pointer-events: none;
       }
 
@@ -338,19 +678,16 @@
         will-change: transform;
       }
 
-      /* 画册纸张质感（内容区） */
+      /* 页底条带：与顶栏同系（非土黄）；土黄色只给 .paper-frame 画册画芯 */
       .paper {
-        background:
-          radial-gradient(1200px 760px at 16% 12%, rgba(255, 250, 238, 0.84), transparent 62%),
-          radial-gradient(900px 620px at 86% 84%, rgba(186, 138, 67, 0.14), transparent 64%),
-          linear-gradient(180deg, #f3e9d7 0%, #e8dcc5 46%, #e2d4bb 100%);
-        color: var(--fg);
+        background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));
+        color: rgba(254, 243, 199, 0.92);
+        padding: 0 clamp(0.5rem, 2.5vw, 1.5rem) 1.5rem;
       }
 
-      /* 黑 -> 纸 的过渡，避免割裂 */
       .paper-bridge {
-        height: 120px;
-        background: linear-gradient(180deg, rgba(8, 8, 8, 0.95), rgba(68, 50, 30, 0.76) 58%, rgba(232, 220, 197, 0.88));
+        height: 72px;
+        background: linear-gradient(180deg, rgba(8, 8, 8, 0.95), rgba(90, 24, 24, 0.55) 70%, rgba(153, 116, 62, 0.42));
       }
 
       .paper::before {
@@ -358,62 +695,71 @@
         position: absolute;
         inset: 0;
         pointer-events: none;
-        background-image: radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.05), transparent 38%),
-          radial-gradient(circle at 80% 92%, rgba(255, 255, 255, 0.04), transparent 42%),
-          linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.06)),
-          repeating-linear-gradient(
-            0deg,
-            rgba(120, 96, 67, 0.04) 0px,
-            rgba(120, 96, 67, 0.04) 1px,
-            transparent 1px,
-            transparent 4px
-          );
-        opacity: 0.72;
-        mix-blend-mode: multiply;
+        background-image: radial-gradient(ellipse 80% 50% at 15% 0%, rgba(255, 255, 255, 0.12), transparent 50%),
+          radial-gradient(ellipse 70% 45% at 90% 100%, rgba(0, 0, 0, 0.12), transparent 55%);
+        opacity: 1;
+        mix-blend-mode: soft-light;
       }
 
+      /* 画册画芯：土黄纸质 */
       .paper-frame {
-        border-radius: 26px;
-        border: 1px solid rgba(160, 124, 72, 0.24);
-        background: linear-gradient(180deg, rgba(255, 251, 243, 0.64), rgba(255, 247, 233, 0.52));
-        box-shadow: 0 26px 90px rgba(37, 26, 12, 0.18), 0 3px 0 rgba(255, 255, 255, 0.5) inset;
+        border-radius: 20px;
+        border: 1px solid rgba(139, 108, 58, 0.45);
+        background: linear-gradient(165deg, #f2e6c8 0%, #e9d9b0 38%, #ddc896 72%, #d4b87a 100%);
+        box-shadow: 0 14px 42px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.45);
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
       }
 
-      .paper p,
-      .paper .dropcap,
-      .paper [style*="rgba(224,224,224"],
-      .paper .text-sm,
-      .paper .text-xs {
-        color: rgba(53, 38, 23, 0.84) !important;
+      .paper-frame .paper-grid-tight {
+        row-gap: 1.25rem;
+        column-gap: 1.25rem;
       }
 
-      .paper h2,
-      .paper h3,
-      .paper [style*="var(--gold)"] {
+      @media (min-width: 768px) {
+        .paper-frame .paper-grid-tight {
+          row-gap: 1.5rem;
+          column-gap: 1.75rem;
+        }
+      }
+
+      /* 北京故宫画册：略加宽，减少两侧留白（覆盖 Tailwind max-w-6xl） */
+      .paper-frame.paper-frame--wide {
+        max-width: min(94vw, 1400px) !important;
+      }
+
+      .paper > .paper-frame p,
+      .paper > .paper-frame .dropcap,
+      .paper > .paper-frame [style*="rgba(224,224,224"],
+      .paper > .paper-frame .text-sm,
+      .paper > .paper-frame .text-xs {
+        color: rgba(53, 38, 23, 0.88) !important;
+      }
+
+      .paper > .paper-frame h2,
+      .paper > .paper-frame h3,
+      .paper > .paper-frame [style*="var(--gold)"] {
         color: var(--gold) !important;
       }
 
-      /* Drop cap：段落首字下沉放大 */
-      .dropcap::first-letter {
+      /* Drop cap：画芯内深褐底上的首字 */
+      .paper-frame .dropcap::first-letter {
         float: left;
-        font-family: "Noto Serif SC", serif;
+        font-family: var(--font-brush);
         font-weight: 700;
-        font-size: 3.4rem;
+        font-size: clamp(2.6rem, 6vw, 3.1rem);
         line-height: 0.9;
-        padding: 0.28rem 0.55rem 0 0;
-        margin-top: 0.10rem;
-        color: rgba(212, 175, 55, 0.92);
+        padding: 0.22rem 0.45rem 0 0;
+        margin-top: 0.08rem;
+        color: rgba(162, 112, 31, 0.92);
       }
 
-      /* 图像：不做硬边框，用柔和阴影与裁切 */
-      .plate {
-        border-radius: 14px;
+      .paper-frame .plate {
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 18px 48px rgba(60, 42, 20, 0.22);
-        border: 1px solid rgba(167, 121, 58, 0.24);
-        background: rgba(255, 249, 236, 0.7);
+        box-shadow: 0 8px 22px rgba(80, 55, 22, 0.18);
+        border: 1px solid rgba(120, 90, 48, 0.28);
+        background: rgba(255, 252, 245, 0.92);
       }
 
       /* 御花园：叠放高亮图，热区内悬停立即显示（无过渡） */
@@ -435,34 +781,6 @@
         position: absolute;
         background: transparent;
         cursor: pointer;
-      }
-
-      /* 线框区：墨线与纸张的对比 */
-      .wireframe-shell {
-        border-radius: 28px;
-        background: linear-gradient(180deg, rgba(255, 250, 241, 0.92), rgba(245, 234, 212, 0.84));
-        box-shadow: 0 16px 38px rgba(71, 50, 23, 0.14);
-        border: 1px solid rgba(164, 120, 58, 0.24);
-      }
-
-      .wireframe svg {
-        width: 100%;
-        height: auto;
-        display: block;
-      }
-
-      .wirepath {
-        fill: none;
-        stroke: rgba(93, 67, 38, 0.68);
-        stroke-width: 2.2;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        vector-effect: non-scaling-stroke;
-      }
-
-      .wire-accent {
-        stroke: rgba(162, 114, 42, 0.85);
-        stroke-width: 2.4;
       }
 
       /* 小屏优化 */
@@ -488,7 +806,7 @@
         <div class="select-none leading-tight">
           <a href="./index.html" class="font-ancient text-[1.2rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.35rem]">古建智寻</a>
           <div class="mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
-        </div>
+      </div>
 
         <div class="flex shrink-0 items-center gap-x-4 md:gap-x-6 font-flow text-lg font-medium tracking-[0.14em] text-amber-50/95 md:text-xl md:tracking-[0.16em]">
           <a
@@ -507,46 +825,39 @@
       <div
         id="heroBg"
         class="hero-bg"
-        style="background-image: url('./assets/taihedian-hero.jpg')"
         role="img"
         aria-label="古建筑背景图"
       ></div>
       <img id="heroHoverHighlight" src="" alt="" aria-hidden="true" hidden />
       <div id="heroHoverHotspot" hidden aria-label="建筑主殿悬浮高亮区域"></div>
       <div class="hero-video-shell" id="heroVideoShell" aria-hidden="true">
-        <video
-          id="heroVideo"
-          class="hero-video"
-          muted
-          playsinline
-          loop
-          preload="metadata"
-          aria-hidden="true"
-        ></video>
+      <video
+        id="heroVideo"
+        class="hero-video"
+        muted
+        playsinline
+        loop
+        preload="metadata"
+        aria-hidden="true"
+      ></video>
       </div>
       <div class="hero-vignette" aria-hidden="true"></div>
 
       <div class="relative z-10 h-full">
         <div class="mx-auto max-w-6xl h-full px-6 flex items-center">
           <div id="heroCopy" class="hero-copy w-full">
-            <div class="text-qianbai/70 text-xs tracking-[0.34em] mb-5">
-              PALACE · CEREMONY · AXIS
-            </div>
+            <div class="text-qianbai/70 text-xs tracking-[0.34em] mb-5" id="heroTagLine"></div>
             <h1
               id="heroTitle"
               class="hero-title font-serifCN text-qianbai text-[64px] md:text-[92px] leading-[1.02]"
-            >
-              故宫太和殿
-            </h1>
+            ></h1>
             <div class="mt-7 flex items-center gap-4">
               <div class="h-px w-24 bg-gradient-to-r from-qianbai/0 via-qianbai/55 to-qianbai/0"></div>
               <div class="text-qianbai/70 text-sm tracking-[0.22em]">北京 · 中轴</div>
               <div class="h-px flex-1 bg-gradient-to-r from-qianbai/0 via-qianbai/18 to-qianbai/0"></div>
             </div>
 
-            <div class="mt-10 text-qianbai/70 text-sm leading-relaxed max-w-xl">
-              向下滚动，背景缓行如云；标题逆风而上，如同礼制空间里的步伐。此页以"画册"的节奏，呈现宫殿的秩序、尺度与光影。
-            </div>
+            <div class="mt-10 text-qianbai/70 text-sm leading-relaxed max-w-xl" id="heroIntroBlurb"></div>
           </div>
         </div>
       </div>
@@ -569,32 +880,35 @@
 
     <div class="paper-bridge" aria-hidden="true"></div>
 
-    <!-- 内容区：米白画册 -->
-    <section class="paper relative">
-      <div class="paper-frame mx-auto max-w-6xl px-6 py-20 md:py-28 relative z-10">
-        <div class="grid grid-cols-12 gap-8 items-start">
+    <!-- 内容区：外层与顶栏同色；中间 .paper-frame 为土黄画册画芯 -->
+    <section class="paper relative" id="paperSection">
+      <div class="paper-frame mx-auto max-w-6xl px-5 py-10 sm:px-7 md:py-14 relative z-10" id="paperFrame">
+        <div class="grid grid-cols-12 paper-grid-tight items-start md:items-end">
           <div class="col-span-12 md:col-span-7">
-            <h2 class="font-serifCN text-3xl md:text-4xl tracking-wide leading-tight" style="color: var(--gold)">
-              结构不是静止的几何，<br />
-              而是一种被风与雪校准过的经验。
+            <h2
+              class="paper-heading-lead text-[1.65rem] md:text-3xl lg:text-4xl tracking-wide leading-snug"
+              style="color: var(--gold)"
+            >
+              <span id="paperH2L1">结构不是静止的几何，</span><br />
+              <span id="paperH2L2">而是一种被风与雪校准过的经验。</span>
             </h2>
           </div>
           <div class="col-span-12 md:col-span-5">
-            <div class="text-sm tracking-[0.22em] leading-relaxed" style="color: rgba(224,224,224,0.72)">
+            <div id="paperIntroRight" class="text-sm tracking-[0.18em] leading-[1.75]" style="color: rgba(224,224,224,0.72)">
               以极深的暗部进入，再以米白纸面铺开——让观看从"惊叹"转入"细读"。在这里，台基、屋脊与出檐不只是名词，
               它们是节奏、比例与工艺。
             </div>
           </div>
         </div>
 
-        <div class="mt-14 md:mt-16 grid grid-cols-12 gap-8 items-start">
+        <div class="mt-8 md:mt-10 grid grid-cols-12 paper-grid-tight items-start">
           <div class="col-span-12 md:col-span-5">
             <div class="plate relative" id="detailPlateWrap">
               <img
                 id="detailPlateBase"
-                class="relative z-0 w-full h-[520px] object-cover"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1600px-Forbidden_City_Beijing_detail_2019.jpg"
-                alt="太和殿细节图"
+                class="relative z-0 w-full h-[min(58vw,380px)] sm:h-[400px] md:h-[440px] object-cover"
+                src="./assets/1.jpg"
+                alt="故宫图片1"
                 loading="lazy"
               />
               <img
@@ -614,7 +928,7 @@
             </div>
             <div
               id="detailPlateCaption"
-              class="mt-4 text-xs tracking-[0.24em]"
+              class="mt-2.5 text-xs tracking-[0.22em]"
               style="color: rgba(224,224,224,0.55)"
             >
               PLATE 01 · 屋面与出檐的层次
@@ -622,129 +936,96 @@
           </div>
 
           <div class="col-span-12 md:col-span-7">
-            <p class="dropcap text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+            <p id="paperP1" class="dropcap text-[16px] md:text-[17px] leading-[1.82]" style="color: rgba(224,224,224,0.82)">
               太和殿以礼制为纲，以尺度为神。高台基托举殿体，层层出檐收束体量，视觉在"仰望"中完成秩序的建立。
               远看是中轴的线，近看是木作与彩画的呼吸。每一道比例与间距，都在长期的经验里被反复校准。
             </p>
-            <p class="mt-8 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+            <p id="paperP2" class="mt-5 text-[16px] md:text-[17px] leading-[1.82]" style="color: rgba(224,224,224,0.82)">
               画册式的留白，是为了让你听见材质：石的沉稳、木的温润、琉璃瓦的冷光、尘埃的浮游。它们共同构成一种"低频的庄严"。
               不必堆砌信息，只需给空间足够的余裕，秩序就会自己讲述。
             </p>
 
-            <div class="mt-10 grid grid-cols-2 gap-5">
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
               <div class="plate">
                 <img
-                  class="w-full h-[240px] object-cover"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Forbidden_City_Beijing_roof_detail.jpg/1200px-Forbidden_City_Beijing_roof_detail.jpg"
-                  alt="屋脊与瓦当细部"
+                  id="paperSubImg1"
+                  class="w-full h-[min(28vw,200px)] sm:h-[200px] object-cover"
+                  src="./assets/2.jpg"
+                  alt="故宫图片2"
                   loading="lazy"
                 />
               </div>
               <div class="plate">
                 <img
-                  class="w-full h-[240px] object-cover"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Forbidden_City_Beijing_courtyard_2017.jpg/1200px-Forbidden_City_Beijing_courtyard_2017.jpg"
-                  alt="院落与空间层次"
+                  id="paperSubImg2"
+                  class="w-full h-[min(28vw,200px)] sm:h-[200px] object-cover"
+                  src="./assets/3.jpg"
+                  alt="故宫图片3"
                   loading="lazy"
                 />
               </div>
             </div>
-            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+            <div id="paperPlate0203Cap" class="mt-2.5 text-xs tracking-[0.22em]" style="color: rgba(224,224,224,0.55)">
               PLATE 02–03 · 架构与空间的层次
             </div>
           </div>
         </div>
 
-        <div class="mt-16 md:mt-20 grid grid-cols-12 gap-8 items-start">
+        <div class="mt-10 md:mt-12 grid grid-cols-12 paper-grid-tight items-start">
           <div class="col-span-12 md:col-span-6 md:order-2">
             <div class="plate">
               <img
-                class="w-full h-[560px] object-cover"
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Forbidden_City_Beijing_corridor_light.jpg/1600px-Forbidden_City_Beijing_corridor_light.jpg"
-                alt="宫殿光影图"
+                id="paperPlateLarge"
+                class="w-full h-[min(62vw,420px)] sm:h-[460px] md:h-[480px] object-cover"
+                src="./assets/4.jpg"
+                alt="故宫图片4"
                 loading="lazy"
               />
             </div>
-            <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
+            <div id="paperPlate04Cap" class="mt-2.5 text-xs tracking-[0.22em]" style="color: rgba(224,224,224,0.55)">
               PLATE 04 · 光沿着梁架行走
             </div>
           </div>
           <div class="col-span-12 md:col-span-6 md:order-1">
-            <h3 class="font-serifCN text-2xl tracking-wide" style="color: var(--gold)">尺度的"规矩"，是审美的根</h3>
-            <p class="mt-7 dropcap text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+            <h3 id="paperS2H3" class="font-serifCN text-xl md:text-2xl tracking-wide" style="color: var(--gold)">尺度的"规矩"，是审美的根</h3>
+            <p id="paperP3" class="mt-5 dropcap text-[16px] md:text-[17px] leading-[1.82]" style="color: rgba(224,224,224,0.82)">
               当我们说"东方美学"，其实是在说一种克制：让结构成为装饰，让比例替代繁复。中轴、台阶与开间的重复，
               像一段被推敲、最终被定格的节拍。它不是符号，而是一套把经验写进空间里的算法。
             </p>
-            <p class="mt-8 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
+            <p id="paperP4" class="mt-5 text-[16px] md:text-[17px] leading-[1.82]" style="color: rgba(224,224,224,0.82)">
               因而，页面也遵循同样的纪律：非对称的排布、充分的页边距、让图像与文字交错但不拥挤。你不需要被告知"该看哪里"，
               因为留白会引导视线。
             </p>
-            <div class="mt-10 flex items-center gap-4">
+            <div class="mt-6 flex items-center gap-4">
               <div class="h-px w-16" style="background: rgba(224,224,224,0.28)"></div>
               <div class="text-xs tracking-[0.30em]" style="color: rgba(224,224,224,0.65)">NOTES · PROPORTION</div>
             </div>
-          </div>
-        </div>
-
-        <!-- 线框图：滚动到此处触发"一笔画" -->
-        <div class="mt-16 md:mt-20">
-          <div class="grid grid-cols-12 gap-8 items-end">
-            <div class="col-span-12 md:col-span-5">
-              <h3 class="font-serifCN text-2xl tracking-wide" style="color: var(--gold)">线框图 · 斗拱意象</h3>
-              <p class="mt-6 text-[17px] leading-[1.95]" style="color: rgba(224,224,224,0.82)">
-                当你滚动至此，墨线会像画笔一样自动勾勒。它不是工程图，而是一种"结构的速写"——用最少的线，描出力的走向。
-              </p>
-              <div class="mt-6 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
-                SCROLL TO DRAW · STROKE-DASHARRAY
-              </div>
+            <div class="plate mt-6">
+              <img
+                id="paperPlateCorner"
+                class="w-full h-[min(42vw,220px)] sm:h-[240px] object-cover"
+                src="./assets/5.jpg"
+                alt="故宫图片5"
+                loading="lazy"
+              />
             </div>
-            <div class="col-span-12 md:col-span-7">
-              <div id="wireframeBlock" class="wireframe-shell p-6 md:p-8">
-                <div class="wireframe">
-                  <svg viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" aria-label="斗拱线框图">
-                    <!-- 底座 -->
-                    <path
-                      class="wirepath"
-                      d="M120 410 L800 410 L800 452 L120 452 Z"
-                    />
-                    <!-- 柱 -->
-                    <path class="wirepath" d="M220 130 L220 410" />
-                    <path class="wirepath" d="M700 130 L700 410" />
-
-                    <!-- 梁 -->
-                    <path class="wirepath" d="M190 150 L730 150" />
-                    <path class="wirepath" d="M170 185 L750 185" />
-
-                    <!-- 斗拱（多边形意象） -->
-                    <path
-                      class="wirepath wire-accent"
-                      d="M280 185 L280 235 L330 235 L330 265 L370 265 L370 235 L430 235 L430 270 L490 270 L490 235 L550 235 L550 265 L590 265 L590 235 L640 235 L640 185"
-                    />
-
-                    <!-- 檐口 -->
-                    <path class="wirepath" d="M150 120 L770 120" />
-                    <path class="wirepath" d="M180 98 L740 98" />
-                    <path class="wirepath" d="M220 78 L700 78" />
-
-                    <!-- 细部辅助线 -->
-                    <path class="wirepath" d="M240 312 L680 312" />
-                    <path class="wirepath" d="M240 338 L680 338" />
-                    <path class="wirepath" d="M240 364 L680 364" />
-                  </svg>
-                </div>
-              </div>
-              <div class="mt-4 text-xs tracking-[0.24em]" style="color: rgba(224,224,224,0.55)">
-                PLATE 05 · 结构速写（示意）
-              </div>
+            <div
+              id="paperPlateCornerCap"
+              class="mt-2.5 text-xs tracking-[0.22em]"
+              style="color: rgba(224,224,224,0.55)"
+            >
+              PLATE 05 · 院落与空间延续
             </div>
           </div>
         </div>
 
-        <div class="mt-16 md:mt-20 flex items-center justify-between">
-          <a href="./list.html" class="text-xs tracking-[0.28em] hover:text-white transition" style="color: rgba(224,224,224,0.72)">
-            ← BACK TO LIST
-          </a>
-          <div class="text-xs tracking-[0.22em]" style="color: rgba(224,224,224,0.45)">DETAIL</div>
+        <div class="mt-8 flex items-center justify-between border-t border-stone-200/90 pt-4">
+          <a
+            href="./list.html"
+            class="text-xs tracking-[0.26em] text-stone-600 transition-colors hover:text-stone-900"
+            >← BACK TO LIST</a
+          >
+          <span class="text-[10px] tracking-[0.22em] text-stone-400">DETAIL</span>
         </div>
       </div>
     </section>
@@ -768,11 +1049,13 @@
           year: "明永乐四年（1406年）",
           desc: "明清两代皇家宫殿，世界现存规模最大的木质结构古建筑群，体现中国古代皇家建筑最高成就。",
           heroVideo: "./古建筑/计算机大赛-景点图片/北京市/北京故宫/故宫.mp4",
-          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/2560px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
-          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Forbidden_City_Beijing_detail_2019.jpg/1600px-Forbidden_City_Beijing_detail_2019.jpg",
+          heroImage: "./assets/1.jpg",
+          detailImage: "./assets/1.jpg",
+          paperLargeImage: "./assets/4.jpg",
+          paperCornerImage: "./assets/5.jpg",
           subImages: [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Forbidden_City_Beijing_roof_detail.jpg/1200px-Forbidden_City_Beijing_roof_detail.jpg",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Forbidden_City_Beijing_courtyard_2017.jpg/1200px-Forbidden_City_Beijing_courtyard_2017.jpg"
+            "./assets/2.jpg",
+            "./assets/3.jpg"
           ]
         },
         "故宫太和殿": {
@@ -1052,82 +1335,311 @@
       };
 
       const MOSAIC_CONTENT = {
-        "故宫太和殿": [
-          {
-            cls: "mosaic-card mosaic-card--tall",
-            image: "./assets/taihedian-mosaic-board.png",
-            alt: "太和殿图文板",
-          },
-          {
-            cls: "mosaic-card mosaic-card--half",
-            image: "./assets/taihedian-hero.jpg",
-            alt: "太和殿主殿全景",
-          },
-          {
-            cls: "mosaic-card mosaic-card--text",
-            title: "礼制空间与中轴构图",
-            desc:
-              "太和殿位于紫禁城中轴核心，承担朝会与庆典礼仪。此卡片先用占位文案，后续可替换为你提供的正式图文。",
-          },
-          {
-            cls: "mosaic-card mosaic-card--wide",
-            image: "./assets/gugong-journey-2.png",
-            alt: "太和殿局部图",
-          },
-          {
-            cls: "mosaic-card mosaic-card--half",
-            image: "./assets/gugong-journey-3.png",
-            alt: "太和殿细节图",
-          },
-          {
-            cls: "mosaic-card mosaic-card--half",
-            image: "./assets/gugong-journey-1.png",
-            alt: "太和殿广场视角",
-          },
-          {
-            cls: "mosaic-card mosaic-card--wide-lower",
-            image: "./assets/taihedian-mosaic-corner.png",
-            alt: "太和殿景观延伸",
-          },
-        ],
         "故宫御花园": [
           {
             cls: "mosaic-card mosaic-card--tall",
-            image: "./assets/yuhuayuan-plate-base.png",
-            alt: "御花园总览",
+            image:
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Lascar_Imperial_Garden_-_Forbidden_City_%284498199246%29.jpg/960px-Lascar_Imperial_Garden_-_Forbidden_City_%284498199246%29.jpg",
+            alt: "御花园古柏与路径",
           },
           {
             cls: "mosaic-card mosaic-card--wide",
-            image: "./assets/yuhuayuan-plate-highlight.png",
-            alt: "御花园高亮示意",
+            image:
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Imperial_garden_of_the_Forbidden_City_20160826.jpg/1280px-Imperial_garden_of_the_Forbidden_City_20160826.jpg",
+            alt: "御花园园路与建筑",
           },
           {
             cls: "mosaic-card mosaic-card--half",
-            image: "./assets/gugong-journey-1.png",
-            alt: "御花园景观卡片",
+            image:
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Rock_garden_in_the_imperial_garden_in_Forbidden_City.jpg/1280px-Rock_garden_in_the_imperial_garden_in_Forbidden_City.jpg",
+            alt: "堆秀山御景亭下假山",
           },
           {
             cls: "mosaic-card mosaic-card--half",
-            image: "./assets/gugong-journey-2.png",
-            alt: "御花园细部卡片",
+            image:
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Forbidden_City%2C_Garden.jpg/1280px-Forbidden_City%2C_Garden.jpg",
+            alt: "御花园园林景致",
           },
           {
             cls: "mosaic-card mosaic-card--text",
-            title: "园林节点与空间层次",
+            title: "位置与布局",
             desc:
-              "御花园由亭台、太湖石与古柏组织空间，形成由中轴向两侧展开的观赏序列。此卡片为占位内容，等你给素材后可逐条替换。",
+              "御花园位于紫禁城内廷中路，坤宁宫以北，南北长约80米、东西宽约140米，面积约一万二千平方米。园中轴线为钦安殿，为明清宫廷道教祭祀场所；两侧对称布置亭、石、古柏与曲径，与内廷宫殿秩序相呼应。明代称「宫后苑」，清代称御花园。园内路径以彩石铺地，图案多样；堆秀山、御景亭等假山与亭台为重要观赏节点。",
           },
           {
             cls: "mosaic-card mosaic-card--wide-lower",
-            image: "./assets/yuhuayuan-mosaic-corner.png",
-            alt: "御花园景观延伸",
+            image:
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Pagoda_in_Forbidden_City_Imperial_garden.jpg/1280px-Pagoda_in_Forbidden_City_Imperial_garden.jpg",
+            alt: "御花园北部石与塔状构筑",
           },
         ],
+      };
+
+      const PAPER_COPY_DEFAULT = {
+        h2L1: "结构不是静止的几何，",
+        h2L2: "而是一种被风与雪校准过的经验。",
+        introRight:
+          '以极深的暗部进入，再以米白纸面铺开——让观看从"惊叹"转入"细读"。在这里，台基、屋脊与出檐不只是名词，它们是节奏、比例与工艺。',
+        p1:
+          '太和殿以礼制为纲，以尺度为神。高台基托举殿体，层层出檐收束体量，视觉在"仰望"中完成秩序的建立。远看是中轴的线，近看是木作与彩画的呼吸。每一道比例与间距，都在长期的经验里被反复校准。',
+        p2:
+          '画册式的留白，是为了让你听见材质：石的沉稳、木的温润、琉璃瓦的冷光、尘埃的浮游。它们共同构成一种"低频的庄严"。不必堆砌信息，只需给空间足够的余裕，秩序就会自己讲述。',
+        plate01: "PLATE 01 · 屋面与出檐的层次",
+        plate0203: "PLATE 02–03 · 架构与空间的层次",
+        plate04: "PLATE 04 · 光沿着梁架行走",
+        s2h3: '尺度的"规矩"，是审美的根',
+        p3:
+          '当我们说"东方美学"，其实是在说一种克制：让结构成为装饰，让比例替代繁复。中轴、台阶与开间的重复，像一段被推敲、最终被定格的节拍。它不是符号，而是一套把经验写进空间里的算法。',
+        p4:
+          '因而，页面也遵循同样的纪律：非对称的排布、充分的页边距、让图像与文字交错但不拥挤。你不需要被告知"该看哪里"，因为留白会引导视线。',
+        plate05: "PLATE 05 · 院落与空间延续",
+      };
+
+      const PAPER_COPY_GUGONG = {
+        h2L1: "结构不是静止的几何，",
+        h2L2: "而是一种被风与雪校准过的经验。",
+        introRight:
+          "古建筑是有生命的肌体：行走与驻足会改变观看——从「远远看见」到「慢慢读懂」。在琉璃瓦、汉白玉石与青砖之间，材料与工序所讲述的，往往比典礼更持久。",
+        p1:
+          "紫禁城（故宫）始建于明永乐四年（1406），永乐十八年（1420）建成，为明清两代皇宫。宫城以内现存宫殿建筑以木结构为主，沿南北中轴对称展开：外朝以太和、中和、保和三大殿为礼仪核心，内廷以乾清宫、交泰殿、坤宁宫为起居中心，左右以庑房与门廊围合，形成「前朝后寝」的典制空间。",
+        p2:
+          "远看是轴线与台基、屋面与檐口，近看是斗栱、和玺彩画与脊兽的层次。屋面坡度与出檐的进退，既是排水与遮阳的经验，也是视觉上的韵律。留白与尺度的克制，让材料的重量与时间的沉积被安静阅读。",
+        plate01: "PLATE 01 · 琉璃屋面与檐部",
+        plate0203: "PLATE 02–03 · 屋脊细部与院落空间",
+        plate04: "PLATE 04 · 廊庑与红墙光影",
+        s2h3: "尺度的「规矩」，是审美的根",
+        p3:
+          "当我们说「东方美学」，其实是在说一种克制：让结构成为装饰，让比例替代堆砌。中轴、台阶与开间的重复，不是单调，而是把千百年营造经验写入空间里的算法。",
+        p4:
+          "故宫建筑群也如这座页面：图像与文字交错、留白与边距彼此让位，让视线不必被指令。你只需在节奏里缓慢移动，秩序就会自己显露。",
+        plate05: "PLATE 05 · 园林与庭院一瞥",
+      };
+
+      const applyPaperCopy = (copy) => {
+        const set = (id, text) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = text;
+        };
+        set("paperH2L1", copy.h2L1);
+        set("paperH2L2", copy.h2L2);
+        set("paperIntroRight", copy.introRight);
+        set("paperP1", copy.p1);
+        set("paperP2", copy.p2);
+        set("detailPlateCaption", copy.plate01);
+        set("paperPlate0203Cap", copy.plate0203);
+        set("paperPlate04Cap", copy.plate04);
+        set("paperS2H3", copy.s2h3);
+        set("paperP3", copy.p3);
+        set("paperP4", copy.p4);
+        set("paperPlateCornerCap", copy.plate05);
+      };
+
+      /** 太和殿拼贴：图文自 Word「太和殿1.5」导出，图见 assets/taihe-doc-* */
+      const renderTaiheEditorialMosaic = (grid) => {
+        const img = (src, alt, cls) => {
+          const el = document.createElement("img");
+          el.src = src;
+          el.alt = alt;
+          el.loading = "lazy";
+          if (cls) el.className = cls;
+          return el;
+        };
+
+        const c1 = document.createElement("article");
+        c1.className = "mosaic-card taihe-v2-loc taihe-card taihe-card--red";
+        const in1 = document.createElement("div");
+        in1.className = "taihe-card__inner";
+        const t1 = document.createElement("h3");
+        t1.className = "taihe-card__title";
+        t1.textContent = "历史位置与文物价值";
+        const d1 = document.createElement("p");
+        d1.className = "taihe-card__desc";
+        d1.textContent =
+          "太和殿，又称「金銮殿」，位于紫禁城外朝、明清北京城中轴线的核心。它与中和殿、保和殿同立于三层汉白玉石须弥座台基之上，是皇宫礼仪空间的主序列。太和殿采用重檐庑殿顶，建筑形制与用材等级在紫禁城中居于首位；历史上，登基、大婚、万寿节等重大国家典礼多在此举行。";
+        const f0 = document.createElement("figure");
+        f0.className = "taihe-card__figure taihe-figure-red-block";
+        f0.appendChild(
+          img("./assets/taihe-doc-halls.jpeg", "紫禁城外朝三大殿营造关系示意（文档素材）", "taihe-card__img")
+        );
+        const d1b = document.createElement("p");
+        d1b.className = "taihe-card__desc";
+        d1b.style.marginTop = "0.35rem";
+        d1b.textContent =
+          "下图沿中轴由南而北依次为太和殿、中和殿与保和殿：太和殿体量最大，为外朝正殿；中和殿为方形攒尖顶、体量最小，大典前皇帝常在此稍憩并接受侍臣行礼；保和殿为重檐歇山顶，清代曾在此举行殿试并举办筵宴。三殿与台基、御路石与石栏杆等共同体现了明清皇家建筑的营造制度与空间秩序。";
+        const f1 = document.createElement("figure");
+        f1.className = "taihe-card__figure taihe-figure-red-block";
+        f1.appendChild(
+          img(
+            "./assets/taihe-three-halls-illustration.png",
+            "紫禁城外朝太和殿、中和殿、保和殿手绘示意图",
+            "taihe-card__img"
+          )
+        );
+        const d1c = document.createElement("p");
+        d1c.className = "taihe-card__desc";
+        d1c.style.marginTop = "0.35rem";
+        d1c.textContent =
+          "1961年，「故宫」已被公布为第一批全国重点文物保护单位。1987年，「明清皇宫（紫禁城）」列入《世界遗产名录》，太和殿是紫禁城中最具标志性的木构礼仪大殿之一。今日观众所见殿宇与陈设，在修缮、监测与开放管理之下，以原状陈列为主，向公众传递明清宫廷建筑与礼制空间的历史信息。";
+        in1.append(t1, d1, f0, d1b, f1, d1c);
+        c1.appendChild(in1);
+
+        const c2 = document.createElement("article");
+        c2.className = "mosaic-card taihe-v2-feat-a taihe-card";
+        const in2 = document.createElement("div");
+        in2.className = "taihe-card__inner";
+        const t2 = document.createElement("h3");
+        t2.className = "taihe-card__title";
+        t2.textContent = "特色雕饰与纹样";
+        const d2a = document.createElement("p");
+        d2a.className = "taihe-card__desc";
+        d2a.textContent =
+          "太和殿的丹陛石雕、木结构雕刻与琉璃装饰，以极致工艺彰显皇家威仪，是中国古建筑装饰艺术的巅峰之作。";
+        const triple = document.createElement("div");
+        triple.className = "taihe-triple";
+        const figStone = document.createElement("figure");
+        figStone.appendChild(img("./assets/taihe-doc-stone.jpeg", "丹陛云龙石石雕"));
+        const cs = document.createElement("figcaption");
+        cs.textContent = "石雕 · 丹陛云龙石";
+        figStone.appendChild(cs);
+        const figWood = document.createElement("figure");
+        figWood.appendChild(img("./assets/taihe-doc-wood.jpeg", "太和殿木雕藻井"));
+        const cw = document.createElement("figcaption");
+        cw.textContent = "木雕";
+        figWood.appendChild(cw);
+        const figGlaze = document.createElement("figure");
+        figGlaze.appendChild(img("./assets/taihe-doc-glaze.jpeg", "琉璃雕饰"));
+        const cg = document.createElement("figcaption");
+        cg.textContent = "琉璃雕";
+        figGlaze.appendChild(cg);
+        triple.append(figStone, figWood, figGlaze);
+        const twinRow = document.createElement("div");
+        twinRow.className = "taihe-twin-row";
+        const colBeast = document.createElement("div");
+        colBeast.className = "taihe-twin-col";
+        const fb = document.createElement("figure");
+        fb.className = "taihe-card__figure taihe-twin-figure";
+        fb.appendChild(img("./assets/taihe-doc-ridge-beasts.jpeg", "太和殿屋脊兽", "taihe-card__img"));
+        const lb = document.createElement("div");
+        lb.className = "taihe-section-label";
+        lb.textContent = "屋脊兽";
+        const db = document.createElement("p");
+        db.className = "taihe-card__desc";
+        db.textContent =
+          "太和殿的装饰上共有10个屋脊兽。这些小兽依次排列在高高的檐角处，象征着消灾灭祸、逢凶化吉，并含有剪除邪恶、主持公道之意。";
+        colBeast.append(fb, lb, db);
+        const colSpout = document.createElement("div");
+        colSpout.className = "taihe-twin-col";
+        const fsp = document.createElement("figure");
+        fsp.className = "taihe-card__figure taihe-twin-figure";
+        fsp.appendChild(
+          img("./assets/taihe-doc-dragon-spouts.png", "太和殿丹陛石阶与汉白玉栏杆（石雕龙头排水）", "taihe-card__img")
+        );
+        const lsp = document.createElement("div");
+        lsp.className = "taihe-section-label";
+        lsp.textContent = "石雕龙头排水";
+        const dsp = document.createElement("p");
+        dsp.className = "taihe-card__desc";
+        dsp.textContent = "栏杆下安有排水用的石雕龙头，每逢雨季，可呈现「千龙吐水」的奇观。";
+        colSpout.append(fsp, lsp, dsp);
+        twinRow.append(colBeast, colSpout);
+        in2.append(t2, d2a, triple, twinRow);
+        c2.appendChild(in2);
+
+        const c4 = document.createElement("article");
+        c4.className = "mosaic-card taihe-v2-time taihe-card taihe-card--timeline-ochre";
+        const in4 = document.createElement("div");
+        in4.className = "taihe-card__inner";
+        const row4 = document.createElement("div");
+        row4.className = "taihe-timeline-row";
+        const vl = document.createElement("span");
+        vl.className = "taihe-vertical-label";
+        vl.textContent = "历史沿革";
+        row4.appendChild(vl);
+        const twrap = document.createElement("div");
+        twrap.className = "taihe-timeline-img-wrap";
+        twrap.appendChild(img("./assets/taihe-doc-timeline.png", "太和殿历史沿革年表"));
+        row4.appendChild(twrap);
+        in4.appendChild(row4);
+        c4.appendChild(in4);
+
+        const c3 = document.createElement("article");
+        c3.className = "mosaic-card taihe-v2-feat-b taihe-card";
+        const in3 = document.createElement("div");
+        in3.className = "taihe-card__inner";
+        const t3 = document.createElement("h3");
+        t3.className = "taihe-card__title";
+        t3.textContent = "特色雕饰与纹样";
+        const l3a = document.createElement("div");
+        l3a.className = "taihe-section-label";
+        l3a.textContent = "汉白玉赤道式日晷";
+        const d3a = document.createElement("p");
+        d3a.className = "taihe-card__desc";
+        d3a.style.fontSize = "0.84rem";
+        d3a.textContent = "日晷在丹陛的左侧，以汉白玉石制成晷盘圆形，中央有金属晷针。";
+        const f3a = document.createElement("figure");
+        f3a.className = "taihe-card__figure";
+        f3a.style.minHeight = "160px";
+        f3a.appendChild(img("./assets/taihe-doc-sundial.jpeg", "汉白玉赤道式日晷", "taihe-card__img"));
+        const l3b = document.createElement("div");
+        l3b.className = "taihe-section-label taihe-section-label--sm";
+        l3b.textContent = "金龙和玺彩画";
+        const pair = document.createElement("div");
+        pair.className = "taihe-paint-pair";
+        const fg = document.createElement("figure");
+        fg.appendChild(img("./assets/taihe-doc-dragon-pattern.jpeg", "龙纹"));
+        const fgc = document.createElement("figcaption");
+        fgc.textContent = "龙纹";
+        fg.appendChild(fgc);
+        const fc = document.createElement("figure");
+        fc.appendChild(img("./assets/taihe-doc-cloud-pattern.jpeg", "祥云纹"));
+        const fcc = document.createElement("figcaption");
+        fcc.textContent = "祥云纹";
+        fc.appendChild(fcc);
+        pair.append(fg, fc);
+        in3.append(t3, l3a, d3a, f3a, l3b, pair);
+        c3.appendChild(in3);
+
+        const c5 = document.createElement("article");
+        c5.className = "mosaic-card taihe-v2-value taihe-card taihe-card--red";
+        const in5 = document.createElement("div");
+        in5.className = "taihe-card__inner";
+        const t5 = document.createElement("h3");
+        t5.className = "taihe-card__title";
+        t5.textContent = "历史价值";
+        const d5 = document.createElement("p");
+        d5.className = "taihe-card__desc";
+        d5.textContent =
+          "太和殿是中国现存等级最高、形制最完备的皇家木结构大殿之一，集中体现明清皇家宫殿建筑的体制与工艺水平，是礼制、营造技艺、空间美学与传统哲学观念相互叠合的典型实例，对东亚地区宫殿类建筑的形制与审美具有广泛影响。";
+        const fv = document.createElement("figure");
+        fv.className = "taihe-value-figure";
+        fv.appendChild(
+          img("./assets/taihe-value-facade.png", "太和殿正立面与三层汉白玉台基", "taihe-card__img")
+        );
+        const d5b = document.createElement("p");
+        d5b.className = "taihe-card__desc";
+        d5b.style.marginTop = "0.35rem";
+        d5b.textContent =
+          "殿宇立于须弥座台基之上，重檐庑殿顶覆黄琉璃瓦，檐下施斗栱与和玺彩画，屋脊饰脊兽，均体现清代官式建筑的等级做法。白石栏杆、御路石雕与铜龟铜鹤等陈设，共同构成外朝大典的视觉中心。作为紫禁城开放参观的重要节点，太和殿承担着文化遗产展示与公众历史教育的现实功能。";
+        const d5c = document.createElement("p");
+        d5c.className = "taihe-card__desc";
+        d5c.style.marginTop = "0.3rem";
+        d5c.textContent =
+          "从文物价值看，太和殿木构架、屋面瓦作、石作与油饰彩画等构件系统，是研究明清皇家工程制度、材料加工与修缮史的实物标本；其与广场、台基、丹陛的组合关系，也是理解中国传统都城轴线与宫廷礼仪空间的关键案例。";
+        in5.append(t5, d5, fv, d5b, d5c);
+        c5.appendChild(in5);
+
+        grid.append(c1, c2, c3, c4, c5);
       };
 
       const renderMosaicCards = (cards, variant) => {
         const grid = document.getElementById("mosaicGrid");
         if (!grid) return;
+        if (variant === "taihe-v2") {
+          grid.className = "mosaic-grid mosaic-grid--taihe-v2";
+          grid.innerHTML = "";
+          renderTaiheEditorialMosaic(grid);
+          return;
+        }
         grid.className =
           variant === "yuhua"
             ? "mosaic-grid mosaic-grid--yuhua"
@@ -1193,10 +1705,10 @@
           document.body.classList.add("body--cinematic-hero");
         } else {
           if (heroVideo) {
-            heroVideo.classList.remove("is-active");
-            heroVideo.pause();
-            heroVideo.removeAttribute("src");
-            heroVideo.load();
+          heroVideo.classList.remove("is-active");
+          heroVideo.pause();
+          heroVideo.removeAttribute("src");
+          heroVideo.load();
           }
           heroBg.style.backgroundColor = "";
           heroBg.style.backgroundImage = `url('${building.heroImage}')`;
@@ -1204,20 +1716,26 @@
           document.body.classList.remove("body--cinematic-hero");
         }
 
-        // 下滑拼贴区：太和殿 / 御花园启用；背景与首屏底色一致，避免断层
+        if (building.name === "故宫御花园") {
+          heroSection?.classList.add("hero--yuhua");
+        } else {
+          heroSection?.classList.remove("hero--yuhua");
+        }
+
+        // 下滑拼贴区：仅太和殿 / 御花园（北京故宫视频下不再插入拼贴，只保留画册正文）
         const mosaicSection = document.getElementById("mosaicSection");
-        const cards = isMosaicDetail ? MOSAIC_CONTENT[building.name] : null;
-        if (mosaicSection && cards) {
+        const cards =
+          isMosaicDetail && building.name !== "故宫太和殿"
+            ? MOSAIC_CONTENT[building.name]
+            : null;
+        if (mosaicSection && isMosaicDetail) {
           document.body.classList.add("body--minimal-detail");
           mosaicSection.classList.add("is-visible");
-          renderMosaicCards(
-            cards,
-            building.name === "故宫御花园"
-              ? "yuhua"
-              : building.name === "故宫太和殿"
-                ? "taihe"
-                : undefined
-          );
+          if (building.name === "故宫太和殿") {
+            renderMosaicCards(null, "taihe-v2");
+          } else {
+            renderMosaicCards(cards, "yuhua");
+          }
           document.documentElement.style.setProperty("--mosaic-bg", building.pageBg || "#e8e2d3");
           document.body.style.background = building.pageBg || "#e8e2d3";
           heroSection.style.backgroundColor = building.pageBg || "#e8e2d3";
@@ -1318,24 +1836,51 @@
             detailPlateHotspot.onmouseleave = null;
             detailPlateHotspot.ontouchstart = null;
             detailPlateHotspot.ontouchend = null;
-            if (detailPlateCaption) {
+            if (detailPlateCaption && building.name !== "北京故宫") {
               detailPlateCaption.textContent = "PLATE 01 · 屋面与出檐的层次";
             }
           }
         }
 
-        // 更新小图
-        const subImages = document.querySelectorAll('.paper .grid.grid-cols-2 img');
-        if (subImages.length >= 2) {
-          subImages[0].src = building.subImages[0];
-          subImages[0].alt = `${building.name}细部图`;
-          subImages[1].src = building.subImages[1];
-          subImages[1].alt = `${building.name}全景图`;
+        const paperFrame = document.getElementById("paperFrame");
+        if (building.name === "北京故宫") {
+          applyPaperCopy(PAPER_COPY_GUGONG);
+          paperFrame?.classList.add("paper-frame--wide");
+        } else {
+          paperFrame?.classList.remove("paper-frame--wide");
+          if (building.name !== "故宫御花园") {
+            applyPaperCopy(PAPER_COPY_DEFAULT);
+          }
+        }
+
+        const paperSub1 = document.getElementById("paperSubImg1");
+        const paperSub2 = document.getElementById("paperSubImg2");
+        if (paperSub1 && paperSub2 && building.subImages?.length >= 2) {
+          paperSub1.src = building.subImages[0];
+          paperSub1.alt = `${building.name}细部图`;
+          paperSub2.src = building.subImages[1];
+          paperSub2.alt = `${building.name}全景图`;
+        }
+
+        const paperPlateLarge = document.getElementById("paperPlateLarge");
+        if (paperPlateLarge) {
+          paperPlateLarge.src = building.paperLargeImage || building.detailImage;
+          paperPlateLarge.alt = `${building.name} · 廊庑与光影`;
+        }
+
+        const paperPlateCorner = document.getElementById("paperPlateCorner");
+        if (paperPlateCorner) {
+          paperPlateCorner.src =
+            building.paperCornerImage || building.subImages?.[0] || building.detailImage;
+          paperPlateCorner.alt = `${building.name} · 局部景观`;
         }
       };
 
-      // 初始化页面
+      // 初始化页面；下一帧再解除隐藏，避免与首帧合成之间夹一帧占位内容
       updatePageContent();
+      requestAnimationFrame(function () {
+        document.documentElement.classList.add("detail-hydrated");
+      });
 
       // Hero 视差：背景/视频慢，文字快
       const bg = document.getElementById("heroBg");
@@ -1353,8 +1898,9 @@
         },
       });
 
-      if (heroVideoShell) {
-        gsap.to(heroVideoShell, {
+      const heroHoverHighlightEl = document.getElementById("heroHoverHighlight");
+      if (heroHoverHighlightEl) {
+        gsap.to(heroHoverHighlightEl, {
           y: 140,
           ease: "none",
           scrollTrigger: {
@@ -1364,6 +1910,19 @@
             scrub: true,
           },
         });
+      }
+
+      if (heroVideoShell) {
+        gsap.to(heroVideoShell, {
+        y: 140,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
       }
 
       gsap.to(title, {
@@ -1376,30 +1935,16 @@
           scrub: true,
         },
       });
-
-      // 线框"画笔"动画：进入视口自动勾勒（内容区隐藏时跳过）
-      const wireBlock = document.getElementById("wireframeBlock");
-      if (wireBlock) {
-        const paths = wireBlock.querySelectorAll("path");
-
-        paths.forEach((p) => {
-          const len = p.getTotalLength();
-          p.style.strokeDasharray = String(len);
-          p.style.strokeDashoffset = String(len);
-        });
-
-        gsap.to(paths, {
-          strokeDashoffset: 0,
-          duration: 1.6,
-          ease: "power2.out",
-          stagger: 0.08,
-          scrollTrigger: {
-            trigger: wireBlock,
-            start: "top 72%",
-            once: true,
-          },
-        });
-      }
     </script>
+    <noscript>
+      <style>
+        body #heroSection,
+        body #mosaicSection,
+        body #paperSection,
+        body .paper-bridge {
+          visibility: visible !important;
+        }
+      </style>
+    </noscript>
   </body>
 </html>

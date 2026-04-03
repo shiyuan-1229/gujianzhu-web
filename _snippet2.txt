@@ -1,0 +1,20 @@
+          "太和殿是中国现存等级最高、形制最完备的皇家木结构大殿，成就中国皇家宫殿建筑的艺术巅峰，是礼制、工艺、美学与哲学的完美结合，深刻影响东亚多国古建筑形制与审美。";
+        in5.append(t5, d5);
+        c5.appendChild(in5);
+
+        grid.append(c1, c2, c3, c4, c5);
+      };
+
+      const renderMosaicCards = (cards, variant) => {
+        const grid = document.getElementById("mosaicGrid");
+        if (!grid) return;
+        if (variant === "taihe-v2") {
+          grid.className = "mosaic-grid mosaic-grid--taihe-v2";
+          grid.innerHTML = "";
+          renderTaiheEditorialMosaic(grid);
+          return;
+        }
+        grid.className =
+          variant === "yuhua"
+            ? "mosaic-grid mosaic-grid--yuhua"
+            : variant === "taihe"

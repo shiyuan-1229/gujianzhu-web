@@ -137,8 +137,73 @@
         pointer-events: none;
       }
 
-      #mapHotspots .map-province-rail {
+      #mapHotspots .map-province-rail,
+      #mapHotspots .map-sichuan-hit-face {
         pointer-events: auto;
+      }
+
+      /* 四川省：你描的 Vector 轮廓，固定叠在热区正中央（不做地图坐标对齐） */
+      .map-sichuan-overlay {
+        position: absolute;
+        left: 50.2%;
+        top: 68%;
+        transform: translate(-50%, -50%)scale(0.66);
+        z-index: 5;
+        box-sizing: border-box;
+        pointer-events: none;
+        width: clamp(150px, 36vmin, 300px);
+        aspect-ratio: 452 / 376;
+        height: auto;
+        max-height: min(46vh, 320px);
+      }
+
+      .map-sichuan-overlay .map-sichuan-hit-svg {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.22s ease;
+      }
+
+      .map-sichuan-overlay.sichuan-lit .map-sichuan-hit-svg {
+        opacity: 1;
+      }
+
+      .map-sichuan-overlay .map-sichuan-hit-svg path {
+        pointer-events: none;
+        fill: rgba(255, 200, 90, 0.38);
+        stroke: rgba(212, 175, 55, 0.85);
+        stroke-width: 0.9;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .map-sichuan-overlay.sichuan-lit .map-sichuan-hit-svg path {
+        fill: rgba(255, 220, 130, 0.52);
+      }
+
+      .map-sichuan-hit-face {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        cursor: pointer;
+        pointer-events: auto;
+        background: transparent;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+
+      .map-sichuan-hit-face:focus-visible {
+        outline: 2px solid rgba(212, 175, 55, 0.95);
+        outline-offset: 2px;
       }
 
       /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
@@ -218,7 +283,7 @@
         left: clamp(8px, 2.2vw, 22px);
         top: 50%;
         transform: translateY(-50%);
-        z-index: 6;
+        z-index: 7;
         display: flex;
         flex-direction: column;
         gap: 0.42rem;
@@ -985,14 +1050,18 @@
         });
       };
 
-      /** 地图左侧竖排省份按钮（文案为简称，data-province 仍为全称以对接详情与列表） */
+      /** 地图左侧四省按钮；四川省仅在地图上以 Vector 1.svg 轮廓高亮交互 */
       const MAP_PROVINCE_RAIL = [
         { province: "北京市", label: "北京" },
         { province: "山西省", label: "山西" },
         { province: "江苏省", label: "江苏" },
-        { province: "四川省", label: "四川" },
         { province: "广东省", label: "广东" },
       ];
+
+      /** 四川省轮廓（Vector 1.svg / Figma 描边），热区 CSS 固定在地图中央 */
+      const SICHUAN_PATH_VIEWBOX = { w: 452, h: 376 };
+      const SICHUAN_SVG_PATH_D =
+        "M290.127 61.5H336.627L381.127 89.5H397.627L451.127 129V150L420.627 166.5H322.627L306.627 180.5L276.127 213L290.127 232L322.627 250.5H290.127V276H276.127L255.127 290.5L241.127 250.5L227.127 276L201.127 323V358L152.127 374.5L114.627 290.5L103.127 292.5L79.6267 246L68.1267 264.5L56.6267 213V150L47.1267 119.5L26.1267 80L0.626709 59L12.1267 31L0.626709 17L12.1267 0.5H37.6267L56.6267 45L91.6267 59L103.127 75.5L135.627 61.5V45L166.127 31V19.5L182.627 0.5H201.127H215.127V19.5L241.127 31L255.127 61.5V75.5H276.127L290.127 61.5ZM290.127 61.5L322.627 75.5";
 
       const validHoverProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
       const validClickNav = ["山西省", "江苏省", "四川省", "广东省"];
@@ -1006,6 +1075,10 @@
         root.querySelectorAll(".map-province-rail__btn.is-active").forEach((el) => {
           el.classList.remove("is-active");
         });
+        root.querySelectorAll(".map-sichuan-hit-face.is-active").forEach((el) => {
+          el.classList.remove("is-active");
+        });
+        root.querySelector(".map-sichuan-overlay")?.classList.remove("sichuan-lit");
       }
 
       function setHotspotActive(province) {
@@ -1014,6 +1087,10 @@
         if (!root || !province) return;
         const btn = root.querySelector(`.map-province-rail__btn[data-province="${province}"]`);
         if (btn) btn.classList.add("is-active");
+        if (province === "四川省") {
+          root.querySelector(".map-sichuan-overlay")?.classList.add("sichuan-lit");
+          root.querySelector(".map-sichuan-hit-face")?.classList.add("is-active");
+        }
       }
 
       const pulseProvinceBtn = (btn) => {
@@ -1027,6 +1104,28 @@
       };
 
       if (mapHotspotsEl) {
+        const svgNS = "http://www.w3.org/2000/svg";
+        const sichuanWrap = document.createElement("div");
+        sichuanWrap.className = "map-sichuan-overlay";
+        sichuanWrap.setAttribute("data-province", "四川省");
+        const sichuanHitSvg = document.createElementNS(svgNS, "svg");
+        sichuanHitSvg.setAttribute("class", "map-sichuan-hit-svg");
+        sichuanHitSvg.setAttribute("viewBox", `0 0 ${SICHUAN_PATH_VIEWBOX.w} ${SICHUAN_PATH_VIEWBOX.h}`);
+        sichuanHitSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        sichuanHitSvg.setAttribute("aria-hidden", "true");
+        const sichuanPathEl = document.createElementNS(svgNS, "path");
+        sichuanPathEl.setAttribute("d", SICHUAN_SVG_PATH_D);
+        sichuanPathEl.setAttribute("vector-effect", "non-scaling-stroke");
+        sichuanHitSvg.appendChild(sichuanPathEl);
+        const sichuanHitBtn = document.createElement("button");
+        sichuanHitBtn.type = "button";
+        sichuanHitBtn.className = "map-sichuan-hit-face";
+        sichuanHitBtn.dataset.province = "四川省";
+        sichuanHitBtn.setAttribute("aria-label", "四川省，悬停查看代表建筑，点击进入列表");
+        sichuanWrap.appendChild(sichuanHitSvg);
+        sichuanWrap.appendChild(sichuanHitBtn);
+        mapHotspotsEl.appendChild(sichuanWrap);
+
         const rail = document.createElement("div");
         rail.id = "mapProvinceRail";
         rail.className = "map-province-rail";
@@ -1045,6 +1144,8 @@
           }
           el.addEventListener("touchstart", openPreview, { passive: true });
         };
+
+        attachPreviewHandlers(sichuanHitBtn, "四川省");
 
         MAP_PROVINCE_RAIL.forEach(({ province, label }) => {
           const b = document.createElement("button");
@@ -1090,7 +1191,9 @@
         }
 
         mapHotspotsEl.addEventListener("click", (e) => {
-          const trigger = e.target.closest(".map-province-rail__btn");
+          const railBtn = e.target.closest(".map-province-rail__btn");
+          const sichuanBtn = e.target.closest(".map-sichuan-hit-face");
+          const trigger = railBtn || sichuanBtn;
           if (!trigger) return;
           const p = trigger.dataset.province;
           if (!p) return;

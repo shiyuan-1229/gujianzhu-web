@@ -232,6 +232,105 @@
         }
       }
 
+      /* 北京故宫：六图轮播（无视频滤镜，避免发糊） */
+      .hero-carousel {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .hero-carousel.hero-carousel--hidden {
+        display: none !important;
+      }
+      .hero-carousel__slides {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        padding: 0;
+      }
+      .hero-carousel__slide {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        opacity: 0;
+        transition: opacity 0.85s ease;
+        pointer-events: none;
+        image-rendering: auto;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+      .hero-carousel__slide.is-active {
+        opacity: 1;
+        z-index: 1;
+      }
+      .hero-carousel__btn {
+        position: absolute;
+        top: 50%;
+        z-index: 6;
+        transform: translateY(-50%);
+        pointer-events: auto;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 240, 210, 0.45);
+        background: rgba(20, 12, 10, 0.42);
+        color: rgba(255, 248, 235, 0.95);
+        font-size: 1.65rem;
+        line-height: 1;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+        padding: 0;
+        font-family: system-ui, sans-serif;
+      }
+      .hero-carousel__btn:hover {
+        background: rgba(40, 24, 18, 0.55);
+        border-color: rgba(255, 230, 190, 0.65);
+      }
+      .hero-carousel__btn--prev {
+        left: clamp(0.75rem, 2.5vw, 1.5rem);
+      }
+      .hero-carousel__btn--next {
+        right: clamp(0.75rem, 2.5vw, 1.5rem);
+      }
+      .hero-carousel__dots {
+        position: absolute;
+        left: 50%;
+        bottom: clamp(4.5rem, 12vh, 6.5rem);
+        z-index: 6;
+        transform: translateX(-50%);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.45rem;
+        pointer-events: auto;
+        max-width: 90vw;
+      }
+      .hero-carousel__dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 235, 200, 0.55);
+        background: rgba(0, 0, 0, 0.35);
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+      .hero-carousel__dot.is-active {
+        background: rgba(255, 236, 200, 0.92);
+        transform: scale(1.15);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero-carousel__slide {
+          transition: none;
+        }
+      }
+
       .hero.hero--cinematic .hero-vignette {
         background: radial-gradient(1200px 700px at 50% 40%, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.12)),
           linear-gradient(180deg, rgba(10, 10, 10, 0.02), rgba(10, 10, 10, 0.14));
@@ -239,6 +338,16 @@
 
       .hero.hero--cinematic .hero-copy {
         display: none;
+      }
+
+      /* 故宫轮播：标题区外层仍是整屏 z-10，会挡住下层箭头/圆点 */
+      .hero.hero--cinematic > div.relative.z-10.h-full {
+        pointer-events: none;
+      }
+
+      /* 轮播打开时让外壳参与命中，避免部分环境下父级 pointer-events:none 影响子按钮 */
+      .hero-video-shell:has(#heroCarousel:not(.hero-carousel--hidden)) {
+        pointer-events: auto;
       }
 
       header.header-over-video {
@@ -1203,6 +1312,13 @@
             >返回上一页</a
           >
           <a href="./index.html" class="whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
+          <a
+            id="detailNavEnterTour"
+            href="./gugong-explore.html"
+            class="hidden whitespace-nowrap rounded-md border border-amber-200/50 bg-[#6b1a1a]/78 px-3 py-1 font-flow text-base font-medium tracking-[0.12em] text-amber-50 shadow-sm transition-colors hover:border-amber-200/65 hover:bg-[#7b1f1f]/88 md:px-4 md:text-lg md:tracking-[0.14em]"
+            aria-hidden="true"
+            >进入游览</a
+          >
         </div>
       </div>
     </nav>
@@ -1218,15 +1334,32 @@
       <img id="heroHoverHighlight" src="" alt="" aria-hidden="true" hidden />
       <div id="heroHoverHotspot" hidden aria-label="建筑主殿悬浮高亮区域"></div>
       <div class="hero-video-shell" id="heroVideoShell" aria-hidden="true">
-      <video
-        id="heroVideo"
-        class="hero-video"
-        muted
-        playsinline
-        loop
-        preload="metadata"
-        aria-hidden="true"
-      ></video>
+        <video
+          id="heroVideo"
+          class="hero-video"
+          muted
+          playsinline
+          loop
+          preload="metadata"
+          aria-hidden="true"
+        ></video>
+        <div
+          id="heroCarousel"
+          class="hero-carousel hero-carousel--hidden"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="故宫影像轮播"
+          aria-hidden="true"
+        >
+          <div class="hero-carousel__slides" id="heroCarouselSlides"></div>
+          <button type="button" id="heroCarouselPrev" class="hero-carousel__btn hero-carousel__btn--prev" aria-label="上一张">
+            ‹
+          </button>
+          <button type="button" id="heroCarouselNext" class="hero-carousel__btn hero-carousel__btn--next" aria-label="下一张">
+            ›
+          </button>
+          <div class="hero-carousel__dots" id="heroCarouselDots" role="tablist" aria-label="轮播页码"></div>
+        </div>
       </div>
       <div class="hero-vignette" aria-hidden="true"></div>
 
@@ -1256,7 +1389,7 @@
         </div>
       </div>
 
-      <!-- 故宫视频页仅保留此提示；其它建筑详情仍显示上方 heroCopy -->
+      <!-- 故宫轮播页仅保留此提示；其它建筑详情仍显示上方 heroCopy -->
       <div
         id="heroScrollCue"
         class="hero-scroll-cue absolute bottom-10 left-1/2 z-10 -translate-x-1/2 select-none text-qianbai/55 text-xs tracking-[0.36em]"
@@ -1442,15 +1575,19 @@
           province: "北京",
           year: "明永乐四年（1406年）",
           desc: "明清两代皇家宫殿，世界现存规模最大的木质结构古建筑群，体现中国古代皇家建筑最高成就。",
-          heroVideo: "./古建筑/计算机大赛-景点图片/北京市/北京故宫/故宫.mp4",
-          heroImage: "./assets/1.jpg",
+          heroCarousel: [
+            { src: "./assets/gugong-hero-1.png", alt: "故宫红墙与殿宇" },
+            { src: "./assets/gugong-hero-2.png", alt: "门廊望太和门广场" },
+            { src: "./assets/gugong-hero-3.png", alt: "角楼与护城河" },
+            { src: "./assets/gugong-hero-4.png", alt: "金水河与琉璃瓦殿宇" },
+            { src: "./assets/gugong-hero-5.png", alt: "夕照中的宫廷广场" },
+            { src: "./assets/gugong-hero-6.png", alt: "雪后宫殿" },
+          ],
+          heroImage: "./assets/gugong-hero-1.png",
           detailImage: "./assets/1.jpg",
           paperLargeImage: "./assets/4.jpg",
           paperCornerImage: "./assets/5.jpg",
-          subImages: [
-            "./assets/2.jpg",
-            "./assets/3.jpg"
-          ]
+          subImages: ["./assets/2.jpg", "./assets/3.jpg"]
         },
         "故宫太和殿": {
           name: "故宫太和殿",
@@ -2327,6 +2464,90 @@
         });
       };
 
+      let heroCarouselAutoplayTimer = null;
+
+      const clearHeroCarouselTimer = () => {
+        if (heroCarouselAutoplayTimer) {
+          clearInterval(heroCarouselAutoplayTimer);
+          heroCarouselAutoplayTimer = null;
+        }
+      };
+
+      const hideHeroCarousel = () => {
+        clearHeroCarouselTimer();
+        const slidesEl = document.getElementById("heroCarouselSlides");
+        const dotsEl = document.getElementById("heroCarouselDots");
+        const prevBtn = document.getElementById("heroCarouselPrev");
+        const nextBtn = document.getElementById("heroCarouselNext");
+        if (slidesEl) slidesEl.innerHTML = "";
+        if (dotsEl) dotsEl.innerHTML = "";
+        if (prevBtn) prevBtn.onclick = null;
+        if (nextBtn) nextBtn.onclick = null;
+        const carousel = document.getElementById("heroCarousel");
+        carousel?.classList.add("hero-carousel--hidden");
+        carousel?.setAttribute("aria-hidden", "true");
+      };
+
+      const setupHeroCarousel = (items) => {
+        const carousel = document.getElementById("heroCarousel");
+        const slidesEl = document.getElementById("heroCarouselSlides");
+        const dotsEl = document.getElementById("heroCarouselDots");
+        const prevBtn = document.getElementById("heroCarouselPrev");
+        const nextBtn = document.getElementById("heroCarouselNext");
+        if (!carousel || !slidesEl || !dotsEl || !items?.length || !prevBtn || !nextBtn) return;
+
+        clearHeroCarouselTimer();
+        slidesEl.innerHTML = "";
+        dotsEl.innerHTML = "";
+
+        items.forEach((item, i) => {
+          const img = document.createElement("img");
+          img.className = "hero-carousel__slide" + (i === 0 ? " is-active" : "");
+          img.src = item.src;
+          img.alt = item.alt || "故宫";
+          img.decoding = "async";
+          img.loading = i < 2 ? "eager" : "lazy";
+          img.sizes = "100vw";
+          slidesEl.appendChild(img);
+        });
+
+        let current = 0;
+        const slideEls = () => Array.from(slidesEl.querySelectorAll(".hero-carousel__slide"));
+        const dotEls = () => Array.from(dotsEl.querySelectorAll(".hero-carousel__dot"));
+
+        function go(index) {
+          const n = items.length;
+          current = ((index % n) + n) % n;
+          slideEls().forEach((el, j) => el.classList.toggle("is-active", j === current));
+          dotEls().forEach((el, j) => {
+            el.classList.toggle("is-active", j === current);
+            el.setAttribute("aria-selected", j === current ? "true" : "false");
+          });
+        }
+
+        items.forEach((item, i) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "hero-carousel__dot" + (i === 0 ? " is-active" : "");
+          dot.setAttribute("role", "tab");
+          dot.setAttribute("aria-label", `第 ${i + 1} 张`);
+          dot.setAttribute("aria-selected", i === 0 ? "true" : "false");
+          dot.addEventListener("click", () => go(i));
+          dotsEl.appendChild(dot);
+        });
+
+        prevBtn.onclick = () => go(current - 1);
+        nextBtn.onclick = () => go(current + 1);
+
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (!reduceMotion) {
+          heroCarouselAutoplayTimer = window.setInterval(() => go(current + 1), 6000);
+        }
+
+        carousel.classList.remove("hero-carousel--hidden");
+        carousel.setAttribute("aria-hidden", "false");
+      };
+
       // 更新页面内容
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
@@ -2338,34 +2559,63 @@
         
         const isMosaicDetail = building.name === "故宫太和殿" || building.name === "故宫御花园";
 
-        // 更新 Hero：北京故宫保留视频，太和殿/御花园与其他页走图片
+        const enterTourEl = document.getElementById("detailNavEnterTour");
+        if (enterTourEl) {
+          const showEnterTour = building.name === "北京故宫";
+          enterTourEl.classList.toggle("hidden", !showEnterTour);
+          enterTourEl.setAttribute("aria-hidden", showEnterTour ? "false" : "true");
+        }
+
+        // 更新 Hero：北京故宫用 assets 内六图轮播；其余建筑有 heroVideo 仍可走视频；太和殿/御花园等走背景图
         const heroBg = document.getElementById("heroBg");
         const heroVideo = document.getElementById("heroVideo");
         const heroHoverHighlight = document.getElementById("heroHoverHighlight");
         const heroHoverHotspot = document.getElementById("heroHoverHotspot");
         const heroSection = document.getElementById("heroSection");
+        const carouselItems = building.heroCarousel;
+        const useCarousel =
+          Array.isArray(carouselItems) &&
+          carouselItems.length > 0 &&
+          !isMosaicDetail &&
+          building.name === "北京故宫";
         const videoSrc = building.heroVideo;
-        if (videoSrc && heroVideo && !isMosaicDetail) {
-          heroVideo.classList.add("is-active");
-          if (heroVideo.getAttribute("src") !== videoSrc) {
-            heroVideo.src = videoSrc;
+
+        if (useCarousel) {
+          if (heroVideo) {
+            heroVideo.classList.remove("is-active");
+            heroVideo.pause();
+            heroVideo.removeAttribute("src");
+            heroVideo.load();
           }
-          heroVideo.play().catch(() => {});
           heroBg.style.backgroundImage = "none";
-          heroBg.style.backgroundColor = "#000";
+          heroBg.style.backgroundColor = "#0a0a0a";
           heroSection?.classList.add("hero--cinematic");
           document.body.classList.add("body--cinematic-hero");
+          setupHeroCarousel(carouselItems);
         } else {
-          if (heroVideo) {
-          heroVideo.classList.remove("is-active");
-          heroVideo.pause();
-          heroVideo.removeAttribute("src");
-          heroVideo.load();
+          hideHeroCarousel();
+          if (videoSrc && heroVideo && !isMosaicDetail) {
+            heroVideo.classList.add("is-active");
+            if (heroVideo.getAttribute("src") !== videoSrc) {
+              heroVideo.src = videoSrc;
+            }
+            heroVideo.play().catch(() => {});
+            heroBg.style.backgroundImage = "none";
+            heroBg.style.backgroundColor = "#000";
+            heroSection?.classList.add("hero--cinematic");
+            document.body.classList.add("body--cinematic-hero");
+          } else {
+            if (heroVideo) {
+              heroVideo.classList.remove("is-active");
+              heroVideo.pause();
+              heroVideo.removeAttribute("src");
+              heroVideo.load();
+            }
+            heroBg.style.backgroundColor = "";
+            heroBg.style.backgroundImage = `url('${building.heroImage}')`;
+            heroSection?.classList.remove("hero--cinematic");
+            document.body.classList.remove("body--cinematic-hero");
           }
-          heroBg.style.backgroundColor = "";
-          heroBg.style.backgroundImage = `url('${building.heroImage}')`;
-          heroSection?.classList.remove("hero--cinematic");
-          document.body.classList.remove("body--cinematic-hero");
         }
 
         if (building.name === "故宫御花园") {
@@ -2374,7 +2624,7 @@
           heroSection?.classList.remove("hero--yuhua");
         }
 
-        // 下滑拼贴区：仅太和殿 / 御花园（北京故宫视频下不再插入拼贴，只保留画册正文）
+        // 下滑拼贴区：仅太和殿 / 御花园（北京故宫首屏为轮播，不插入拼贴，只保留画册正文）
         const mosaicSection = document.getElementById("mosaicSection");
         const cards =
           isMosaicDetail && building.name !== "故宫太和殿"

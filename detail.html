@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -285,6 +286,54 @@
         z-index: 4;
         background: transparent;
         cursor: pointer;
+      }
+
+      .hero-svg-hotspot-layer {
+        position: absolute;
+        inset: -10% 0 -10% 0;
+        z-index: 20;
+        pointer-events: none;
+      }
+
+      .hero-svg-hotspot-layer .map-svg-overlay-anchor {
+        pointer-events: auto;
+      }
+
+      /* 极简详情：pointer-events 不继承，子级默认 auto 仍会挡在 SVG 上方，必须连带后代全部关闭 */
+      .body--minimal-detail #heroForeground,
+      .body--minimal-detail #heroForeground * {
+        pointer-events: none !important;
+      }
+
+      .body--minimal-detail .taihe-vertical-title,
+      .body--minimal-detail .taihe-vertical-title * {
+        pointer-events: none !important;
+      }
+
+      #detailPlateWrap .map-svg-overlay-anchor {
+        z-index: 8;
+      }
+
+      .hero-svg-hotspot-layer .hero-svg-hotspot-base {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        pointer-events: none;
+      }
+
+      .hero.hero--yuhua .hero-svg-hotspot-layer .hero-svg-hotspot-base {
+        inset: auto;
+        left: 50%;
+        top: 48%;
+        width: 89%;
+        max-width: none;
+        height: auto;
+        max-height: 95%;
+        transform: translate(-50%, -50%);
+        object-fit: contain;
       }
 
       /* 下滑拼贴区：与上方照片同色底，避免断层 */
@@ -1237,7 +1286,7 @@
         <span class="taihe-char">殿</span>
       </div>
 
-      <div class="relative z-10 h-full">
+      <div id="heroForeground" class="relative z-10 h-full">
         <div class="mx-auto max-w-6xl h-full px-6 flex items-center">
           <div id="heroCopy" class="hero-copy w-full">
             <div class="text-qianbai/70 text-xs tracking-[0.34em] mb-5" id="heroTagLine"></div>
@@ -1262,6 +1311,81 @@
         class="hero-scroll-cue absolute bottom-10 left-1/2 z-10 -translate-x-1/2 select-none text-qianbai/55 text-xs tracking-[0.36em]"
       >
         SCROLL
+      </div>
+
+      <!-- 置于 Hero 末尾、z-index 最高，保证路径热区在最上层接收指针 -->
+      <div id="heroSvgHotspotLayer" class="hero-svg-hotspot-layer" hidden>
+        <img id="heroSvgHotspotBase" class="hero-svg-hotspot-base" src="" alt="" decoding="async" />
+        <div id="heroSvgHotspotAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
+          <svg
+            id="heroSvgTaihe"
+            class="map-hotspot-svg"
+            viewBox="0 0 1800 1259"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            hidden
+          >
+            <g class="map-hotspot-g" transform="translate(178, 491)">
+              <path
+                class="map-hotspot-path"
+                data-name-zh="太和殿屋顶"
+                data-name-en="Hall of Supreme Harmony Roof"
+                data-category="屋顶 · 庑殿顶"
+                data-desc="重檐庑殿顶覆黄色琉璃瓦，正脊与垂脊走兽排列有序，是清代最高等级屋顶形制的典型呈现。"
+                d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
+              />
+            </g>
+            <g class="map-hotspot-g" transform="translate(1103, 677.5)">
+              <path
+                class="map-hotspot-path"
+                data-name-zh="太和殿屋檐角"
+                data-name-en="Roof Corner"
+                data-category="翼角 · 檐部"
+                data-desc="翼角起翘柔和舒展，瓦当、滴水与斗栱层叠出跳，共同承担排水、遮阳与视觉收头。"
+                d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
+              />
+            </g>
+            <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
+              <path
+                class="map-hotspot-path"
+                data-name-zh="太和殿屋檐底"
+                data-name-en="Eaves Soffit"
+                data-category="檐口 · 梁枋"
+                data-desc="檐下梁枋施以金龙和玺彩画，与斗栱、雀替相互衬托，体现大殿的礼制等级与营造细节。"
+                d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
+              />
+            </g>
+          </svg>
+          <svg
+            id="heroSvgYuhua"
+            class="map-hotspot-svg"
+            viewBox="0 0 1460 830"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            hidden
+          >
+            <g class="map-hotspot-g" transform="translate(541.5, 434.5)">
+              <path
+                class="map-hotspot-path"
+                data-name-zh="钦安殿"
+                data-name-en="Hall of Imperial Peace (Qin'an)"
+                data-category="内廷 · 祠庙"
+                data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间，与周围古柏、奇石形成肃静深远的庭院氛围。"
+                d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
+              />
+            </g>
+            <g class="map-hotspot-g" transform="translate(902, 271.5)">
+              <path
+                class="map-hotspot-path"
+                data-name-zh="堆秀亭"
+                data-name-en="Duixiu Pavilion"
+                data-category="园林 · 叠山"
+                data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的焦点，与山道、蹬道共同构成立体的游观体验。"
+                d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
+              />
+            </g>
+          </svg>
+        </div>
       </div>
     </section>
 
@@ -1319,6 +1443,36 @@
                 hidden
                 aria-label="钦安殿区域，悬停显示建筑高亮"
               ></div>
+              <div id="detailPlateSvgAnchor" class="map-svg-overlay-anchor" hidden aria-hidden="true">
+                <svg
+                  id="detailPlateYuhuaSvg"
+                  class="map-hotspot-svg"
+                  viewBox="0 0 1460 830"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g class="map-hotspot-g" transform="translate(541.5, 434.5)">
+                    <path
+                      class="map-hotspot-path"
+                      data-name-zh="钦安殿"
+                      data-name-en="Hall of Imperial Peace (Qin'an)"
+                      data-category="内廷 · 祠庙"
+                      data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间，与周围古柏、奇石形成肃静深远的庭院氛围。"
+                      d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
+                    />
+                  </g>
+                  <g class="map-hotspot-g" transform="translate(902, 271.5)">
+                    <path
+                      class="map-hotspot-path"
+                      data-name-zh="堆秀亭"
+                      data-name-en="Duixiu Pavilion"
+                      data-category="园林 · 叠山"
+                      data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的焦点，与山道、蹬道共同构成立体的游观体验。"
+                      d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
+                    />
+                  </g>
+                </svg>
+              </div>
             </div>
             <div
               id="detailPlateCaption"
@@ -1425,6 +1579,7 @@
     </section>
 
     <!-- GSAP + ScrollTrigger -->
+    <script src="./js/map-svg-hotspots.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
 
@@ -1474,11 +1629,7 @@
           desc: "御花园位于乾清宫后方，是明清宫廷休憩赏景之所。园内以亭、石、柏与曲径组织空间，在中轴秩序中形成精巧而层次丰富的园林节点。",
           pageBg: "#f7f4ed",
           heroImage: "./assets/yuhuayuan-plate-base.png",
-          heroHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
-          heroHotspot: { left: 40, top: 48, width: 22, height: 24 },
           detailImage: "./assets/yuhuayuan-plate-base.png",
-          detailHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
-          detailPlateHotspot: { left: 37, top: 48, width: 26, height: 32 },
           subImages: [
             "./assets/yuhuayuan-plate-base.png",
             "./assets/yuhuayuan-plate-highlight.png"
@@ -2374,6 +2525,48 @@
           heroSection?.classList.remove("hero--yuhua");
         }
 
+        const heroSvgHotspotLayer = document.getElementById("heroSvgHotspotLayer");
+        const heroSvgHotspotBase = document.getElementById("heroSvgHotspotBase");
+        const heroSvgHotspotAnchor = document.getElementById("heroSvgHotspotAnchor");
+        const heroSvgTaihe = document.getElementById("heroSvgTaihe");
+        const heroSvgYuhua = document.getElementById("heroSvgYuhua");
+        if (
+          isMosaicDetail &&
+          heroSvgHotspotLayer &&
+          heroSvgHotspotBase &&
+          heroSvgHotspotAnchor &&
+          heroSvgTaihe &&
+          heroSvgYuhua &&
+          typeof window.initMapSvgHotspots === "function"
+        ) {
+          heroSvgHotspotLayer.hidden = false;
+          heroBg.style.visibility = "hidden";
+          heroSvgHotspotBase.alt = building.name;
+          heroSvgHotspotBase.src = building.heroImage;
+          if (building.name === "故宫太和殿") {
+            heroSvgTaihe.hidden = false;
+            heroSvgYuhua.hidden = true;
+            window.initMapSvgHotspots({
+              root: heroSvgHotspotLayer,
+              img: heroSvgHotspotBase,
+              anchor: heroSvgHotspotAnchor,
+              svg: heroSvgTaihe,
+            });
+          } else {
+            heroSvgTaihe.hidden = true;
+            heroSvgYuhua.hidden = false;
+            window.initMapSvgHotspots({
+              root: heroSvgHotspotLayer,
+              img: heroSvgHotspotBase,
+              anchor: heroSvgHotspotAnchor,
+              svg: heroSvgYuhua,
+            });
+          }
+        } else {
+          if (heroSvgHotspotLayer) heroSvgHotspotLayer.hidden = true;
+          heroBg.style.visibility = "";
+        }
+
         // 下滑拼贴区：仅太和殿 / 御花园（北京故宫视频下不再插入拼贴，只保留画册正文）
         const mosaicSection = document.getElementById("mosaicSection");
         const cards =
@@ -2449,11 +2642,14 @@
           introEl.textContent = building.desc;
         }
 
-        // 更新详情主图（御花园：底层 + 悬停高亮层 + 热区）
+        // 更新详情主图（御花园：底层 + SVG 路径热区）
         const detailPlateBase = document.getElementById("detailPlateBase");
         const detailPlateHighlight = document.getElementById("detailPlateHighlight");
         const detailPlateHotspot = document.getElementById("detailPlateHotspot");
         const detailPlateCaption = document.getElementById("detailPlateCaption");
+        const detailPlateWrap = document.getElementById("detailPlateWrap");
+        const detailPlateSvgAnchor = document.getElementById("detailPlateSvgAnchor");
+        const detailPlateYuhuaSvg = document.getElementById("detailPlateYuhuaSvg");
 
         if (detailPlateBase) {
           detailPlateBase.src = building.detailImage;
@@ -2494,6 +2690,28 @@
               detailPlateCaption.textContent = "PLATE 01 · 屋面与出檐的层次";
             }
           }
+        }
+
+        if (
+          building.name === "故宫御花园" &&
+          detailPlateWrap &&
+          detailPlateSvgAnchor &&
+          detailPlateYuhuaSvg &&
+          detailPlateBase &&
+          typeof window.initMapSvgHotspots === "function"
+        ) {
+          detailPlateSvgAnchor.hidden = false;
+          if (detailPlateCaption) {
+            detailPlateCaption.textContent = "PLATE 01 · 悬停鸟瞰热区可览钦安殿与堆秀亭";
+          }
+          window.initMapSvgHotspots({
+            root: detailPlateWrap,
+            img: detailPlateBase,
+            anchor: detailPlateSvgAnchor,
+            svg: detailPlateYuhuaSvg,
+          });
+        } else if (detailPlateSvgAnchor) {
+          detailPlateSvgAnchor.hidden = true;
         }
 
         const paperFrame = document.getElementById("paperFrame");

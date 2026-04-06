@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -475,14 +476,70 @@
                   fetchpriority="high"
                 />
               <div class="map-china-layer">
-                <img
-                  id="mapChinaMap"
-                  class="pointer-events-none absolute inset-0 z-[1] h-full w-full select-none object-cover"
-                  src="./assets/地图.png"
-                  alt=""
-                  decoding="async"
-                  fetchpriority="high"
-                />
+                <div class="map-china-map-media absolute inset-0 z-[1]">
+                  <img
+                    id="mapChinaMap"
+                    class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
+                    src="./assets/地图.png"
+                    alt=""
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                  <div id="chinaMapSvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
+                    <svg
+                      id="chinaMapHotspotSvg"
+                      class="map-hotspot-svg"
+                      viewBox="0 0 3448 1900"
+                      preserveAspectRatio="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g class="map-hotspot-g" transform="translate(2155.5, 769)">
+                        <path
+                          class="map-hotspot-path"
+                          data-href="./gugong-explore.html"
+                          data-name-zh="北京"
+                          data-name-en="Beijing"
+                          data-category="都城 · 直辖市"
+                          data-desc="北京为六朝古都，中轴秩序与宫城坛庙共同构成都城营造的典范。由此可入卷探秘，沿中轴走进紫禁城的建筑序列。"
+                          d="M23.166 58.798L6.66602 65.798L0.666016 72.298L11.166 84.798L17.666 79.298H23.166H37.166L41.666 84.798H53.166L59.666 79.298L67.666 72.298H59.666V65.798L67.666 58.798H76.666H82.666L98.166 54.298H88.166L82.666 47.298V36.298L88.166 30.798H98.166V22.298H88.166H82.666L76.666 17.798L67.666 9.79803L59.666 0.798035L53.166 9.79803L59.666 17.798L53.166 22.298H41.666L37.166 17.798L26.666 26.798L29.166 41.798L37.166 47.298L23.166 58.798Z"
+                        />
+                      </g>
+                      <g class="map-hotspot-g" transform="translate(1942.5, 1518)">
+                        <path
+                          class="map-hotspot-path"
+                          data-href="./list.html?province=广东省"
+                          data-name-zh="广东省"
+                          data-name-en="Guangdong Province"
+                          data-category="省份 · 岭南"
+                          data-desc="广东地处岭南，气候湿热，孕育了镬耳山墙、蚝壳墙与通透的庭院组织；陈家祠等建筑以砖雕、灰塑与陶塑装饰著称。"
+                          d="M0.5 167.096V205.596L23.5 209.596L27.5 179.596L50.5 171.096L98.5 153.596L132.5 133.596L149.5 116.596L162 123.596L172 116.596V103.596L214 65.5959L245.5 99.0959L270 68.5959L257 31.0959L245.5 26.5959L225 14.5959V31.0959H214L201.5 26.5959L184 31.0959V21.0959H172L156.5 14.5959L132.5 0.595947L109 17.5959L81.5 26.5959L86.5 31.0959L81.5 39.0959H68.5L81.5 48.0959V58.0959L68.5 89.0959L40.5 123.596L0.5 167.096Z"
+                        />
+                      </g>
+                      <g class="map-hotspot-g" transform="translate(1962, 783)">
+                        <path
+                          class="map-hotspot-path"
+                          data-href="./list.html?province=山西省"
+                          data-name-zh="山西省"
+                          data-name-en="Shanxi Province"
+                          data-category="省份 · 晋地"
+                          data-desc="山西表里山河，地上木构古建筑存量极丰；平遥古城、晋祠与大院民居共同呈现了北方合院与礼制空间的多样面貌。"
+                          d="M151.52 36.2501L132.02 1.25012L123.52 27.7501L94.0204 36.2501L53.5204 52.7501L28.5204 94.7501L9.02039 133.75L20.0204 161.75L9.02039 199.25V255.25L0.520386 291.25L9.02039 315.25L53.5204 291.25L66.5204 267.75H109.52L132.02 237.25V217.25V186.75L141.52 161.75L123.52 122.75L132.02 94.7501L151.52 73.7501L132.02 45.7501L151.52 36.2501Z"
+                        />
+                      </g>
+                      <g class="map-hotspot-g" transform="translate(2174.5, 1060.5)">
+                        <path
+                          class="map-hotspot-path"
+                          data-href="./list.html?province=江苏省"
+                          data-name-zh="江苏省"
+                          data-name-en="Jiangsu Province"
+                          data-category="省份 · 江南"
+                          data-desc="江苏水网密布，园林与民居讲究曲径与借景；拙政园、周庄与宝带桥等体现了江南营造在尺度与细部上的精致追求。"
+                          d="M194.831 164.477H212.831V152.977L194.831 133.477L173.831 123.977V94.4772L194.831 86.4772L155.331 62.4772L124.831 20.4772L116.331 0.977173L88.3311 37.4772L68.8311 20.4772L47.8311 30.4772H31.3311V9.47717L0.831055 30.4772L31.3311 55.4772H47.8311L68.8311 72.4772L78.8311 86.4772L88.3311 94.4772L102.331 111.477L88.3311 123.977V164.477L102.331 187.977H116.331L124.831 201.977L138.831 187.977L155.331 201.977H173.831L194.831 164.477Z"
+                        />
+                      </g>
+                    </svg>
+                  </div>
+                </div>
                 <!-- 省份交互：左侧竖排按钮（JS 注入），悬停详情 / 点击跳转逻辑不变 -->
                 <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
               </div>
@@ -541,6 +598,7 @@
     <!-- GSAP + ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="./js/map-svg-hotspots.js"></script>
 
     <script>
       // 全局：确保字体渲染更细腻
@@ -1258,6 +1316,16 @@
           }
         });
       }
+
+      (function initChinaMapSvgHotspots() {
+        const root = document.querySelector(".map-china-map-media");
+        const img = document.getElementById("mapChinaMap");
+        const anchor = document.getElementById("chinaMapSvgAnchor");
+        const svg = document.getElementById("chinaMapHotspotSvg");
+        if (root && img && anchor && svg && typeof window.initMapSvgHotspots === "function") {
+          window.initMapSvgHotspots({ root, img, anchor, svg });
+        }
+      })();
     </script>
   </body>
 </html>

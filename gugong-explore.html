@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -127,6 +128,16 @@
         vertical-align: middle;
         filter: brightness(1.08) contrast(1.04) saturate(1.06);
         animation: slowDrift 12s ease-in-out infinite alternate;
+      }
+
+      .scene-journeyMotion {
+        position: relative;
+        width: 100%;
+        animation: slowDrift 12s ease-in-out infinite alternate;
+      }
+
+      .scene-journeyMotion .scene-img--stack {
+        animation: none;
       }
 
       .scene-overlay {
@@ -384,13 +395,37 @@
     <main class="w-full max-w-none pt-[5.25rem]">
       <!-- 第一景：通栏铺满；玉佩锚点用 left/bottom 微调 -->
       <section id="scene1" class="relative w-full">
-        <img
-          class="scene-img"
-          src="./assets/gugong-journey-1.png"
-          alt="古建山水长卷"
-          loading="eager"
-          decoding="async"
-        />
+        <div class="scene-journeyMotion">
+          <img
+            id="gugongJourney1Img"
+            class="scene-img scene-img--stack"
+            src="./assets/gugong-journey-1.png"
+            alt="古建山水长卷"
+            loading="eager"
+            decoding="async"
+          />
+          <div id="gugongJourney1SvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
+            <svg
+              id="gugongJourney1HotspotSvg"
+              class="map-hotspot-svg"
+              viewBox="0 0 2082 1535"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g class="map-hotspot-g" transform="translate(474.5, 1129)">
+                <path
+                  class="map-hotspot-path"
+                  data-href="./gugong-palace-map.html"
+                  data-name-zh="故宫"
+                  data-name-en="The Forbidden City"
+                  data-category="皇宫 · 世界遗产"
+                  data-desc="紫禁城沿北京中轴展开，前朝后寝、左祖右社，是明清皇家礼制建筑的集大成者。由此入宫，可俯瞰太和殿与御花园等核心区域。"
+                  d="M437.5 411.5C311.167 371.667 46.9 287.2 0.5 268V206.5L29 194L23 187L34 179.5V169.5H46.5L75.5 151.5L81.5 160L95 169.5L141.5 151.5L176.5 131L186.5 122V113.5L201 108.5L209.5 103.5L262 78.5L277.5 96L294 87L312.5 78.5L371.5 52L373.648 42.5H371.5V37.5L386.5 31L394 14.5L400 21H412.5H421L437 31H446.5L437 42.5H446.5H455L485.5 28L498 21L508.5 0.5H514.5V8.5L616.5 31L621 21L630 28L637.5 42.5L658 52L688 60L675.5 72.5V78.5H688H697H704V87L688 96V103.5L761 122H771L775.5 113.5L782.5 108.5L787.5 103.5L794 108.5L803 113.5H813.5L822 108.5V113.5L834 125L851.5 131L843.5 143.5H860V151.5L888.5 162V199.5L581 411.5H437.5Z"
+                />
+              </g>
+            </svg>
+          </div>
+        </div>
         <div class="scene-overlay" aria-hidden="true"></div>
         <!--
           自上而下：恭王府 → 万宁桥 → 宛平城 → 卢沟桥 → 四合院 → 故宫（仅故宫可点进内景）
@@ -462,6 +497,18 @@
       <div class="transition-text">启卷入宫</div>
       <div class="transition-subtext">沿中轴，入紫禁</div>
     </div>
+    <script src="./js/map-svg-hotspots.js"></script>
+    <script>
+      (function initGugongJourney1Hotspots() {
+        var root = document.querySelector("#scene1 .scene-journeyMotion");
+        var img = document.getElementById("gugongJourney1Img");
+        var anchor = document.getElementById("gugongJourney1SvgAnchor");
+        var svg = document.getElementById("gugongJourney1HotspotSvg");
+        if (root && img && anchor && svg && typeof window.initMapSvgHotspots === "function") {
+          window.initMapSvgHotspots({ root: root, img: img, anchor: anchor, svg: svg });
+        }
+      })();
+    </script>
     <script>
       (function () {
         var trigger = document.getElementById("jadeGugong");

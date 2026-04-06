@@ -10,6 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -114,6 +115,12 @@
       .map-pill--link:focus-visible {
         outline: 2px solid rgba(212, 175, 55, 0.85);
         outline-offset: 3px;
+      }
+
+      .gugong-palace-map-media {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
       }
 
       .detail-transition {
@@ -225,14 +232,48 @@
 
     <main class="w-full max-w-none pt-[5.25rem]">
       <section class="scene-stage relative">
-        <img
-          id="gugongMapImg"
-          class="scene-img"
-          src="./assets/gugong-journey-2.png"
-          alt="故宫建筑群鸟瞰"
-          loading="eager"
-          decoding="async"
-        />
+        <div class="gugong-palace-map-media">
+          <img
+            id="gugongMapImg"
+            class="scene-img"
+            src="./assets/gugong-journey-2.png"
+            alt="故宫建筑群鸟瞰"
+            loading="eager"
+            decoding="async"
+          />
+          <div id="gugongPalaceSvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
+            <svg
+              id="gugongPalaceHotspotSvg"
+              class="map-hotspot-svg"
+              viewBox="0 0 3142 1344"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g class="map-hotspot-g" transform="translate(1305, 593.5)">
+                <path
+                  class="map-hotspot-path"
+                  data-href="./detail.html?building=故宫太和殿"
+                  data-name-zh="太和殿区域"
+                  data-name-en="Hall of Supreme Harmony Precinct"
+                  data-category="礼制 · 前朝核心"
+                  data-desc="太和殿坐落于三层汉白玉须弥座台基之上，重檐庑殿顶，为紫禁城内等级最高的大殿，是明清举行登基、大婚等大典的场所。"
+                  d="M160.297 34.5L184.297 3L192.297 12H374.297V0.5H383.297L390.297 12L402.797 25.5L420.297 34.5L434.797 39.5H448.297H459.797L464.797 71.5H481.297V151.5L487.297 160V170.5H472.297V190H513.797L526.297 261.5V295H379.297V323H345.797V295H309.797V323H251.297V295H214.797V323H177.297V295H41.7974V261.5L48.2974 217.5L0.797363 239L7.29736 217.5L48.2974 190H92.7974V170.5H80.2974L70.2974 151.5L86.2974 106.5V66.5H104.797V34.5H133.797H160.297Z"
+                />
+              </g>
+              <g class="map-hotspot-g" transform="translate(1093.5, 94)">
+                <path
+                  class="map-hotspot-path"
+                  data-href="./detail.html?building=故宫御花园"
+                  data-name-zh="御花园区域"
+                  data-name-en="Imperial Garden"
+                  data-category="园林 · 内廷"
+                  data-desc="御花园位于紫禁城中轴线北端，古柏参天、亭台错落，钦安殿居中，与堆秀山、曲径共同构成皇家内廷的游赏与休憩空间。"
+                  d="M0.543945 310.606L52.0439 99.106L57.0439 94.106L68.0439 85.606V72.106H79.0439H397.044V47.606H409.044V21.106H426.044V12.106V1.10603L438.544 12.106H547.544L554.544 1.10603L567.044 21.106H581.544V47.606H592.544L601.044 72.106H897.044V55.106L908.044 47.606L921.544 55.106V85.606L935.044 99.106L990.044 350.106H970.544H642.544V323.106H631.544V297.106L614.544 290.106L592.544 281.606L567.044 269.106H426.044H409.044L389.544 281.606L362.544 290.106L355.544 323.106H337.044V350.106H41.0439L33.5439 339.106V323.106H10.5439L0.543945 310.606Z"
+                />
+              </g>
+            </svg>
+          </div>
+        </div>
         <!-- data-map-cx/cy：中心在原图比例；rw/rh：横排按钮宽、高占原图比例。仅太和殿、御花园可点。 -->
         <span class="map-pill map-pill--static" data-map-cx="0.118" data-map-cy="0.445" data-map-rw="0.032" data-map-rh="0.102">慈宁宫</span>
         <span class="map-pill map-pill--static" data-map-cx="0.345" data-map-cy="0.415" data-map-rw="0.032" data-map-rh="0.098">养心殿</span>
@@ -269,6 +310,18 @@
       <div class="detail-scroll" aria-hidden="true"></div>
       <div id="detailTransitionTitle" class="detail-title">入殿细览</div>
     </div>
+    <script src="./js/map-svg-hotspots.js"></script>
+    <script>
+      (function initGugongPalaceSvgHotspots() {
+        var root = document.querySelector(".gugong-palace-map-media");
+        var img = document.getElementById("gugongMapImg");
+        var anchor = document.getElementById("gugongPalaceSvgAnchor");
+        var svg = document.getElementById("gugongPalaceHotspotSvg");
+        if (root && img && anchor && svg && typeof window.initMapSvgHotspots === "function") {
+          window.initMapSvgHotspots({ root: root, img: img, anchor: anchor, svg: svg });
+        }
+      })();
+    </script>
     <script>
       (function () {
         function placeGugongHotspots() {

@@ -29,11 +29,13 @@
   stroke: transparent;
   stroke-width: 3;
   cursor: pointer;
-  pointer-events: fill;
+  /* fill 在部分环境下命中区过窄，改用 all 保证悬停高亮可靠 */
+  pointer-events: all;
   transition: stroke 0.15s ease, filter 0.15s ease;
 }
 
 .map-hotspot-g:hover .map-hotspot-path,
+.map-hotspot-path:hover,
 .map-hotspot-path:focus-visible {
   fill: rgba(0, 0, 0, 0.02);
   stroke: #ffe566;
@@ -45,6 +47,27 @@
 
 .map-hotspot-path:focus-visible {
   outline: none;
+}
+
+/*
+  太和殿鸟瞰（detail 页 body.page-taihe-hotspots）：热区 SVG 叠在底图之上（与首页地图同理）。
+  默认即显示淡金描边，便于对准屋顶 / 脊兽 / 斗栱；悬停时再加强发光。
+*/
+body.page-taihe-hotspots .map-hotspot-path {
+  fill: rgba(255, 210, 120, 0.07);
+  stroke: rgba(255, 200, 90, 0.5);
+  stroke-width: 2;
+}
+
+body.page-taihe-hotspots .map-hotspot-g:hover .map-hotspot-path,
+body.page-taihe-hotspots .map-hotspot-path:hover,
+body.page-taihe-hotspots .map-hotspot-path:focus-visible {
+  fill: rgba(255, 220, 140, 0.12);
+  stroke: #ffe566;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+    drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+    drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
 }
 
 .map-hotspot-info-card {
@@ -66,8 +89,18 @@
   transform-origin: center center;
 }
 
-.map-hotspot-info-card.is-visible {
+/* 默认深棕卡不再使用：仅详情页传入 --detailHero 时才显示悬浮说明 */
+.map-hotspot-info-card:not(.map-hotspot-info-card--detailHero) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.map-hotspot-info-card.map-hotspot-info-card--detailHero.is-visible {
+  display: block !important;
   visibility: visible;
+  opacity: 1;
   animation: mapHotspotPopIn 0.27s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -125,7 +158,7 @@
   .map-hotspot-path {
     transition: none;
   }
-  .map-hotspot-info-card.is-visible {
+  .map-hotspot-info-card.map-hotspot-info-card--detailHero.is-visible {
     animation: none;
     opacity: 1;
     transform: scale(1);

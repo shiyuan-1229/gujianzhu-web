@@ -351,6 +351,41 @@
         pointer-events: auto;
       }
 
+      /* 故宫轮播：左右下角石狮装饰（滚动时由脚本下滑淡出） */
+      .hero-lion-decor {
+        position: absolute;
+        inset: 0;
+        z-index: 12;
+        pointer-events: none;
+        overflow: visible;
+      }
+      .hero-lion-decor[hidden] {
+        display: none !important;
+      }
+      .hero-lion-decor .hero-lion {
+        position: absolute;
+        bottom: -0.75rem;
+        width: min(41vw, 360px);
+        max-height: min(58vh, 420px);
+        height: auto;
+        object-fit: contain;
+        object-position: bottom center;
+        opacity: 0.8;
+      }
+      .hero-lion-decor .hero-lion--left {
+        left: max(-0.25rem, env(safe-area-inset-left, 0px));
+      }
+      .hero-lion-decor .hero-lion--right {
+        right: max(-0.25rem, env(safe-area-inset-right, 0px));
+      }
+      @media (max-width: 640px) {
+        .hero-lion-decor .hero-lion {
+          bottom: -0.5rem;
+          width: min(53vw, 278px);
+          max-height: 46vh;
+        }
+      }
+
       header.header-over-video {
         background: transparent !important;
         border-bottom-color: transparent !important;
@@ -400,12 +435,19 @@
       .hero-svg-hotspot-layer {
         position: absolute;
         inset: -10% 0 -10% 0;
-        z-index: 20;
-        pointer-events: none;
+        /* 高于 heroForeground(z10) / 竖排标题(z15)，低于顶栏(z50) */
+        z-index: 40;
+        /* 父级不设 none，避免部分浏览器子级 SVG 无法命中；图片单独关命中 */
+        pointer-events: auto;
+      }
+
+      .hero-svg-hotspot-layer .map-svg-overlay-anchor,
+      .hero-svg-hotspot-layer .map-hotspot-svg {
+        pointer-events: auto;
       }
 
       .hero-svg-hotspot-layer .map-svg-overlay-anchor {
-        pointer-events: auto;
+        z-index: 2;
       }
 
       /* 极简详情：pointer-events 不继承，子级默认 auto 仍会挡在 SVG 上方，必须连带后代全部关闭 */
@@ -420,7 +462,12 @@
       }
 
       #detailPlateWrap .map-svg-overlay-anchor {
-        z-index: 8;
+        z-index: 12;
+        pointer-events: auto;
+      }
+
+      #detailPlateWrap .map-hotspot-svg {
+        pointer-events: auto;
       }
 
       .hero-svg-hotspot-layer .hero-svg-hotspot-base {
@@ -433,6 +480,22 @@
         pointer-events: none;
       }
 
+      /*
+        热区 path 按原图 1800×1259 绘制；object-fit:cover 会裁切画面导致与 SVG 错位。
+        太和殿页改为 contain，使整图与 viewBox 一一对应，屋顶/檐角/斗栱三处才能对准。
+      */
+      body.page-taihe-hotspots .hero-svg-hotspot-layer .hero-svg-hotspot-base {
+        object-fit: contain;
+        object-position: center center;
+        background-color: var(--mosaic-bg, #e8e2d3);
+      }
+
+      body.page-taihe-hotspots #detailPlateBase {
+        object-fit: contain !important;
+        object-position: center center;
+        background-color: rgba(232, 226, 211, 0.35);
+      }
+
       .hero.hero--yuhua .hero-svg-hotspot-layer .hero-svg-hotspot-base {
         inset: auto;
         left: 50%;
@@ -443,6 +506,41 @@
         max-height: 95%;
         transform: translate(-50%, -50%);
         object-fit: contain;
+      }
+
+      /* 太和殿 / 御花园鸟瞰：右侧固定信息卡（与首页地图区分） */
+      .map-hotspot-info-card.map-hotspot-info-card--detailHero {
+        max-width: min(22rem, calc(44vw - 1.5rem));
+        padding: 1rem 1.2rem 1.2rem;
+        background: linear-gradient(165deg, rgba(44, 24, 18, 0.96), rgba(24, 14, 12, 0.94));
+        border: 1px solid rgba(255, 212, 150, 0.38);
+        box-shadow:
+          0 0 0 1px rgba(255, 200, 120, 0.1),
+          0 20px 50px rgba(0, 0, 0, 0.45);
+      }
+      .map-hotspot-info-card--detailHero .map-hotspot-info-card__tag {
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        letter-spacing: 0.18em;
+      }
+      .map-hotspot-info-card--detailHero .map-hotspot-info-card__title {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "Source Han Serif SC", serif;
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #ffe8c4;
+      }
+      .map-hotspot-info-card--detailHero .map-hotspot-info-card__en {
+        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+      }
+      .map-hotspot-info-card--detailHero .map-hotspot-info-card__desc {
+        font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        letter-spacing: 0.06em;
+        text-align: justify;
+        font-feature-settings: "kern" 1;
       }
 
       /* 下滑拼贴区：与上方照片同色底，避免断层 */
@@ -897,6 +995,7 @@
 
       /* 太和殿 · 文档素材拼贴（左：历史位置 + 雕饰 B；右：雕饰 A + 沿革 + 价值） */
       .mosaic-grid--taihe-v2 {
+        display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.88fr);
         grid-template-rows: minmax(300px, auto) minmax(110px, auto) minmax(220px, auto);
         align-items: stretch;
@@ -924,6 +1023,27 @@
         grid-row: 3;
       }
 
+      /* 右边三个部分的高亮效果 */
+      .mosaic-grid--taihe-v2 .taihe-v2-feat-a,
+      .mosaic-grid--taihe-v2 .taihe-v2-time,
+      .mosaic-grid--taihe-v2 .taihe-v2-value {
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .mosaic-grid--taihe-v2 .taihe-v2-feat-a:hover,
+      .mosaic-grid--taihe-v2 .taihe-v2-time:hover,
+      .mosaic-grid--taihe-v2 .taihe-v2-value:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+        position: relative;
+      }
+      .mosaic-grid--taihe-v2 .taihe-v2-feat-a:hover .taihe-card__inner,
+      .mosaic-grid--taihe-v2 .taihe-v2-time:hover .taihe-card__inner,
+      .mosaic-grid--taihe-v2 .taihe-v2-value:hover .taihe-card__inner {
+        border: 2px solid rgba(212, 175, 55, 0.8);
+      }
+
       .taihe-card__inner {
         padding: 1.05rem 1.12rem 1.2rem;
         display: flex;
@@ -932,6 +1052,8 @@
         height: 100%;
         min-height: 0;
         box-sizing: border-box;
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease;
       }
       .taihe-card__title {
         font-family: var(--font-display);
@@ -1410,6 +1532,24 @@
           <div class="hero-carousel__dots" id="heroCarouselDots" role="tablist" aria-label="轮播页码"></div>
         </div>
       </div>
+      <div id="heroLionDecor" class="hero-lion-decor" hidden aria-hidden="true">
+        <img
+          class="hero-lion hero-lion--left"
+          src="./assets/gugong-lion-left.jpg"
+          alt=""
+          role="presentation"
+          decoding="async"
+          loading="eager"
+        />
+        <img
+          class="hero-lion hero-lion--right"
+          src="./assets/gugong-lion-right.jpg"
+          alt=""
+          role="presentation"
+          decoding="async"
+          loading="eager"
+        />
+      </div>
       <div class="hero-vignette" aria-hidden="true"></div>
 
       <!-- 左侧竖排古风标题 -->
@@ -1458,34 +1598,54 @@
             xmlns="http://www.w3.org/2000/svg"
             hidden
           >
-            <g class="map-hotspot-g" transform="translate(178, 491)">
-              <path
+            <!--
+              简易矩形热区（与 assets/taihedian-hero.jpg 同坐标系 1800×1259）。
+              自行微调：改每个 rect 的 x、y、width、height（单位与 viewBox 一致）。
+              ① 屋顶 ② 檐角脊兽一带 ③ 檐下斗栱一带 — 当前大致放在画面中上 / 右中 / 中下。
+            -->
+            <g class="map-hotspot-g">
+              <rect
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋顶"
-                data-name-en="Hall of Supreme Harmony Roof"
-                data-category="屋顶 · 庑殿顶"
-                data-desc="重檐庑殿顶覆黄色琉璃瓦，正脊与垂脊走兽排列有序，是清代最高等级屋顶形制的典型呈现。"
-                d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
+                x="380"
+                y="140"
+                width="1040"
+                height="300"
+                rx="12"
+                data-name-zh="重檐庑殿顶"
+                data-name-en="Double-eave hip roof (wudian)"
+                data-category="屋顶形制"
+                data-card-placement="right"
+                data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
               />
             </g>
-            <g class="map-hotspot-g" transform="translate(1103, 677.5)">
-              <path
+            <g class="map-hotspot-g">
+              <rect
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋檐角"
-                data-name-en="Roof Corner"
-                data-category="翼角 · 檐部"
-                data-desc="翼角起翘柔和舒展，瓦当、滴水与斗栱层叠出跳，共同承担排水、遮阳与视觉收头。"
-                d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
+                x="1180"
+                y="560"
+                width="240"
+                height="180"
+                rx="10"
+                data-name-zh="脊兽"
+                data-name-en="Ridge figures"
+                data-category="屋脊陈设"
+                data-card-placement="right"
+                data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
               />
             </g>
-            <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
-              <path
+            <g class="map-hotspot-g">
+              <rect
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋檐底"
-                data-name-en="Eaves Soffit"
-                data-category="檐口 · 梁枋"
-                data-desc="檐下梁枋施以金龙和玺彩画，与斗栱、雀替相互衬托，体现大殿的礼制等级与营造细节。"
-                d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
+                x="720"
+                y="780"
+                width="400"
+                height="160"
+                rx="10"
+                data-name-zh="溜金斗拱"
+                data-name-en="Gilded dougong (bracket sets)"
+                data-category="檐下木构"
+                data-card-placement="right"
+                data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
               />
             </g>
           </svg>
@@ -1577,6 +1737,62 @@
                 aria-label="钦安殿区域，悬停显示建筑高亮"
               ></div>
               <div id="detailPlateSvgAnchor" class="map-svg-overlay-anchor" hidden aria-hidden="true">
+                <!-- 与 Hero 同坐标：太和殿鸟瞰主图上的三处标注（画册区滚动后可交互） -->
+                <svg
+                  id="detailPlateTaiheSvg"
+                  class="map-hotspot-svg"
+                  viewBox="0 0 1800 1259"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  hidden
+                >
+                  <!-- 与上方 #heroSvgTaihe 保持同一组 rect，改一处请同步另一处 -->
+                  <g class="map-hotspot-g">
+                    <rect
+                      class="map-hotspot-path"
+                      x="380"
+                      y="140"
+                      width="1040"
+                      height="300"
+                      rx="12"
+                      data-name-zh="重檐庑殿顶"
+                      data-name-en="Double-eave hip roof (wudian)"
+                      data-category="屋顶形制"
+                      data-card-placement="right"
+                      data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                    />
+                  </g>
+                  <g class="map-hotspot-g">
+                    <rect
+                      class="map-hotspot-path"
+                      x="1180"
+                      y="560"
+                      width="240"
+                      height="180"
+                      rx="10"
+                      data-name-zh="脊兽"
+                      data-name-en="Ridge figures"
+                      data-category="屋脊陈设"
+                      data-card-placement="right"
+                      data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                    />
+                  </g>
+                  <g class="map-hotspot-g">
+                    <rect
+                      class="map-hotspot-path"
+                      x="720"
+                      y="780"
+                      width="400"
+                      height="160"
+                      rx="10"
+                      data-name-zh="溜金斗拱"
+                      data-name-en="Gilded dougong (bracket sets)"
+                      data-category="檐下木构"
+                      data-card-placement="right"
+                      data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                    />
+                  </g>
+                </svg>
                 <svg
                   id="detailPlateYuhuaSvg"
                   class="map-hotspot-svg"
@@ -2310,7 +2526,7 @@
         in5.append(t5, d5, fv, d5b, d5c);
         c5.appendChild(in5);
 
-        grid.append(c1, c2, c3, c4, c5);
+        grid.append(c1, c2, c4, c3, c5);
       };
 
       const renderMosaicCards = (cards, variant) => {
@@ -2699,10 +2915,55 @@
         carousel.setAttribute("aria-hidden", "false");
       };
 
+      let gugongLionTween = null;
+
+      function setupGugongHeroLions(active) {
+        const decor = document.getElementById("heroLionDecor");
+        if (!decor || typeof gsap === "undefined") return;
+
+        if (gugongLionTween) {
+          gugongLionTween.scrollTrigger?.kill();
+          gugongLionTween.kill();
+          gugongLionTween = null;
+        }
+
+        const lions = decor.querySelectorAll(".hero-lion");
+        gsap.killTweensOf(lions);
+
+        if (!active) {
+          decor.setAttribute("hidden", "");
+          decor.setAttribute("aria-hidden", "true");
+          gsap.set(lions, { clearProps: "all" });
+          return;
+        }
+
+        decor.removeAttribute("hidden");
+        decor.setAttribute("aria-hidden", "false");
+        gsap.set(lions, { y: 0, opacity: 0.8 });
+
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) return;
+
+        gugongLionTween = gsap.to(lions, {
+          y: 320,
+          opacity: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+            id: "gugongHeroLions",
+          },
+        });
+      }
+
       // 更新页面内容
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
         const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB["故宫太和殿"];
+
+        document.body.classList.toggle("page-taihe-hotspots", building.name === "故宫太和殿");
 
         // 更新标题
         document.title = `${building.name} · 华夏建筑选集`;
@@ -2729,6 +2990,7 @@
           carouselItems.length > 0 &&
           !isMosaicDetail &&
           building.name === "北京故宫";
+        setupGugongHeroLions(!!useCarousel);
         const videoSrc = building.heroVideo;
 
         if (useCarousel) {
@@ -2801,6 +3063,7 @@
               img: heroSvgHotspotBase,
               anchor: heroSvgHotspotAnchor,
               svg: heroSvgTaihe,
+              cardClass: "map-hotspot-info-card--detailHero",
             });
           } else {
             heroSvgTaihe.hidden = true;
@@ -2810,6 +3073,7 @@
               img: heroSvgHotspotBase,
               anchor: heroSvgHotspotAnchor,
               svg: heroSvgYuhua,
+              cardClass: "map-hotspot-info-card--detailHero",
             });
           }
         } else {
@@ -2899,6 +3163,7 @@
         const detailPlateCaption = document.getElementById("detailPlateCaption");
         const detailPlateWrap = document.getElementById("detailPlateWrap");
         const detailPlateSvgAnchor = document.getElementById("detailPlateSvgAnchor");
+        const detailPlateTaiheSvg = document.getElementById("detailPlateTaiheSvg");
         const detailPlateYuhuaSvg = document.getElementById("detailPlateYuhuaSvg");
 
         if (detailPlateBase) {
@@ -2943,14 +3208,39 @@
         }
 
         if (
-          building.name === "故宫御花园" &&
+          building.name === "故宫太和殿" &&
           detailPlateWrap &&
           detailPlateSvgAnchor &&
+          detailPlateTaiheSvg &&
           detailPlateYuhuaSvg &&
           detailPlateBase &&
           typeof window.initMapSvgHotspots === "function"
         ) {
           detailPlateSvgAnchor.hidden = false;
+          detailPlateTaiheSvg.hidden = false;
+          detailPlateYuhuaSvg.hidden = true;
+          if (detailPlateCaption) {
+            detailPlateCaption.textContent = "PLATE 01 · 悬停主图可览重檐庑殿顶、脊兽与溜金斗拱";
+          }
+          window.initMapSvgHotspots({
+            root: detailPlateWrap,
+            img: detailPlateBase,
+            anchor: detailPlateSvgAnchor,
+            svg: detailPlateTaiheSvg,
+            cardClass: "map-hotspot-info-card--detailHero",
+          });
+        } else if (
+          building.name === "故宫御花园" &&
+          detailPlateWrap &&
+          detailPlateSvgAnchor &&
+          detailPlateTaiheSvg &&
+          detailPlateYuhuaSvg &&
+          detailPlateBase &&
+          typeof window.initMapSvgHotspots === "function"
+        ) {
+          detailPlateSvgAnchor.hidden = false;
+          detailPlateTaiheSvg.hidden = true;
+          detailPlateYuhuaSvg.hidden = false;
           if (detailPlateCaption) {
             detailPlateCaption.textContent = "PLATE 01 · 悬停鸟瞰热区可览钦安殿与堆秀亭";
           }
@@ -2959,9 +3249,12 @@
             img: detailPlateBase,
             anchor: detailPlateSvgAnchor,
             svg: detailPlateYuhuaSvg,
+            cardClass: "map-hotspot-info-card--detailHero",
           });
         } else if (detailPlateSvgAnchor) {
           detailPlateSvgAnchor.hidden = true;
+          if (detailPlateTaiheSvg) detailPlateTaiheSvg.hidden = true;
+          if (detailPlateYuhuaSvg) detailPlateYuhuaSvg.hidden = true;
         }
 
         const paperFrame = document.getElementById("paperFrame");
@@ -3002,6 +3295,11 @@
       updatePageContent();
       requestAnimationFrame(function () {
         document.documentElement.classList.add("detail-hydrated");
+        // 首屏曾 visibility:hidden，热区锚点需在可见后重算，否则命中区为 0 / 错位
+        window.dispatchEvent(new Event("resize"));
+        requestAnimationFrame(function () {
+          window.dispatchEvent(new Event("resize"));
+        });
       });
 
       // Hero 视差：背景/视频慢，文字快

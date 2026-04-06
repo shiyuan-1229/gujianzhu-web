@@ -1,16 +1,21 @@
 /**
  * 地图底图 + 透明 SVG 热区：对齐显示区域、悬停信息卡、可选点击跳转。
- * opts: { root, img, anchor, svg } — svg 为已含 viewBox 的 <svg>，置于 anchor 内。
+ * opts: { root, img, anchor, svg, cardClass? } — svg 为已含 viewBox 的 <svg>，置于 anchor 内。
  */
 (function () {
   const CARD_ID = "mapHotspotGlobalCard";
 
-  function ensureCard() {
+  function ensureCard(extraClass) {
+    var base = "map-hotspot-info-card";
+    var fullClass = extraClass ? base + " " + String(extraClass).trim() : base;
     var el = document.getElementById(CARD_ID);
-    if (el) return el;
+    if (el) {
+      el.className = fullClass;
+      return el;
+    }
     el = document.createElement("div");
     el.id = CARD_ID;
-    el.className = "map-hotspot-info-card";
+    el.className = fullClass;
     el.setAttribute("role", "tooltip");
     el.innerHTML =
       '<span class="map-hotspot-info-card__tag" data-card="tag"></span>' +
@@ -53,18 +58,31 @@
     return { x: x, y: y };
   }
 
-  function syncAnchor(img, anchor, root) {
-    if (!img || !anchor || !root || !img.naturalWidth) return;
+  /** 与热区 SVG viewBox 一致的内禀宽高；natural 为 0（未解码或 404）时用 viewBox 兜底，否则锚点永远 0×0、无法悬停。 */
+  function getIntrinsicImageSize(img, svg) {
+    var w = img.naturalWidth;
+    var h = img.naturalHeight;
+    if (w > 0 && h > 0) return { w: w, h: h };
+    var vb = svg && svg.viewBox && svg.viewBox.baseVal;
+    if (vb && vb.width > 0 && vb.height > 0) return { w: vb.width, h: vb.height };
+    return null;
+  }
+
+  function syncAnchor(img, anchor, root, svg) {
+    if (!img || !anchor || !root) return;
+    var intr = getIntrinsicImageSize(img, svg);
+    if (!intr) return;
     var ir = img.getBoundingClientRect();
+    if (ir.width < 1 || ir.height < 1) return;
     var rr = root.getBoundingClientRect();
     var sl = root.scrollLeft || 0;
     var st = root.scrollTop || 0;
     var fit = getComputedStyle(img).objectFit || "fill";
+    var iw = intr.w;
+    var ih = intr.h;
     if (fit === "cover") {
       var cw = img.clientWidth;
       var ch = img.clientHeight;
-      var iw = img.naturalWidth;
-      var ih = img.naturalHeight;
       var pos = parseObjectPosition(getComputedStyle(img).objectPosition);
       var scale = Math.max(cw / iw, ch / ih);
       var dw = iw * scale;
@@ -80,12 +98,10 @@
     if (fit === "contain") {
       var cw2 = img.clientWidth;
       var ch2 = img.clientHeight;
-      var iw2 = img.naturalWidth;
-      var ih2 = img.naturalHeight;
       var pos2 = parseObjectPosition(getComputedStyle(img).objectPosition);
-      var scale2 = Math.min(cw2 / iw2, ch2 / ih2);
-      var dw2 = iw2 * scale2;
-      var dh2 = ih2 * scale2;
+      var scale2 = Math.min(cw2 / iw, ch2 / ih);
+      var dw2 = iw * scale2;
+      var dh2 = ih * scale2;
       var offX2 = pos2.x * (cw2 - dw2);
       var offY2 = pos2.y * (ch2 - dh2);
       anchor.style.left = ir.left - rr.left + sl + offX2 + "px";
@@ -104,12 +120,20 @@
     return Math.max(min, Math.min(max, n));
   }
 
-  function positionCard(card, clientX, clientY) {
+  function positionCard(card, clientX, clientY, placement) {
     var pad = 16;
     var w = card.offsetWidth || 280;
     var h = card.offsetHeight || 120;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
+    if (placement === "right") {
+      var rx = vw - w - pad;
+      var ry = clientY - h / 2;
+      ry = clamp(ry, pad, vh - h - pad);
+      card.style.left = rx + "px";
+      card.style.top = ry + "px";
+      return;
+    }
     var x = clientX + 14;
     var y = clientY + 14;
     if (x + w + pad > vw) x = clientX - w - 14;
@@ -126,6 +150,7 @@
       en: path.getAttribute("data-name-en") || "",
       category: path.getAttribute("data-category") || "",
       desc: path.getAttribute("data-desc") || "",
+      placement: path.getAttribute("data-card-placement") || "",
     };
   }
 
@@ -135,12 +160,14 @@
     tagEl.textContent = d.category || "";
     tagEl.style.display = d.category ? "" : "none";
     card.querySelector("[data-card=title]").textContent = d.zh;
-    card.querySelector("[data-card=en]").textContent = d.en;
+    var enEl = card.querySelector("[data-card=en]");
+    enEl.textContent = d.en;
+    enEl.style.display = d.en ? "" : "none";
     card.querySelector("[data-card=desc]").textContent = d.desc;
     card.classList.remove("is-visible");
     void card.offsetWidth;
     card.classList.add("is-visible");
-    positionCard(card, clientX, clientY);
+    positionCard(card, clientX, clientY, d.placement);
   }
 
   window.initMapSvgHotspots = function initMapSvgHotspots(opts) {
@@ -152,11 +179,11 @@
 
     if (svg.parentNode !== anchor) anchor.appendChild(svg);
 
-    var card = ensureCard();
+    var card = ensureCard(opts.cardClass || "");
     var hideTimer = null;
 
     function layout() {
-      syncAnchor(img, anchor, root);
+      syncAnchor(img, anchor, root, svg);
     }
 
     function layoutSoon() {
@@ -166,6 +193,13 @@
         requestAnimationFrame(layout);
       });
     }
+
+    if (svg.dataset.mhsInit === "1") {
+      ensureCard(opts.cardClass || "");
+      layoutSoon();
+      return { layout: layout, destroy: function () {} };
+    }
+    svg.dataset.mhsInit = "1";
 
     function hideCard() {
       card.classList.remove("is-visible");
@@ -180,7 +214,7 @@
         showCard(card, path, e.clientX, e.clientY);
       });
       path.addEventListener("mousemove", function (e) {
-        positionCard(card, e.clientX, e.clientY);
+        positionCard(card, e.clientX, e.clientY, readData(path).placement);
       });
       path.addEventListener("mouseleave", function () {
         hideTimer = setTimeout(hideCard, 100);
@@ -196,8 +230,17 @@
 
     svg.querySelectorAll(".map-hotspot-path").forEach(bindPath);
 
-    if (img.complete && img.naturalWidth) layoutSoon();
-    else img.addEventListener("load", layoutSoon, { once: true });
+    if (img.complete && (img.naturalWidth || getIntrinsicImageSize(img, svg))) layoutSoon();
+    else {
+      img.addEventListener("load", layoutSoon, { once: true });
+      img.addEventListener(
+        "error",
+        function () {
+          layoutSoon();
+        },
+        { once: true }
+      );
+    }
 
     window.addEventListener("resize", layout);
     if (window.ResizeObserver) {

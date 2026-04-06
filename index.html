@@ -138,12 +138,11 @@
         pointer-events: none;
       }
 
-      #mapHotspots .map-province-rail,
       #mapHotspots .map-sichuan-hit-face {
         pointer-events: auto;
       }
 
-      /* 四川省：你描的 Vector 轮廓，固定叠在热区正中央（不做地图坐标对齐） */
+      /* 四川省热区：沿用现有定位，但视觉高亮与其他省份一致 */
       .map-sichuan-overlay {
         position: absolute;
         left: 50.2%;
@@ -166,24 +165,24 @@
         height: 100%;
         overflow: visible;
         pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.22s ease;
-      }
-
-      .map-sichuan-overlay.sichuan-lit .map-sichuan-hit-svg {
-        opacity: 1;
       }
 
       .map-sichuan-overlay .map-sichuan-hit-svg path {
         pointer-events: none;
-        fill: rgba(255, 200, 90, 0.38);
-        stroke: rgba(212, 175, 55, 0.85);
-        stroke-width: 0.9;
+        fill: rgba(0, 0, 0, 0.02);
+        stroke: transparent;
+        stroke-width: 3;
         vector-effect: non-scaling-stroke;
+        transition: stroke 0.15s ease, filter 0.15s ease;
       }
 
       .map-sichuan-overlay.sichuan-lit .map-sichuan-hit-svg path {
-        fill: rgba(255, 220, 130, 0.52);
+        fill: rgba(0, 0, 0, 0.02);
+        stroke: #ffe566;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
       }
 
       .map-sichuan-hit-face {
@@ -205,6 +204,16 @@
       .map-sichuan-hit-face:focus-visible {
         outline: 2px solid rgba(212, 175, 55, 0.95);
         outline-offset: 2px;
+      }
+
+      /* 允许 JS 持续高亮其它省份热区（非仅 hover） */
+      #chinaMapHotspotSvg .map-hotspot-path.is-active {
+        fill: rgba(0, 0, 0, 0.02);
+        stroke: #ffe566;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
       }
 
       /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
@@ -276,62 +285,6 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform: translateZ(0);
-      }
-
-      /* 五省入口：竖排在地图左侧，不叠右侧详情卡 */
-      .map-province-rail {
-        position: absolute;
-        left: clamp(8px, 2.2vw, 22px);
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 7;
-        display: flex;
-        flex-direction: column;
-        gap: 0.42rem;
-        pointer-events: auto;
-      }
-
-      .map-province-rail__btn {
-        margin: 0;
-        padding: 0.38rem 0.62rem;
-        min-width: 3.1rem;
-        transform-origin: center center;
-        border-radius: 999px;
-        border: 1px solid rgba(212, 175, 55, 0.42);
-        background: rgba(36, 10, 10, 0.58);
-        color: rgba(255, 248, 230, 0.94);
-        font-size: 0.78rem;
-        font-weight: 500;
-        letter-spacing: 0.14em;
-        line-height: 1.2;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition:
-          background 0.2s ease,
-          border-color 0.2s ease,
-          box-shadow 0.2s ease,
-          color 0.2s ease;
-      }
-
-      .map-province-rail__btn:hover,
-      .map-province-rail__btn:focus-visible {
-        background: rgba(80, 22, 22, 0.75);
-        border-color: rgba(255, 210, 120, 0.55);
-        box-shadow: 0 0 18px rgba(255, 210, 120, 0.22);
-        outline: none;
-      }
-
-      .map-province-rail__btn:focus-visible {
-        outline: 2px solid rgba(212, 175, 55, 0.85);
-        outline-offset: 2px;
-      }
-
-      .map-province-rail__btn.is-active {
-        background: rgba(100, 32, 32, 0.82);
-        border-color: rgba(255, 220, 140, 0.65);
-        box-shadow: 0 0 22px rgba(255, 210, 120, 0.35);
       }
 
       /* 左下角：浑天仪/罗盘线稿水印 */
@@ -540,7 +493,7 @@
                     </svg>
                   </div>
                 </div>
-                <!-- 省份交互：左侧竖排按钮（JS 注入），悬停详情 / 点击跳转逻辑不变 -->
+                <!-- 省份交互热区容器（含四川补充热区），悬停预览 / 点击跳转 -->
                 <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
               </div>
               <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center text-white/75 opacity-0">
@@ -1108,14 +1061,6 @@
         });
       };
 
-      /** 地图左侧四省按钮；四川省仅在地图上以 Vector 1.svg 轮廓高亮交互 */
-      const MAP_PROVINCE_RAIL = [
-        { province: "北京市", label: "北京" },
-        { province: "山西省", label: "山西" },
-        { province: "江苏省", label: "江苏" },
-        { province: "广东省", label: "广东" },
-      ];
-
       /** 四川省轮廓（Vector 1.svg / Figma 描边），热区 CSS 固定在地图中央 */
       const SICHUAN_PATH_VIEWBOX = { w: 452, h: 376 };
       const SICHUAN_SVG_PATH_D =
@@ -1123,43 +1068,38 @@
 
       const validHoverProvinces = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
       const validClickNav = ["山西省", "江苏省", "四川省", "广东省"];
+      const hotspotNameToProvince = {
+        北京: "北京市",
+        山西省: "山西省",
+        江苏省: "江苏省",
+        广东省: "广东省",
+      };
 
       const mapHotspotsEl = document.getElementById("mapHotspots");
       const mapWrapEl = document.getElementById("mapWrap");
+      const mapHotspotSvgEl = document.getElementById("chinaMapHotspotSvg");
 
       function clearHotspotActive() {
-        const root = document.getElementById("mapHotspots");
-        if (!root) return;
-        root.querySelectorAll(".map-province-rail__btn.is-active").forEach((el) => {
+        mapHotspotsEl?.querySelectorAll(".map-sichuan-hit-face.is-active").forEach((el) => {
           el.classList.remove("is-active");
         });
-        root.querySelectorAll(".map-sichuan-hit-face.is-active").forEach((el) => {
+        mapHotspotsEl?.querySelector(".map-sichuan-overlay")?.classList.remove("sichuan-lit");
+        mapHotspotSvgEl?.querySelectorAll(".map-hotspot-path.is-active").forEach((el) => {
           el.classList.remove("is-active");
         });
-        root.querySelector(".map-sichuan-overlay")?.classList.remove("sichuan-lit");
       }
 
       function setHotspotActive(province) {
         clearHotspotActive();
-        const root = document.getElementById("mapHotspots");
-        if (!root || !province) return;
-        const btn = root.querySelector(`.map-province-rail__btn[data-province="${province}"]`);
-        if (btn) btn.classList.add("is-active");
+        if (!province) return;
+        mapHotspotSvgEl
+          ?.querySelector(`.map-hotspot-path[data-province="${province}"]`)
+          ?.classList.add("is-active");
         if (province === "四川省") {
-          root.querySelector(".map-sichuan-overlay")?.classList.add("sichuan-lit");
-          root.querySelector(".map-sichuan-hit-face")?.classList.add("is-active");
+          mapHotspotsEl?.querySelector(".map-sichuan-overlay")?.classList.add("sichuan-lit");
+          mapHotspotsEl?.querySelector(".map-sichuan-hit-face")?.classList.add("is-active");
         }
       }
-
-      const pulseProvinceBtn = (btn) => {
-        if (!btn || typeof gsap === "undefined") return;
-        gsap.killTweensOf(btn);
-        gsap.fromTo(
-          btn,
-          { scale: 0.92 },
-          { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.52)" }
-        );
-      };
 
       if (mapHotspotsEl) {
         const svgNS = "http://www.w3.org/2000/svg";
@@ -1184,39 +1124,28 @@
         sichuanWrap.appendChild(sichuanHitBtn);
         mapHotspotsEl.appendChild(sichuanWrap);
 
-        const rail = document.createElement("div");
-        rail.id = "mapProvinceRail";
-        rail.className = "map-province-rail";
-        rail.setAttribute("role", "toolbar");
-        rail.setAttribute("aria-label", "选择省份");
-
-        const attachPreviewHandlers = (el, p) => {
+        const attachPreviewHandlers = (el, province) => {
           const openPreview = () => {
-            if (!validHoverProvinces.includes(p)) return;
-            setHotspotActive(p);
-            showDetail(p);
+            if (!validHoverProvinces.includes(province)) return;
+            setHotspotActive(province);
+            showDetail(province);
           };
           el.addEventListener("mouseenter", openPreview);
+          el.addEventListener("touchstart", openPreview, { passive: true });
           if (el.tagName === "BUTTON") {
             el.addEventListener("focus", openPreview);
           }
-          el.addEventListener("touchstart", openPreview, { passive: true });
         };
 
         attachPreviewHandlers(sichuanHitBtn, "四川省");
 
-        MAP_PROVINCE_RAIL.forEach(({ province, label }) => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "map-province-rail__btn";
-          b.dataset.province = province;
-          b.textContent = label;
-          b.setAttribute("aria-label", `${province}，悬停查看代表建筑，点击进入`);
-          rail.appendChild(b);
-          attachPreviewHandlers(b, province);
+        mapHotspotSvgEl?.querySelectorAll(".map-hotspot-path").forEach((pathEl) => {
+          const nameZh = pathEl.getAttribute("data-name-zh") || "";
+          const province = hotspotNameToProvince[nameZh];
+          if (!province) return;
+          pathEl.setAttribute("data-province", province);
+          attachPreviewHandlers(pathEl, province);
         });
-
-        mapHotspotsEl.appendChild(rail);
 
         mapHotspotsEl.addEventListener("mouseout", (e) => {
           const to = e.relatedTarget;
@@ -1249,20 +1178,25 @@
         }
 
         mapHotspotsEl.addEventListener("click", (e) => {
-          const railBtn = e.target.closest(".map-province-rail__btn");
           const sichuanBtn = e.target.closest(".map-sichuan-hit-face");
-          const trigger = railBtn || sichuanBtn;
-          if (!trigger) return;
-          const p = trigger.dataset.province;
-          if (!p) return;
-          pulseProvinceBtn(trigger);
-          if (p === "北京市") {
-            window.location.href = "./gugong-explore.html";
-            return;
+          if (!sichuanBtn) return;
+          const province = sichuanBtn.dataset.province;
+          if (!province) return;
+          if (validClickNav.includes(province)) {
+            window.location.href = "list.html?province=" + encodeURIComponent(province);
           }
-          if (validClickNav.includes(p)) {
-            window.location.href = "list.html?province=" + encodeURIComponent(p);
-          }
+        });
+
+        mapHotspotSvgEl?.addEventListener("mouseout", (e) => {
+          const to = e.relatedTarget;
+          if (to && mapHotspotSvgEl.contains(to)) return;
+          if (to && mapHotspotsEl.contains(to)) return;
+          if (to && detailEl && detailEl.contains(to)) return;
+          if (hideTimer) window.clearTimeout(hideTimer);
+          hideTimer = window.setTimeout(() => {
+            clearHotspotActive();
+            hideDetail();
+          }, 140);
         });
       }
 

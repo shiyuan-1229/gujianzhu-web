@@ -7,7 +7,7 @@
 
   var CARD_INNER_HTML =
     '<div class="map-hotspot-info-card__inner">' +
-    '<div class="map-hotspot-info-card__brand" aria-hidden="true">太和殿</div>' +
+    '<div class="map-hotspot-info-card__brand" data-card="brand" aria-hidden="true"></div>' +
     '<div class="map-hotspot-info-card__main">' +
     '<span class="map-hotspot-info-card__tag" data-card="tag"></span>' +
     '<h3 class="map-hotspot-info-card__title" data-card="title"></h3>' +
@@ -175,6 +175,7 @@
       category: path.getAttribute("data-category") || "",
       desc: path.getAttribute("data-desc") || "",
       placement: path.getAttribute("data-card-placement") || "",
+      brand: path.getAttribute("data-card-brand") || "",
     };
   }
 
@@ -188,6 +189,15 @@
     enEl.textContent = d.en;
     enEl.style.display = d.en ? "" : "none";
     card.querySelector("[data-card=desc]").textContent = d.desc;
+    var brandEl = card.querySelector("[data-card=brand]");
+    if (brandEl) {
+      var fallbackBrand = card.classList.contains("map-hotspot-info-card--yuhua")
+        ? "御花园"
+        : card.classList.contains("map-hotspot-info-card--taihe")
+        ? "太和殿"
+        : "";
+      brandEl.textContent = d.brand || fallbackBrand;
+    }
     card.classList.remove("is-visible");
     void card.offsetWidth;
     card.classList.add("is-visible");
@@ -230,19 +240,40 @@
     }
 
     function bindPath(path) {
-      path.addEventListener("mouseenter", function (e) {
+      function onEnter(e) {
         if (hideTimer) {
           clearTimeout(hideTimer);
           hideTimer = null;
         }
-        showCard(card, path, e.clientX, e.clientY);
-      });
-      path.addEventListener("mousemove", function (e) {
-        positionCard(card, e.clientX, e.clientY, readData(path).placement);
-      });
-      path.addEventListener("mouseleave", function () {
+        showCard(card, path, e.clientX || 24, e.clientY || 84);
+      }
+
+      function onMove(e) {
+        positionCard(card, e.clientX || 24, e.clientY || 84, readData(path).placement);
+      }
+
+      function onLeave() {
         hideTimer = setTimeout(hideCard, 100);
-      });
+      }
+
+      path.addEventListener("mouseenter", onEnter);
+      path.addEventListener("mousemove", onMove);
+      path.addEventListener("mouseleave", onLeave);
+
+      // 兼容部分设备/浏览器仅触发 PointerEvent 的情况
+      path.addEventListener("pointerenter", onEnter);
+      path.addEventListener("pointermove", onMove);
+      path.addEventListener("pointerleave", onLeave);
+
+      // 触屏兜底：轻触先显示说明卡
+      path.addEventListener("touchstart", function () {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+        showCard(card, path, 24, 84);
+      }, { passive: true });
+
       path.addEventListener("click", function (e) {
         var href = path.getAttribute("data-href");
         if (href) {

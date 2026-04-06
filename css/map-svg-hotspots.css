@@ -85,27 +85,45 @@
   animation: mapHotspotPopIn 0.27s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 太和殿横卡：具体外观在 detail.html body.page-taihe-hotspots 内覆盖（半透明+毛玻璃） */
+/* 太和殿：横向长条卡（占满上方留白），左侧竖排「太和殿」 */
 .map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe {
-  max-width: min(520px, calc(100vw - 40px));
-  width: min(520px, calc(100vw - 40px));
+  max-width: min(1200px, calc(100vw - 24px));
+  width: min(1200px, calc(100vw - 24px));
   min-height: 0;
   padding: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .map-hotspot-info-card--taihe .map-hotspot-info-card__inner {
-  display: block;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
   min-height: 0;
 }
 
 .map-hotspot-info-card--taihe .map-hotspot-info-card__brand {
-  display: none !important;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+  font-size: clamp(1.75rem, 4.2vw, 2.75rem);
+  letter-spacing: 0.35em;
+  line-height: 1.2;
+  color: #ffe8c8;
+  padding: 1rem 0.65rem 1rem 0.85rem;
+  background: rgba(0, 0, 0, 0.12);
+  border-right: 1px solid rgba(255, 200, 120, 0.28);
 }
 
 .map-hotspot-info-card--taihe .map-hotspot-info-card__main {
-  padding: 12px 16px 14px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px 14px 14px;
 }
 
 .map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe) .map-hotspot-info-card__inner {

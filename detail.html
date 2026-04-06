@@ -1596,56 +1596,39 @@
             viewBox="0 0 1800 1259"
             preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
-            hidden
           >
-            <!--
-              简易矩形热区（与 assets/taihedian-hero.jpg 同坐标系 1800×1259）。
-              自行微调：改每个 rect 的 x、y、width、height（单位与 viewBox 一致）。
-              ① 屋顶 ② 檐角脊兽一带 ③ 檐下斗栱一带 — 当前大致放在画面中上 / 右中 / 中下。
-            -->
-            <g class="map-hotspot-g">
-              <rect
+            <!-- path 与 translate 与 taihedian-hero.jpg（1800×1259）对齐 -->
+            <g class="map-hotspot-g" transform="translate(178, 491)">
+              <path
                 class="map-hotspot-path"
-                x="380"
-                y="140"
-                width="1040"
-                height="300"
-                rx="12"
-                data-name-zh="重檐庑殿顶"
+                data-name-zh="太和殿屋顶"
                 data-name-en="Double-eave hip roof (wudian)"
                 data-category="屋顶形制"
-                data-card-placement="right"
+                data-card-placement="top"
                 data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
               />
             </g>
-            <g class="map-hotspot-g">
-              <rect
+            <g class="map-hotspot-g" transform="translate(1103, 677.5)">
+              <path
                 class="map-hotspot-path"
-                x="1180"
-                y="560"
-                width="240"
-                height="180"
-                rx="10"
-                data-name-zh="脊兽"
+                data-name-zh="太和殿屋檐角"
                 data-name-en="Ridge figures"
                 data-category="屋脊陈设"
-                data-card-placement="right"
+                data-card-placement="top"
                 data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
               />
             </g>
-            <g class="map-hotspot-g">
-              <rect
+            <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
+              <path
                 class="map-hotspot-path"
-                x="720"
-                y="780"
-                width="400"
-                height="160"
-                rx="10"
-                data-name-zh="溜金斗拱"
+                data-name-zh="太和殿屋檐底"
                 data-name-en="Gilded dougong (bracket sets)"
                 data-category="檐下木构"
-                data-card-placement="right"
+                data-card-placement="top"
                 data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
               />
             </g>
           </svg>
@@ -1737,59 +1720,45 @@
                 aria-label="钦安殿区域，悬停显示建筑高亮"
               ></div>
               <div id="detailPlateSvgAnchor" class="map-svg-overlay-anchor" hidden aria-hidden="true">
-                <!-- 与 Hero 同坐标：太和殿鸟瞰主图上的三处标注（画册区滚动后可交互） -->
+                <!-- 与 #heroSvgTaihe 同一组 path/transform，改一处请同步另一处 -->
                 <svg
                   id="detailPlateTaiheSvg"
                   class="map-hotspot-svg"
                   viewBox="0 0 1800 1259"
                   preserveAspectRatio="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  hidden
                 >
-                  <!-- 与上方 #heroSvgTaihe 保持同一组 rect，改一处请同步另一处 -->
-                  <g class="map-hotspot-g">
-                    <rect
+                  <g class="map-hotspot-g" transform="translate(178, 491)">
+                    <path
                       class="map-hotspot-path"
-                      x="380"
-                      y="140"
-                      width="1040"
-                      height="300"
-                      rx="12"
-                      data-name-zh="重檐庑殿顶"
+                      data-name-zh="太和殿屋顶"
                       data-name-en="Double-eave hip roof (wudian)"
                       data-category="屋顶形制"
-                      data-card-placement="right"
+                      data-card-placement="top"
                       data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                      d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
                     />
                   </g>
-                  <g class="map-hotspot-g">
-                    <rect
+                  <g class="map-hotspot-g" transform="translate(1103, 677.5)">
+                    <path
                       class="map-hotspot-path"
-                      x="1180"
-                      y="560"
-                      width="240"
-                      height="180"
-                      rx="10"
-                      data-name-zh="脊兽"
+                      data-name-zh="太和殿屋檐角"
                       data-name-en="Ridge figures"
                       data-category="屋脊陈设"
-                      data-card-placement="right"
+                      data-card-placement="top"
                       data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                      d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
                     />
                   </g>
-                  <g class="map-hotspot-g">
-                    <rect
+                  <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
+                    <path
                       class="map-hotspot-path"
-                      x="720"
-                      y="780"
-                      width="400"
-                      height="160"
-                      rx="10"
-                      data-name-zh="溜金斗拱"
+                      data-name-zh="太和殿屋檐底"
                       data-name-en="Gilded dougong (bracket sets)"
                       data-category="檐下木构"
-                      data-card-placement="right"
+                      data-card-placement="top"
                       data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                      d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
                     />
                   </g>
                 </svg>
@@ -3063,7 +3032,7 @@
               img: heroSvgHotspotBase,
               anchor: heroSvgHotspotAnchor,
               svg: heroSvgTaihe,
-              cardClass: "map-hotspot-info-card--detailHero",
+              cardClass: "map-hotspot-info-card--detailHero map-hotspot-info-card--taihe",
             });
           } else {
             heroSvgTaihe.hidden = true;
@@ -3227,7 +3196,7 @@
             img: detailPlateBase,
             anchor: detailPlateSvgAnchor,
             svg: detailPlateTaiheSvg,
-            cardClass: "map-hotspot-info-card--detailHero",
+            cardClass: "map-hotspot-info-card--detailHero map-hotspot-info-card--taihe",
           });
         } else if (
           building.name === "故宫御花园" &&

@@ -5,23 +5,33 @@
 (function () {
   const CARD_ID = "mapHotspotGlobalCard";
 
+  var CARD_INNER_HTML =
+    '<div class="map-hotspot-info-card__inner">' +
+    '<div class="map-hotspot-info-card__brand" aria-hidden="true">太和殿</div>' +
+    '<div class="map-hotspot-info-card__main">' +
+    '<span class="map-hotspot-info-card__tag" data-card="tag"></span>' +
+    '<h3 class="map-hotspot-info-card__title" data-card="title"></h3>' +
+    '<p class="map-hotspot-info-card__en" data-card="en"></p>' +
+    '<p class="map-hotspot-info-card__desc" data-card="desc"></p>' +
+    "</div>" +
+    "</div>";
+
   function ensureCard(extraClass) {
     var base = "map-hotspot-info-card";
     var fullClass = extraClass ? base + " " + String(extraClass).trim() : base;
     var el = document.getElementById(CARD_ID);
     if (el) {
       el.className = fullClass;
+      if (!el.querySelector(".map-hotspot-info-card__inner")) {
+        el.innerHTML = CARD_INNER_HTML;
+      }
       return el;
     }
     el = document.createElement("div");
     el.id = CARD_ID;
     el.className = fullClass;
     el.setAttribute("role", "tooltip");
-    el.innerHTML =
-      '<span class="map-hotspot-info-card__tag" data-card="tag"></span>' +
-      '<h3 class="map-hotspot-info-card__title" data-card="title"></h3>' +
-      '<p class="map-hotspot-info-card__en" data-card="en"></p>' +
-      '<p class="map-hotspot-info-card__desc" data-card="desc"></p>';
+    el.innerHTML = CARD_INNER_HTML;
     document.body.appendChild(el);
     return el;
   }
@@ -122,10 +132,24 @@
 
   function positionCard(card, clientX, clientY, placement) {
     var pad = 16;
-    var w = card.offsetWidth || 280;
-    var h = card.offsetHeight || 120;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
+    /* 太和殿顶栏横条才保留固定宽度；其它情况清掉，避免从御花园等页带过来 */
+    if (placement !== "top" || !card.classList.contains("map-hotspot-info-card--taihe")) {
+      card.style.width = "";
+    }
+    var w = card.offsetWidth || 280;
+    var h = card.offsetHeight || 120;
+    /* 画面上方留白（如天空），固定左上角，避开顶栏 */
+    if (placement === "top") {
+      var topBelowNav = 72;
+      card.style.left = pad + "px";
+      card.style.top = Math.max(pad, topBelowNav) + "px";
+      if (card.classList.contains("map-hotspot-info-card--taihe")) {
+        card.style.width = "min(1200px, calc(100vw - " + pad * 2 + "px))";
+      }
+      return;
+    }
     if (placement === "right") {
       var rx = vw - w - pad;
       var ry = clientY - h / 2;
@@ -242,10 +266,20 @@
       );
     }
 
+    /* 父层刚去掉 [hidden] 的同一帧内，getBoundingClientRect 仍可能为 0，锚点会一直是 0×0；延迟与监听 img 尺寸可消除 */
+    function scheduleLayoutRetries() {
+      [0, 32, 120, 400].forEach(function (ms) {
+        window.setTimeout(layoutSoon, ms);
+      });
+    }
+    scheduleLayoutRetries();
+    window.addEventListener("load", layoutSoon, { once: true });
+
     window.addEventListener("resize", layout);
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(layout);
       ro.observe(root);
+      ro.observe(img);
       if (img.parentElement) ro.observe(img.parentElement);
     }
 

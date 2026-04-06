@@ -49,26 +49,7 @@
   outline: none;
 }
 
-/*
-  太和殿鸟瞰（detail 页 body.page-taihe-hotspots）：热区 SVG 叠在底图之上（与首页地图同理）。
-  默认即显示淡金描边，便于对准屋顶 / 脊兽 / 斗栱；悬停时再加强发光。
-*/
-body.page-taihe-hotspots .map-hotspot-path {
-  fill: rgba(255, 210, 120, 0.07);
-  stroke: rgba(255, 200, 90, 0.5);
-  stroke-width: 2;
-}
-
-body.page-taihe-hotspots .map-hotspot-g:hover .map-hotspot-path,
-body.page-taihe-hotspots .map-hotspot-path:hover,
-body.page-taihe-hotspots .map-hotspot-path:focus-visible {
-  fill: rgba(255, 220, 140, 0.12);
-  stroke: #ffe566;
-  stroke-width: 3;
-  filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
-    drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
-    drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
-}
+/* 太和殿鸟瞰热区：不单独覆盖，与首页地图 #chinaMapHotspotSvg 使用同一套 .map-hotspot-path / :hover 烫金描边 + 光晕 */
 
 .map-hotspot-info-card {
   position: fixed;
@@ -102,6 +83,55 @@ body.page-taihe-hotspots .map-hotspot-path:focus-visible {
   visibility: visible;
   opacity: 1;
   animation: mapHotspotPopIn 0.27s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 太和殿：横向长条卡（占满上方留白），左侧竖排「太和殿」 */
+.map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe {
+  max-width: min(1200px, calc(100vw - 24px));
+  width: min(1200px, calc(100vw - 24px));
+  min-height: 0;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__inner {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  min-height: 0;
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__brand {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+  font-size: clamp(1.75rem, 4.2vw, 2.75rem);
+  letter-spacing: 0.35em;
+  line-height: 1.2;
+  color: #ffe8c8;
+  padding: 1rem 0.65rem 1rem 0.85rem;
+  background: rgba(0, 0, 0, 0.12);
+  border-right: 1px solid rgba(255, 200, 120, 0.28);
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__main {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px 14px 14px;
+}
+
+.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe) .map-hotspot-info-card__inner {
+  display: contents;
+}
+
+.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe) .map-hotspot-info-card__brand {
+  display: none;
 }
 
 .map-hotspot-info-card__tag {

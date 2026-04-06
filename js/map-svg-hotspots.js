@@ -7,7 +7,7 @@
 
   var CARD_INNER_HTML =
     '<div class="map-hotspot-info-card__inner">' +
-    '<div class="map-hotspot-info-card__brand" aria-hidden="true">太和殿</div>' +
+    '<div class="map-hotspot-info-card__brand" data-card="brand" aria-hidden="true"></div>' +
     '<div class="map-hotspot-info-card__main">' +
     '<span class="map-hotspot-info-card__tag" data-card="tag"></span>' +
     '<h3 class="map-hotspot-info-card__title" data-card="title"></h3>' +
@@ -134,45 +134,19 @@
     var pad = 16;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    card.style.width = "";
-    card.style.left = "";
-    card.style.right = "";
-    card.style.transform = "";
+    /* 太和殿顶栏横条才保留固定宽度；其它情况清掉，避免从御花园等页带过来 */
+    if (placement !== "top" || !card.classList.contains("map-hotspot-info-card--taihe")) {
+      card.style.width = "";
+    }
     var w = card.offsetWidth || 280;
     var h = card.offsetHeight || 120;
-    /* 太和殿：画面上方居中（顶栏下），不占满屏宽 */
-    if (placement === "top-center") {
-      /* 太和殿：略抬高；水平略偏左（中心约在 43%） */
-      var topBelowNav =
-        card.classList.contains("map-hotspot-info-card--taihe") ? 52 : 72;
-      card.style.left = card.classList.contains("map-hotspot-info-card--taihe")
-        ? "38%"
-        : "50%";
-      card.style.top = Math.max(pad, topBelowNav) + "px";
-      card.style.transform = "translateX(-50%)";
-      if (card.classList.contains("map-hotspot-info-card--taihe")) {
-        card.style.width = "min(520px, calc(100vw - " + pad * 2 + "px))";
-      }
-      return;
-    }
-    /* 右上角（备用） */
-    if (placement === "top-right") {
-      var topBelowNavR = 72;
-      card.style.left = "auto";
-      card.style.right = pad + "px";
-      card.style.top = Math.max(pad, topBelowNavR) + "px";
-      if (card.classList.contains("map-hotspot-info-card--taihe")) {
-        card.style.width = "min(520px, calc(100vw - " + pad * 2 + "px))";
-      }
-      return;
-    }
-    /* 兼容旧 top */
+    /* 画面上方留白（如天空），固定左上角，避开顶栏 */
     if (placement === "top") {
-      var topBelowNav2 = 72;
+      var topBelowNav = 72;
       card.style.left = pad + "px";
-      card.style.top = Math.max(pad, topBelowNav2) + "px";
+      card.style.top = Math.max(pad, topBelowNav) + "px";
       if (card.classList.contains("map-hotspot-info-card--taihe")) {
-        card.style.width = "min(520px, calc(100vw - " + pad * 2 + "px))";
+        card.style.width = "min(1200px, calc(100vw - " + pad * 2 + "px))";
       }
       return;
     }
@@ -201,6 +175,7 @@
       category: path.getAttribute("data-category") || "",
       desc: path.getAttribute("data-desc") || "",
       placement: path.getAttribute("data-card-placement") || "",
+      brand: path.getAttribute("data-card-brand") || "",
     };
   }
 
@@ -214,6 +189,15 @@
     enEl.textContent = d.en;
     enEl.style.display = d.en ? "" : "none";
     card.querySelector("[data-card=desc]").textContent = d.desc;
+    var brandEl = card.querySelector("[data-card=brand]");
+    if (brandEl) {
+      var fallbackBrand = card.classList.contains("map-hotspot-info-card--yuhua")
+        ? "御花园"
+        : card.classList.contains("map-hotspot-info-card--taihe")
+        ? "太和殿"
+        : "";
+      brandEl.textContent = d.brand || fallbackBrand;
+    }
     card.classList.remove("is-visible");
     void card.offsetWidth;
     card.classList.add("is-visible");
@@ -244,9 +228,6 @@
       });
     }
 
-    if (opts.forceReinit) {
-      delete svg.dataset.mhsInit;
-    }
     if (svg.dataset.mhsInit === "1") {
       ensureCard(opts.cardClass || "");
       layoutSoon();
@@ -259,19 +240,40 @@
     }
 
     function bindPath(path) {
-      path.addEventListener("mouseenter", function (e) {
+      function onEnter(e) {
         if (hideTimer) {
           clearTimeout(hideTimer);
           hideTimer = null;
         }
-        showCard(card, path, e.clientX, e.clientY);
-      });
-      path.addEventListener("mousemove", function (e) {
-        positionCard(card, e.clientX, e.clientY, readData(path).placement);
-      });
-      path.addEventListener("mouseleave", function () {
+        showCard(card, path, e.clientX || 24, e.clientY || 84);
+      }
+
+      function onMove(e) {
+        positionCard(card, e.clientX || 24, e.clientY || 84, readData(path).placement);
+      }
+
+      function onLeave() {
         hideTimer = setTimeout(hideCard, 100);
-      });
+      }
+
+      path.addEventListener("mouseenter", onEnter);
+      path.addEventListener("mousemove", onMove);
+      path.addEventListener("mouseleave", onLeave);
+
+      // 兼容部分设备/浏览器仅触发 PointerEvent 的情况
+      path.addEventListener("pointerenter", onEnter);
+      path.addEventListener("pointermove", onMove);
+      path.addEventListener("pointerleave", onLeave);
+
+      // 触屏兜底：轻触先显示说明卡
+      path.addEventListener("touchstart", function () {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+        showCard(card, path, 24, 84);
+      }, { passive: true });
+
       path.addEventListener("click", function (e) {
         var href = path.getAttribute("data-href");
         if (href) {
@@ -297,7 +299,7 @@
 
     /* 父层刚去掉 [hidden] 的同一帧内，getBoundingClientRect 仍可能为 0，锚点会一直是 0×0；延迟与监听 img 尺寸可消除 */
     function scheduleLayoutRetries() {
-      [0, 32, 120, 400, 800].forEach(function (ms) {
+      [0, 32, 120, 400].forEach(function (ms) {
         window.setTimeout(layoutSoon, ms);
       });
     }
@@ -313,35 +315,5 @@
     }
 
     return { layout: layout, destroy: function () {} };
-  };
-
-  /**
-   * 御花园等：在 map-svg-overlay-anchor 内用可见 DIV 线框做热区（百分比相对锚点），与 initMapSvgHotspots 同锚点叠放。
-   * 须在 initMapSvgHotspots 之后调用，以便锚点已参与 layout。opts: { frameRoot, cardClass? }
-   */
-  window.bindMapHotspotFrameDivs = function bindMapHotspotFrameDivs(opts) {
-    var root = opts.frameRoot;
-    if (!root || root.dataset.mhsFrameBound === "1") return;
-    root.dataset.mhsFrameBound = "1";
-    var card = ensureCard(opts.cardClass || "");
-    var hideTimer = null;
-    function hideCard() {
-      card.classList.remove("is-visible");
-    }
-    root.querySelectorAll(".yuhua-hotspot-frame").forEach(function (el) {
-      el.addEventListener("mouseenter", function (e) {
-        if (hideTimer) {
-          clearTimeout(hideTimer);
-          hideTimer = null;
-        }
-        showCard(card, el, e.clientX, e.clientY);
-      });
-      el.addEventListener("mousemove", function (e) {
-        positionCard(card, e.clientX, e.clientY, readData(el).placement);
-      });
-      el.addEventListener("mouseleave", function () {
-        hideTimer = setTimeout(hideCard, 100);
-      });
-    });
   };
 })();

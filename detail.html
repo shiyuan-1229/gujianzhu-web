@@ -112,45 +112,46 @@
         background: #000;
       }
 
-      /* 太和殿左侧竖排古风标题 */
+      /* 太和殿：左侧竖排「太·和·殿」，高于鸟瞰热区层(z40)、低于顶栏(z50)；黑色字、略靠右 */
       .taihe-vertical-title {
         position: absolute;
-        left: 2rem;
-        top: 35%;
+        left: clamp(3.85rem, 12.5vw, 6.75rem);
+        top: 22%;
         transform: translateY(-50%);
-        z-index: 15;
-        display: flex;
+        z-index: 48;
+        display: none;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.45rem;
         pointer-events: none;
       }
-      .taihe-vertical-title .taihe-char {
-        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        font-weight: 400;
-        color: rgba(245, 230, 200, 0.95);
-        text-shadow:
-          0 2px 8px rgba(0, 0, 0, 0.6),
-          0 4px 20px rgba(0, 0, 0, 0.4);
-        writing-mode: vertical-rl;
-        letter-spacing: 0.15em;
-        line-height: 1.2;
+      body.page-taihe-hotspots .taihe-vertical-title {
+        display: flex !important;
       }
-      /* 仅在太和殿页面显示 */
-      .hero:not(.hero--cinematic):not(.hero--yuhua) .taihe-vertical-title {
-        display: flex;
-      }
+      body.page-yuhua-hotspots .taihe-vertical-title,
       .hero--cinematic .taihe-vertical-title,
       .hero--yuhua .taihe-vertical-title {
         display: none !important;
       }
+      .taihe-vertical-title .taihe-char {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(2.85rem, 5.6vw, 4.5rem);
+        font-weight: 500;
+        color: #141414;
+        text-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 1px 2px rgba(255, 255, 255, 0.25);
+        writing-mode: vertical-rl;
+        letter-spacing: 0.15em;
+        line-height: 1.2;
+      }
       @media (max-width: 768px) {
         .taihe-vertical-title {
-          left: 1rem;
+          left: clamp(2.5rem, 9vw, 4rem);
+          top: 26%;
         }
         .taihe-vertical-title .taihe-char {
-          font-size: 2rem;
+          font-size: 2.35rem;
         }
       }
 
@@ -182,6 +183,46 @@
         height: auto;
         object-fit: contain;
         object-position: center center;
+      }
+
+      /* 御花园首屏：两行导语靠右（背景图已含标题；叠在留白上，不拦截热区） */
+      body.page-yuhua-hotspots .hero-yuhua-page-header {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 4.25rem;
+        z-index: 45;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+        padding: 0.35rem clamp(1.5rem, 6vw, 5rem) 0 clamp(1rem, 4vw, 3.5rem);
+        pointer-events: none;
+      }
+      body.page-yuhua-hotspots .hero-yuhua-page-header__intro {
+        max-width: min(38rem, calc(100vw - 2.5rem));
+        margin: 0;
+        text-align: left;
+      }
+      body.page-yuhua-hotspots .hero-yuhua-page-header__line {
+        margin: 0 0 0.45rem;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(0.95rem, 2.1vw, 1.15rem);
+        line-height: 1.65;
+        letter-spacing: 0.04em;
+        color: rgba(28, 22, 18, 0.92);
+        text-align: left;
+        word-break: keep-all;
+      }
+      body.page-yuhua-hotspots .hero-yuhua-page-header__nb {
+        white-space: nowrap;
+      }
+      body.page-yuhua-hotspots .hero-yuhua-page-header__line:last-child {
+        margin-bottom: 0;
+      }
+      @media (max-width: 720px) {
+        body.page-yuhua-hotspots .hero-yuhua-page-header {
+          top: 4rem;
+        }
       }
 
       /* 视差作用在外壳上，内部视频用 translate 居中 + min 尺寸铺满，避免与 GSAP 抢 transform */
@@ -526,8 +567,10 @@
         object-fit: contain;
       }
 
-      /* 太和殿 / 御花园鸟瞰：右侧固定信息卡（与首页地图区分） */
-      .map-hotspot-info-card.map-hotspot-info-card--detailHero {
+      /* 太和殿 / 御花园鸟瞰：顶栏横条大卡由 map-svg-hotspots.css + JS 定宽；此处仅窄卡默认 */
+      .map-hotspot-info-card.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe):not(
+          .map-hotspot-info-card--yuhua
+        ) {
         max-width: min(22rem, calc(44vw - 1.5rem));
         padding: 1rem 1.2rem 1.2rem;
         background: linear-gradient(165deg, rgba(44, 24, 18, 0.96), rgba(24, 14, 12, 0.94));
@@ -535,6 +578,16 @@
         box-shadow:
           0 0 0 1px rgba(255, 200, 120, 0.1),
           0 20px 50px rgba(0, 0, 0, 0.45);
+      }
+      body.page-taihe-hotspots .map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe,
+      body.page-yuhua-hotspots .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua {
+        background: linear-gradient(165deg, rgba(44, 24, 18, 0.94), rgba(24, 14, 12, 0.92));
+        border: 1px solid rgba(255, 212, 150, 0.38);
+        box-shadow:
+          0 0 0 1px rgba(255, 200, 120, 0.1),
+          0 20px 50px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
       }
       .map-hotspot-info-card--detailHero .map-hotspot-info-card__tag {
         font-family: "Noto Sans SC", system-ui, sans-serif;
@@ -1007,6 +1060,341 @@
         }
         .yuhua-season-inline-row .taihe-card__desc {
           text-align: left;
+          width: 100%;
+        }
+      }
+
+      /* 御花园拼贴 v4：纵向四张大卡（仅故宫御花园页使用） */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 {
+        display: flex;
+        flex-direction: column;
+        gap: 1.35rem;
+        max-width: min(96vw, 1100px);
+        margin: 0 auto;
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel {
+        border-radius: 18px;
+        background: linear-gradient(165deg, #fffdf8 0%, #fff8ec 48%, #fff2dc 100%);
+        border: 1px solid rgba(200, 175, 110, 0.26);
+        box-shadow: 0 8px 22px rgba(140, 110, 50, 0.09);
+        overflow: hidden;
+      }
+      /* 四季亭台：第二张稿陶土色底 */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel--season {
+        border-radius: 24px;
+        background: linear-gradient(168deg, #d4b09a 0%, #cc9e83 44%, #be8a70 100%);
+        border: 1px solid rgba(95, 48, 32, 0.22);
+        box-shadow: 0 10px 30px rgba(85, 45, 30, 0.2);
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel .taihe-card__inner {
+        padding: 1rem 1.15rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .taihe-card__title {
+        font-size: clamp(1.2rem, 2.6vw, 1.45rem);
+        font-weight: 800;
+        color: #3d2812;
+        margin: 0;
+        letter-spacing: 0.06em;
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .taihe-card__desc {
+        font-size: 0.96rem;
+        line-height: 1.82;
+        color: rgba(42, 28, 14, 0.92);
+        margin: 0;
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .taihe-section-label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: #5c3a18;
+        margin: 0.15rem 0 0.25rem;
+      }
+      /* ① 四季亭台：左双图 + 右文（对齐设计稿：标题+英文、方位层级、中间两行强调、末段密排） */
+      body.page-yuhua-hotspots .yuhua-v4-panel--season .taihe-card__inner {
+        padding: 1.25rem 1.35rem 1.35rem;
+        gap: 0.85rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-card-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.85rem;
+        margin: 0 0 0.1rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-card-head .taihe-card__title {
+        font-size: clamp(1.28rem, 2.8vw, 1.58rem);
+        letter-spacing: 0.08em;
+        line-height: 1.2;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-card-head__en {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: rgba(61, 40, 18, 0.52);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-panel--season .taihe-card__title {
+        color: #4a2c1d;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-panel--season .yuhua-v4-season-card-head__en {
+        color: rgba(74, 44, 29, 0.58);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-row {
+        display: grid;
+        grid-template-columns: minmax(0, 0.4fr) minmax(0, 1fr);
+        gap: 1.1rem 2.05rem;
+        align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 0.55rem 0.65rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs figure {
+        margin: 0;
+        flex: 1 1 42%;
+        min-width: 0;
+        text-align: center;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs figure:first-child img {
+        aspect-ratio: 3 / 4;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs figure:nth-child(2) img {
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        object-position: center;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(74, 44, 29, 0.28);
+        display: block;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-figs figcaption {
+        margin-top: 0.32rem;
+        font-size: 0.72rem;
+        line-height: 1.35;
+        color: rgba(74, 44, 29, 0.72);
+        letter-spacing: 0.02em;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        min-width: 0;
+        padding-left: 0.55rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-copy > .yuhua-section-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        color: #4a2c1d;
+        margin: 0 0 0.42rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-lead {
+        font-size: 0.9rem;
+        line-height: 1.82;
+        letter-spacing: 0.02em;
+        color: rgba(74, 44, 29, 0.95);
+        margin: 0 0 0.38rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-en {
+        font-size: 0.62rem;
+        line-height: 1.45;
+        font-weight: 400;
+        font-style: italic;
+        letter-spacing: 0.03em;
+        color: rgba(74, 44, 29, 0.58);
+        margin: 0 0 0.55rem;
+        max-width: 36em;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-pair-lines {
+        margin: 0.15rem 0 0.55rem;
+        padding: 0.35rem 0 0.35rem 0.65rem;
+        border-left: 2px solid rgba(255, 255, 255, 0.38);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-pair-lines p {
+        margin: 0 0 0.72rem;
+        font-size: 1.02rem;
+        line-height: 1.58;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: #4a2c1d;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-pair-lines p:last-child {
+        margin-bottom: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-season-foot {
+        font-size: 0.875rem;
+        line-height: 1.92;
+        letter-spacing: 0.03em;
+        text-align: justify;
+        text-justify: inter-ideograph;
+        color: rgba(74, 44, 29, 0.92);
+        margin: 0;
+      }
+      /* ② 藻井：左文+双图 | 中文 | 右圆图 */
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) minmax(0, 0.85fr);
+        gap: 0.85rem 1rem;
+        align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem;
+        margin-top: 0.4rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-pair figure {
+        margin: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-pair img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(125, 82, 36, 0.18);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-pair figcaption {
+        font-size: 0.72rem;
+        margin-top: 0.2rem;
+        color: rgba(42, 28, 14, 0.85);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-circle {
+        margin: 0;
+        justify-self: center;
+        width: min(100%, 240px);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid rgba(212, 175, 55, 0.35);
+        box-shadow: 0 6px 18px rgba(60, 40, 18, 0.12);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      /* ③ 景观：上缘导语 + 左大图 + 右双栏 */
+      body.page-yuhua-hotspots .yuhua-v4-land-lead {
+        text-align: right;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        color: rgba(42, 28, 14, 0.88);
+        margin: 0 0 0.45rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: 0.85rem 1rem;
+        align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-grid > img {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 1px solid rgba(125, 82, 36, 0.22);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-mini-box {
+        padding: 0.55rem 0.6rem;
+        border-radius: 12px;
+        background: rgba(255, 252, 245, 0.92);
+        border: 1px solid rgba(125, 82, 36, 0.16);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-mini-box--green {
+        background: linear-gradient(165deg, #f9fcf8 0%, #f1f8f0 100%);
+        border-color: rgba(95, 145, 105, 0.2);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.35rem;
+        margin-top: 0.4rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-mini-grid img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(125, 82, 36, 0.18);
+      }
+      /* ④ 花卉：圆图行 + 沿革时间轴 */
+      body.page-yuhua-hotspots .yuhua-v4-flowers-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        gap: 0.85rem 1rem;
+        align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips + .yuhua-v4-flower-chips {
+        margin-top: 0.35rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips--second {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips figure {
+        margin: 0;
+        text-align: center;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips img {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid rgba(125, 82, 36, 0.22);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-chips figcaption {
+        margin-top: 0.22rem;
+        font-size: 0.74rem;
+        color: rgba(42, 28, 14, 0.88);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-timeline-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        margin-top: 0.35rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-timeline-row .taihe-timeline-img-wrap img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid rgba(125, 82, 36, 0.2);
+      }
+      @media (max-width: 900px) {
+        body.page-yuhua-hotspots .yuhua-v4-season-row,
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-grid,
+        body.page-yuhua-hotspots .yuhua-v4-land-grid,
+        body.page-yuhua-hotspots .yuhua-v4-flowers-row {
+          grid-template-columns: 1fr;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-circle {
+          width: min(100%, 280px);
+          margin: 0 auto;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-flower-chips {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        body.page-yuhua-hotspots .yuhua-v4-season-pair-lines p {
+          font-size: 0.95rem;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-season-card-head__en {
           width: 100%;
         }
       }
@@ -1569,6 +1957,18 @@
         />
       </div>
       <div class="hero-vignette" aria-hidden="true"></div>
+
+      <!-- 御花园：顶区两行导语靠右（背景图已含标题；仅故宫御花园；pointer-events:none 不挡热区） -->
+      <div id="heroYuhuaPageHeader" class="hero-yuhua-page-header" hidden>
+        <div class="hero-yuhua-page-header__intro">
+          <p class="hero-yuhua-page-header__line">
+            御花园集建筑、园林、礼制与哲学于一体，是中华优秀传统建筑文明的<span class="hero-yuhua-page-header__nb">生动缩影。</span>
+          </p>
+          <p class="hero-yuhua-page-header__line">
+            是让中华传统营建智慧与文化精神的代代相传。
+          </p>
+        </div>
+      </div>
 
       <!-- 左侧竖排古风标题 -->
       <div id="taiheVerticalTitle" class="taihe-vertical-title" aria-hidden="true">
@@ -2544,7 +2944,7 @@
           renderTaiheEditorialMosaic(grid);
           return;
         }
-        if (variant === "yuhua-v3") {
+        if (variant === "yuhua-v4") {
           const mkImg = (src, alt, cls) => {
             const el = document.createElement("img");
             el.src = src;
@@ -2553,9 +2953,9 @@
             if (cls) el.className = cls;
             return el;
           };
-          const mkYuhuaCard = (posClass, title) => {
+          const mkPanel = (title) => {
             const art = document.createElement("article");
-            art.className = `mosaic-card ${posClass} taihe-card taihe-card--timeline-ochre`.trim();
+            art.className = "mosaic-card yuhua-v4-panel taihe-card taihe-card--timeline-ochre";
             const inner = document.createElement("div");
             inner.className = "taihe-card__inner";
             if (title) {
@@ -2573,233 +2973,213 @@
             p.textContent = text;
             return p;
           };
-          const mkCaption = (text) => {
-            const p = document.createElement("p");
-            p.className = "taihe-card__desc yuhua-v3-caption";
-            p.textContent = text;
-            return p;
-          };
           const mkSub = (text) => {
             const el = document.createElement("div");
             el.className = "taihe-section-label";
             el.textContent = text;
             return el;
           };
-          const mkLi = (arr) => {
-            const ul = document.createElement("ul");
-            ul.className = "yuhua-v2-list";
-            arr.forEach((item) => {
-              const li = document.createElement("li");
-              li.textContent = item;
-              ul.appendChild(li);
-            });
-            return ul;
-          };
 
-          grid.className = "mosaic-grid mosaic-grid--yuhua-v3";
+          grid.className = "mosaic-grid mosaic-grid--yuhua-v4";
           grid.innerHTML = "";
 
-          const { art: pHero, inner: inHero } = mkYuhuaCard("yuhua-v3-hero", "御花园");
-          const heroLead = mkDesc(
-            "御花园布局对应四时与天地秩序，亭石古树与铺地相互映衬，体现古人顺应天时、敬畏自然的营造观。"
-          );
-          heroLead.classList.add("yuhua-v3-hero-lead");
-          inHero.appendChild(heroLead);
+          const B = "./assets/yuhua-docx/media";
 
-          const heroSplit = document.createElement("div");
-          heroSplit.className = "yuhua-v2-hero-split";
-          const heroColText = document.createElement("div");
-          heroColText.className = "yuhua-v3-hero-col--text";
-          heroColText.appendChild(
-            mkDesc(
-              "御花园位于紫禁城内廷北部，坤宁宫以北，南北纵深展开，中轴以钦安殿为核心。园内亭、石、古树与彩石铺地穿插布置，与内廷宫殿轴线相呼应。"
-            )
-          );
-          heroColText.appendChild(
-            mkDesc(
-              "明代称「宫后苑」，清代称御花园。路径曲折、开合有度，是宫廷生活中少见的自然意趣与休憩空间。"
-            )
-          );
-          const heroColMedia = document.createElement("div");
-          heroColMedia.className = "yuhua-v2-hero-col--media";
-          const heroFig = document.createElement("figure");
-          heroFig.className = "yuhua-v2-hero-figure";
-          heroFig.appendChild(
-            mkImg(
-              "./assets/yuhua-docx/media/image1.png",
-              "御花园万春亭",
-              "yuhua-v2-img"
-            )
-          );
-          const heroCap = document.createElement("figcaption");
-          heroCap.className = "yuhua-v3-caption";
-          heroCap.textContent = "御花园 · 建筑与园林概览";
-          heroFig.appendChild(heroCap);
-          heroColMedia.appendChild(heroFig);
-          heroSplit.append(heroColText, heroColMedia);
-          inHero.appendChild(heroSplit);
-
-          const seasonInline = document.createElement("div");
-          seasonInline.className = "yuhua-season-inline";
+          const { art: c1, inner: i1 } = mkPanel("");
+          c1.classList.add("yuhua-v4-panel--season");
+          const seasonHead = document.createElement("div");
+          seasonHead.className = "yuhua-v4-season-card-head";
           const hSeason = document.createElement("h3");
           hSeason.className = "taihe-card__title";
           hSeason.textContent = "四季亭台";
-          seasonInline.appendChild(hSeason);
-          const seasonRow = document.createElement("div");
-          seasonRow.className = "yuhua-season-inline-row";
-          const figSeason = document.createElement("figure");
-          figSeason.className = "yuhua-season-hero-fig";
-          figSeason.appendChild(
-            mkImg(
-              "./assets/yuhua-docx/media/image2.png",
-              "御花园四季亭台亭阁外景",
-              "yuhua-img--season-hero"
-            )
-          );
-          seasonRow.appendChild(figSeason);
-          seasonRow.appendChild(
-            mkDesc(
-              "四季亭台对应四时轮回、天地有序，体现古人顺应天时、敬畏自然的宇宙观。东方属春主生，称万春；西方属秋主收，称千秋。"
-            )
-          );
-          seasonInline.appendChild(seasonRow);
-          heroColText.appendChild(seasonInline);
+          const enSeason = document.createElement("span");
+          enSeason.className = "yuhua-v4-season-card-head__en";
+          enSeason.lang = "en";
+          enSeason.textContent = "Four Seasons Pavilion Terrace";
+          seasonHead.append(hSeason, enSeason);
+          i1.appendChild(seasonHead);
 
-          const { art: p2, inner: in2 } = mkYuhuaCard("yuhua-v3-zaojing", "藻井");
-          in2.appendChild(
+          const row1 = document.createElement("div");
+          row1.className = "yuhua-v4-season-row";
+          const figs = document.createElement("div");
+          figs.className = "yuhua-v4-season-figs";
+          const wf = document.createElement("figure");
+          wf.appendChild(mkImg(`${B}/image1.png`, "御花园 · 万春亭"));
+          const wcap = document.createElement("figcaption");
+          wcap.textContent = "御花园 · 万春亭";
+          wf.appendChild(wcap);
+          const qf = document.createElement("figure");
+          qf.appendChild(mkImg(`${B}/image2.png`, "御花园 · 千秋亭"));
+          const qcap = document.createElement("figcaption");
+          qcap.textContent = "御花园 · 千秋亭";
+          qf.appendChild(qcap);
+          figs.append(wf, qf);
+          const copy1 = document.createElement("div");
+          copy1.className = "yuhua-v4-season-copy";
+          copy1.appendChild(mkSub("方位"));
+          const lead = document.createElement("p");
+          lead.className = "yuhua-v4-season-lead";
+          lead.textContent =
+            "对应四季轮回、天地有序，代表中国古人「顺应天时、敬畏自然」的宇宙观。";
+          copy1.appendChild(lead);
+          const enLead = document.createElement("p");
+          enLead.className = "yuhua-v4-season-en";
+          enLead.lang = "en";
+          enLead.textContent =
+            "It corresponds to the cycles of the four seasons and an ordered cosmos—reflecting the traditional view of aligning with nature and revering the natural order.";
+          copy1.appendChild(enLead);
+          const pairLines = document.createElement("div");
+          pairLines.className = "yuhua-v4-season-pair-lines";
+          const lineL = document.createElement("p");
+          lineL.textContent = "东方属春、主生，所以叫「万春」；";
+          const lineR = document.createElement("p");
+          lineR.textContent = "西方属秋、主收，所以叫「千秋」。";
+          pairLines.append(lineL, lineR);
+          copy1.appendChild(pairLines);
+          const foot = document.createElement("p");
+          foot.className = "yuhua-v4-season-foot";
+          foot.textContent =
+            "二者东西对称、形制精巧、内涵深厚，与攒尖顶、方形基座相呼应，诠释了「天圆地方」与「天人合一」的传统宇宙观。";
+          copy1.appendChild(foot);
+          row1.append(figs, copy1);
+          i1.appendChild(row1);
+
+          const { art: c2, inner: i2 } = mkPanel("藻井");
+          const gZ = document.createElement("div");
+          gZ.className = "yuhua-v4-zaojing-grid";
+          const zL = document.createElement("div");
+          zL.appendChild(
             mkDesc(
-              "藻井是中国古代建筑中的独特元素。因古建多为木结构，防火尤为关键，古人将「井」置于屋顶，寓意压制火魔、护佑建筑。"
+              "藻井位于殿亭内部天花重点部位，以叠涩退缩与彩画向上收束视线。木构建筑重防火，藻井亦有「以水克火」的象征意涵，与琉璃瓦顶、金柱彩画共同形成层次丰富的室内天穹。"
             )
           );
           const pairZ = document.createElement("div");
-          pairZ.className = "yuhua-v2-pair";
+          pairZ.className = "yuhua-v4-zaojing-pair";
           const fz1 = document.createElement("figure");
-          fz1.appendChild(
-            mkImg("./assets/yuhua-docx/media/image3.jpeg", "万春亭内藻井顶棚", "yuhua-v2-img")
-          );
+          fz1.appendChild(mkImg(`${B}/image3.jpeg`, "万春亭内藻井顶棚"));
           const cz1 = document.createElement("figcaption");
           cz1.textContent = "万春亭 · 亭内藻井";
           fz1.appendChild(cz1);
           const fz2 = document.createElement("figure");
-          fz2.appendChild(
-            mkImg("./assets/yuhua-docx/media/image4.jpeg", "千秋亭内藻井顶棚", "yuhua-v2-img")
-          );
+          fz2.appendChild(mkImg(`${B}/image4.jpeg`, "千秋亭内藻井顶棚"));
           const cz2 = document.createElement("figcaption");
           cz2.textContent = "千秋亭 · 亭内藻井";
           fz2.appendChild(cz2);
           pairZ.append(fz1, fz2);
-          in2.appendChild(pairZ);
-          in2.appendChild(
+          zL.appendChild(pairZ);
+          const zM = document.createElement("div");
+          zM.appendChild(
             mkDesc(
-              "东方属春、主生，所以叫「万春」；西方属秋、主收，所以叫「千秋」。二亭东西对称、形制精巧，方形基座象征大地，圆形重檐攒尖顶象征天空，诠释「天圆地方」与「天人合一」。"
+              "几何纹样与龙纹等主题层层递进，与攒尖顶、圆形亭身形成「天圆地方」的视觉呼应，既承托结构亦寄托吉祥。"
             )
           );
+          const zR = document.createElement("div");
+          const fc = document.createElement("figure");
+          fc.className = "yuhua-v4-zaojing-circle";
+          fc.appendChild(mkImg(`${B}/image3.jpeg`, "藻井细部"));
+          zR.appendChild(fc);
+          gZ.append(zL, zM, zR);
+          i2.appendChild(gZ);
 
-          const { art: p3, inner: in3 } = mkYuhuaCard("yuhua-v3-land", "景观");
-          const g3 = document.createElement("div");
-          g3.className = "yuhua-v2-subgrid-2";
-          const g3l = document.createElement("div");
-          g3l.appendChild(mkCaption("堆秀山与御景亭"));
-          g3l.appendChild(
+          const { art: c3, inner: i3 } = mkPanel("景观");
+          const pLead = document.createElement("p");
+          pLead.className = "taihe-card__desc yuhua-v4-land-lead";
+          pLead.textContent =
+            "园内散布各类奇石，与建筑、植物相互映衬，营造「虽由人作，宛自天开」的意境。";
+          i3.appendChild(pLead);
+          const gLand = document.createElement("div");
+          gLand.className = "yuhua-v4-land-grid";
+          gLand.appendChild(mkImg(`${B}/image5.png`, "堆秀山与御景亭", "yuhua-v4-land-hero"));
+          const side = document.createElement("div");
+          side.className = "yuhua-v4-land-side";
+          const boxStone = document.createElement("div");
+          boxStone.className = "yuhua-v4-mini-box";
+          boxStone.appendChild(mkSub("奇石"));
+          boxStone.appendChild(
             mkDesc(
-              "堆秀山以太湖石叠筑，山势险峻、磴道陡峭，叠石手法新颖。山顶御景亭是帝后重阳节登高眺望之处。"
+              "拜斗石、海参石、木化石等名石点缀园中，与路径、植栽形成对景与框景，是皇家园林叠山理石传统的缩影。"
             )
           );
-          g3l.appendChild(
-            mkImg("./assets/yuhua-docx/media/image5.png", "堆秀山与御景亭", "yuhua-v2-img")
-          );
-          const g3r = document.createElement("div");
-          g3r.appendChild(
-            mkImg("./assets/yuhua-docx/media/image6.jpeg", "盘龙衔珠浮雕", "yuhua-v2-img")
-          );
-          g3.append(g3l, g3r);
-          const dragonBlock = document.createElement("div");
-          dragonBlock.className = "yuhua-land-dragon-block";
-          dragonBlock.appendChild(mkCaption("中心盘龙衔珠浮雕"));
-          dragonBlock.appendChild(
+          const miniS = document.createElement("div");
+          miniS.className = "yuhua-v4-mini-grid";
+          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例一"));
+          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例二"));
+          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例三"));
+          boxStone.appendChild(miniS);
+          const boxTree = document.createElement("div");
+          boxTree.className = "yuhua-v4-mini-box yuhua-v4-mini-box--green";
+          boxTree.appendChild(mkSub("古树"));
+          boxTree.appendChild(
             mkDesc(
-              "中心盘龙衔珠浮雕搭配环绕双凤与龙凤纹样，层叠井架构成“天圆地方”格局，边缘火焰纹工艺繁复，寓意吉祥安康、天地和谐。"
+              "蟠龙槐、连理柏、人字柏等古木与御花园共生，冠盖参天，见证宫苑岁月。"
             )
           );
-          in3.appendChild(g3);
-          in3.appendChild(dragonBlock);
+          const miniT = document.createElement("div");
+          miniT.className = "yuhua-v4-mini-grid";
+          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例一"));
+          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例二"));
+          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例三"));
+          boxTree.appendChild(miniT);
+          side.append(boxStone, boxTree);
+          gLand.appendChild(side);
+          i3.appendChild(gLand);
 
-          const { art: p4, inner: in4 } = mkYuhuaCard("yuhua-v3-rocks", "奇石与古树");
-          const cols = document.createElement("div");
-          cols.className = "yuhua-v2-cols";
-          const cL = document.createElement("div");
-          cL.appendChild(mkImg("./assets/yuhua-docx/media/image9.png", "奇石", "yuhua-v2-img"));
-          cL.appendChild(mkSub("奇石"));
-          cL.appendChild(
-            mkDesc("园内散布各类奇石，与建筑、植物相互映衬，营造“虽由人作，宛自天开”的意境。")
-          );
-          cL.appendChild(
-            mkLi([
-              "拜斗石：石纹似长袍人躬身参拜北斗七星。",
-              "海参石：现存少见的中型珊瑚礁观赏石。",
-              "木化石：历经千百年“化木为石”。",
-            ])
-          );
-          const cR = document.createElement("div");
-          cR.appendChild(mkImg("./assets/yuhua-docx/media/image10.jpeg", "古树", "yuhua-v2-img"));
-          cR.appendChild(mkSub("古树"));
-          cR.appendChild(
-            mkDesc("蟠龙槐、连理柏、人字柏等古树与御花园空间共生，承载宫苑岁月记忆。")
-          );
-          cR.appendChild(
-            mkLi([
-              "蟠龙槐：植于明代，一级古树，龙爪槐之最。",
-              "连理柏：树龄四百余年，象征恩爱和合。",
-              "人字柏：枝干盘旋上举，紫藤缠绕。"
-            ])
-          );
-          cols.append(cL, cR);
-          in4.appendChild(cols);
-
-          const { art: p5, inner: in5 } = mkYuhuaCard("yuhua-v3-flowers", "花卉与沿革");
-          in5.appendChild(
-            mkDesc(
-              "玉兰、榆叶梅、梨花、丁香、紫玉兰、海棠、桃花、楸树、芍药次第开放，与亭台楼阁相映成趣，寄托吉祥与生机。"
-            )
-          );
-          const flowers = [
+          const { art: c4, inner: i4 } = mkPanel("花卉");
+          const rowF = document.createElement("div");
+          rowF.className = "yuhua-v4-flowers-row";
+          const chips = document.createElement("div");
+          chips.className = "yuhua-v4-flower-chips";
+          [
             ["玉兰", "image13.jpeg"],
             ["榆叶梅", "image14.jpeg"],
             ["梨花", "image15.jpeg"],
             ["丁香", "image16.jpeg"],
             ["紫玉兰", "image17.jpeg"],
+          ].forEach(([name, file]) => {
+            const fig = document.createElement("figure");
+            fig.appendChild(mkImg(`${B}/${file}`, name));
+            const cap = document.createElement("figcaption");
+            cap.textContent = name;
+            fig.appendChild(cap);
+            chips.appendChild(fig);
+          });
+          const fText = document.createElement("div");
+          fText.appendChild(
+            mkDesc(
+              "玉兰、榆叶梅、梨花、丁香与海棠、芍药等次第开放，与亭台楼阁相映成趣，寄托吉祥与生机，亦承载宫廷岁时游赏与审美传统。"
+            )
+          );
+          rowF.append(chips, fText);
+          i4.appendChild(rowF);
+          const rowF2 = document.createElement("div");
+          rowF2.className = "yuhua-v4-flower-chips yuhua-v4-flower-chips--second";
+          [
             ["海棠", "image18.jpeg"],
             ["桃花", "image19.jpeg"],
             ["楸树", "image20.jpeg"],
             ["芍药", "image21.jpeg"],
-          ];
-          const chipGrid = document.createElement("div");
-          chipGrid.className = "yuhua-v2-chip-grid";
-          flowers.forEach(([name, file]) => {
+          ].forEach(([name, file]) => {
             const fig = document.createElement("figure");
-            fig.className = "yuhua-v2-chip";
-            fig.appendChild(mkImg(`./assets/yuhua-docx/media/${file}`, name));
+            fig.appendChild(mkImg(`${B}/${file}`, name));
             const cap = document.createElement("figcaption");
             cap.textContent = name;
             fig.appendChild(cap);
-            chipGrid.appendChild(fig);
+            rowF2.appendChild(fig);
           });
-          in5.appendChild(chipGrid);
-          in5.appendChild(mkSub("历史沿革"));
+          i4.appendChild(rowF2);
+          i4.appendChild(mkSub("御花园历史精华时轴"));
           const tlRow = document.createElement("div");
-          tlRow.className = "taihe-timeline-row yuhua-v3-timeline-row";
+          tlRow.className = "yuhua-v4-timeline-row taihe-timeline-row";
           const vl = document.createElement("span");
           vl.className = "taihe-vertical-label";
           vl.textContent = "沿革";
           const twrap = document.createElement("div");
           twrap.className = "taihe-timeline-img-wrap";
-          twrap.appendChild(
-            mkImg("./assets/yuhua-docx/media/image22.png", "御花园历史沿革")
-          );
+          twrap.appendChild(mkImg(`${B}/image22.png`, "御花园历史沿革"));
           tlRow.append(vl, twrap);
-          in5.appendChild(tlRow);
+          i4.appendChild(tlRow);
 
-          grid.append(pHero, p2, p4, p3, p5);
+          grid.append(c1, c2, c3, c4);
           return;
         }
         grid.className =
@@ -2976,6 +3356,17 @@
         document.body.classList.toggle("page-taihe-hotspots", building.name === "故宫太和殿");
         document.body.classList.toggle("page-yuhua-hotspots", building.name === "故宫御花园");
 
+        const heroYuhuaPageHeader = document.getElementById("heroYuhuaPageHeader");
+        if (heroYuhuaPageHeader) {
+          heroYuhuaPageHeader.hidden = building.name !== "故宫御花园";
+        }
+
+        const taiheVerticalTitleEl = document.getElementById("taiheVerticalTitle");
+        if (taiheVerticalTitleEl) {
+          const showTaiheSideTitle = building.name === "故宫太和殿";
+          taiheVerticalTitleEl.setAttribute("aria-hidden", showTaiheSideTitle ? "false" : "true");
+        }
+
         // 更新标题
         document.title = `${building.name} · 华夏建筑选集`;
         document.getElementById('heroTitle').textContent = building.name;
@@ -3104,7 +3495,7 @@
           if (building.name === "故宫太和殿") {
             renderMosaicCards(null, "taihe-v2");
           } else {
-            renderMosaicCards(cards, "yuhua-v3");
+            renderMosaicCards(cards, "yuhua-v4");
           }
           document.documentElement.style.setProperty("--mosaic-bg", building.pageBg || "#e8e2d3");
           document.documentElement.style.background = building.pageBg || "#e8e2d3";

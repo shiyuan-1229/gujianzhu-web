@@ -134,19 +134,36 @@
     var pad = 16;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    /* 太和殿顶栏横条才保留固定宽度；其它情况清掉，避免从御花园等页带过来 */
-    if (placement !== "top" || !card.classList.contains("map-hotspot-info-card--taihe")) {
+    var topBarCard =
+      placement === "top" &&
+      (card.classList.contains("map-hotspot-info-card--taihe") ||
+        card.classList.contains("map-hotspot-info-card--yuhua"));
+    if (!topBarCard) {
       card.style.width = "";
+      card.style.left = "";
+      card.style.transform = "";
     }
     var w = card.offsetWidth || 280;
     var h = card.offsetHeight || 120;
-    /* 画面上方留白（如天空），固定左上角，避开顶栏 */
+    /* 画面上方留白（天空）：横条大卡；太和殿避开左侧竖排标题，御花园水平居中 */
     if (placement === "top") {
-      var topBelowNav = 72;
-      card.style.left = pad + "px";
+      var topBelowNav = 90;
       card.style.top = Math.max(pad, topBelowNav) + "px";
+      card.style.right = "auto";
+      card.style.bottom = "auto";
       if (card.classList.contains("map-hotspot-info-card--taihe")) {
-        card.style.width = "min(1200px, calc(100vw - " + pad * 2 + "px))";
+        card.style.left = "max(" + pad + "px, min(15rem, 21vw))";
+        card.style.transform = "none";
+        card.style.width =
+          "min(640px, calc(100vw - " + pad * 2 + "px - min(12rem, 18vw)))";
+      } else if (card.classList.contains("map-hotspot-info-card--yuhua")) {
+        var maxCardW = Math.min(640, vw - pad * 2);
+        card.style.left = Math.max(pad, Math.round((vw - maxCardW) / 2)) + "px";
+        card.style.transform = "none";
+        card.style.width = maxCardW + "px";
+      } else {
+        card.style.left = pad + "px";
+        card.style.transform = "none";
       }
       return;
     }

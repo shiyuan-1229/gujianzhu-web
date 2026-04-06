@@ -85,34 +85,69 @@
   animation: mapHotspotPopIn 0.27s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 太和殿横卡：具体外观在 detail.html body.page-taihe-hotspots 内覆盖（半透明+毛玻璃） */
-.map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe {
-  max-width: min(520px, calc(100vw - 40px));
-  width: min(520px, calc(100vw - 40px));
+/* 太和殿 / 御花园：顶栏横条大卡（宽度由 JS placement=top 与内联配合） */
+.map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe,
+.map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua {
+  max-width: min(640px, calc(100vw - 40px));
+  width: min(640px, calc(100vw - 40px));
   min-height: 0;
   padding: 0;
   border-radius: 14px;
   overflow: hidden;
 }
 
-.map-hotspot-info-card--taihe .map-hotspot-info-card__inner {
+.map-hotspot-info-card--taihe .map-hotspot-info-card__inner,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__inner {
   display: block;
   min-height: 0;
 }
 
-.map-hotspot-info-card--taihe .map-hotspot-info-card__brand {
+.map-hotspot-info-card--taihe .map-hotspot-info-card__brand,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__brand {
   display: none !important;
 }
 
-.map-hotspot-info-card--taihe .map-hotspot-info-card__main {
-  padding: 12px 16px 14px;
+.map-hotspot-info-card--taihe .map-hotspot-info-card__main,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  padding: 9px 15px 12px;
+  box-sizing: border-box;
 }
 
-.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe) .map-hotspot-info-card__inner {
+.map-hotspot-info-card--taihe .map-hotspot-info-card__tag,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__tag {
+  margin-bottom: 0;
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__title,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__title {
+  margin: 0;
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__en,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__en {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.map-hotspot-info-card--taihe .map-hotspot-info-card__desc,
+.map-hotspot-info-card--yuhua .map-hotspot-info-card__desc {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
+.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe):not(.map-hotspot-info-card--yuhua)
+  .map-hotspot-info-card__inner {
   display: contents;
 }
 
-.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe) .map-hotspot-info-card__brand {
+.map-hotspot-info-card--detailHero:not(.map-hotspot-info-card--taihe):not(.map-hotspot-info-card--yuhua)
+  .map-hotspot-info-card__brand {
   display: none;
 }
 

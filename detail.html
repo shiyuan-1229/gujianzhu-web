@@ -1238,132 +1238,436 @@
         color: rgba(74, 44, 29, 0.92);
         margin: 0;
       }
-      /* ② 藻井：左文+双图 | 中文 | 右圆图 */
-      body.page-yuhua-hotspots .yuhua-v4-zaojing-grid {
+      /* ② 藻井：第二稿 — 左（导语+底双图）| 中（长文窄栏）| 右（方形主图） */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel--zaojing {
+        border-radius: 24px;
+        background: linear-gradient(168deg, #ddc6a9 0%, #d4af8f 44%, #c49a7a 100%);
+        border: 1px solid rgba(120, 75, 45, 0.22);
+        box-shadow: 0 10px 30px rgba(85, 45, 30, 0.18);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-panel--zaojing .taihe-card__inner {
+        padding: 1.25rem 1.35rem 1.35rem;
+        gap: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.85rem;
+        margin: 0 0 0.85rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-head .taihe-card__title {
+        font-size: clamp(1.28rem, 2.8vw, 1.58rem);
+        letter-spacing: 0.08em;
+        line-height: 1.2;
+        color: #4a2c1d;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-head__en {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: rgba(74, 44, 29, 0.55);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr) minmax(0, 0.85fr);
-        gap: 0.85rem 1rem;
+        grid-template-columns: minmax(0, 1.42fr) minmax(0, 0.78fr) minmax(0, 0.58fr);
+        gap: 1rem 1.15rem;
         align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-col-left {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        min-width: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-intro {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.82;
+        letter-spacing: 0.03em;
+        color: rgba(74, 44, 29, 0.96);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-col-left__pair {
+        margin-top: auto;
+        padding-top: 0.25rem;
       }
       body.page-yuhua-hotspots .yuhua-v4-zaojing-pair {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.45rem;
-        margin-top: 0.4rem;
+        gap: 0.65rem;
       }
       body.page-yuhua-hotspots .yuhua-v4-zaojing-pair figure {
         margin: 0;
+        text-align: center;
+        background: rgba(255, 252, 245, 0.45);
+        border-radius: 10px;
+        padding: 0.35rem;
+        box-sizing: border-box;
       }
       body.page-yuhua-hotspots .yuhua-v4-zaojing-pair img {
         width: 100%;
-        aspect-ratio: 1;
-        object-fit: cover;
+        height: auto;
+        max-height: min(200px, 32vw);
+        object-fit: contain;
+        object-position: center;
         border-radius: 8px;
-        border: 1px solid rgba(125, 82, 36, 0.18);
+        border: 1px solid rgba(74, 44, 29, 0.2);
+        display: block;
       }
       body.page-yuhua-hotspots .yuhua-v4-zaojing-pair figcaption {
         font-size: 0.72rem;
-        margin-top: 0.2rem;
-        color: rgba(42, 28, 14, 0.85);
+        margin-top: 0.28rem;
+        line-height: 1.35;
+        color: rgba(100, 88, 72, 0.88);
       }
-      body.page-yuhua-hotspots .yuhua-v4-zaojing-circle {
-        margin: 0;
-        justify-self: center;
-        width: min(100%, 240px);
-        aspect-ratio: 1;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 3px solid rgba(212, 175, 55, 0.35);
-        box-shadow: 0 6px 18px rgba(60, 40, 18, 0.12);
-      }
-      body.page-yuhua-hotspots .yuhua-v4-zaojing-circle img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      /* ③ 景观：上缘导语 + 左大图 + 右双栏 */
-      body.page-yuhua-hotspots .yuhua-v4-land-lead {
-        text-align: right;
-        font-size: 0.95rem;
-        line-height: 1.75;
-        color: rgba(42, 28, 14, 0.88);
-        margin: 0 0 0.45rem;
-      }
-      body.page-yuhua-hotspots .yuhua-v4-land-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-        gap: 0.85rem 1rem;
-        align-items: start;
-      }
-      body.page-yuhua-hotspots .yuhua-v4-land-grid > img {
-        width: 100%;
-        height: auto;
-        border-radius: 12px;
-        object-fit: cover;
-        border: 1px solid rgba(125, 82, 36, 0.22);
-      }
-      body.page-yuhua-hotspots .yuhua-v4-land-side {
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-col-mid {
+        min-width: 0;
         display: flex;
         flex-direction: column;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-mid-text {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.85;
+        letter-spacing: 0.03em;
+        color: rgba(55, 42, 32, 0.94);
+        text-align: justify;
+        text-justify: inter-ideograph;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-col-right {
+        min-width: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-hero {
+        margin: 0;
+        width: 100%;
+        max-width: min(210px, 100%);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(74, 44, 29, 0.28);
+        box-shadow: 0 6px 18px rgba(45, 35, 22, 0.18);
+        background: rgba(255, 252, 245, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.35rem;
+        box-sizing: border-box;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-zaojing-hero img {
+        width: 100%;
+        height: auto;
+        max-height: min(220px, 42vh);
+        object-fit: contain;
+        object-position: center;
+        display: block;
+      }
+      /* ③ 景观：第二稿 — 外层浅米底 + 顶栏标题/导语 + 左大图 + 右列两张嵌套卡 */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel--land {
+        border-radius: 22px;
+        background: linear-gradient(165deg, #fdf9f2 0%, #f9f4e8 48%, #f3ead8 100%);
+        border: 1px solid rgba(200, 175, 130, 0.28);
+        box-shadow: 0 8px 22px rgba(120, 95, 55, 0.1);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-panel--land .taihe-card__inner {
+        padding: 1.15rem 1.25rem 1.25rem;
         gap: 0.75rem;
       }
-      body.page-yuhua-hotspots .yuhua-v4-mini-box {
-        padding: 0.55rem 0.6rem;
-        border-radius: 12px;
-        background: rgba(255, 252, 245, 0.92);
-        border: 1px solid rgba(125, 82, 36, 0.16);
+      body.page-yuhua-hotspots .yuhua-v4-land-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.6rem 1rem;
+        margin-bottom: 0.15rem;
       }
-      body.page-yuhua-hotspots .yuhua-v4-mini-box--green {
-        background: linear-gradient(165deg, #f9fcf8 0%, #f1f8f0 100%);
-        border-color: rgba(95, 145, 105, 0.2);
+      body.page-yuhua-hotspots .yuhua-v4-land-head__brand {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.75rem;
       }
-      body.page-yuhua-hotspots .yuhua-v4-mini-grid {
+      body.page-yuhua-hotspots .yuhua-v4-land-head .taihe-card__title {
+        font-size: clamp(1.22rem, 2.6vw, 1.5rem);
+        color: #4a3728;
+        margin: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-head__en {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: rgba(74, 55, 38, 0.55);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-head__lead {
+        flex: 1 1 min(100%, 22rem);
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.72;
+        letter-spacing: 0.02em;
+        color: rgba(55, 40, 28, 0.92);
+        text-align: left;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+        gap: 0.9rem 1rem;
+        align-items: stretch;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-col-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        min-width: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-duixiu {
+        margin: 0;
+        font-size: 0.86rem;
+        line-height: 1.78;
+        letter-spacing: 0.03em;
+        color: rgba(55, 42, 32, 0.92);
+        text-align: center;
+        font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-hero {
+        margin: 0;
+        min-height: 0;
+        height: 100%;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(125, 95, 60, 0.22);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-hero img {
+        width: 100%;
+        height: 100%;
+        min-height: 260px;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        min-width: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 0.55rem 0.75rem;
+        padding: 0.6rem 0.7rem 0.65rem;
+        border-radius: 14px;
+        border: 1px solid rgba(120, 90, 50, 0.14);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest--stone {
+        background: linear-gradient(165deg, #efe4d4 0%, #e8d8c0 100%);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest--tree {
+        background: linear-gradient(165deg, #dcebd8 0%, #cfe6d0 100%);
+        border-color: rgba(85, 130, 90, 0.22);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__titles {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex: 0 0 auto;
+        max-width: 4.5rem;
+        padding-top: 0.1rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__zh {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: 1.12rem;
+        font-weight: 600;
+        color: #4a3728;
+        line-height: 1.2;
+        letter-spacing: 0.06em;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__en {
+        margin-top: 0.2rem;
+        font-size: 0.62rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: rgba(74, 55, 38, 0.58);
+        line-height: 1.25;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__gallery {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.35rem;
-        margin-top: 0.4rem;
-      }
-      body.page-yuhua-hotspots .yuhua-v4-mini-grid img {
-        width: 100%;
-        aspect-ratio: 1;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid rgba(125, 82, 36, 0.18);
-      }
-      /* ④ 花卉：圆图行 + 沿革时间轴 */
-      body.page-yuhua-hotspots .yuhua-v4-flowers-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-        gap: 0.85rem 1rem;
+        gap: 0.4rem 0.5rem;
         align-items: start;
       }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips + .yuhua-v4-flower-chips {
-        margin-top: 0.35rem;
-      }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 0.45rem;
-      }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips--second {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips figure {
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__gallery figure {
         margin: 0;
         text-align: center;
       }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips img {
+      body.page-yuhua-hotspots .yuhua-v4-land-nest--stone .yuhua-v4-land-nest__gallery img {
         width: 100%;
-        aspect-ratio: 1;
+        height: auto;
+        max-height: min(100px, 22vw);
+        object-fit: contain;
+        object-position: center;
+        display: block;
+        margin: 0 auto;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest--tree .yuhua-v4-land-nest__gallery {
+        gap: 0.45rem 0.55rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest--tree .yuhua-v4-land-nest__gallery img {
+        width: 100%;
+        height: auto;
+        max-height: min(118px, 26vw);
+        aspect-ratio: 4 / 3;
+        object-fit: contain;
+        object-position: center;
+        border-radius: 8px;
+        display: block;
+        margin: 0 auto;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__cap {
+        margin-top: 0.22rem;
+        font-size: 0.68rem;
+        line-height: 1.35;
+        font-weight: 400;
+        font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+        color: rgba(74, 55, 38, 0.88);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__gallery figure:nth-child(3) {
+        text-align: left;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__gallery figure:nth-child(3) img {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__gallery figure:nth-child(3) .yuhua-v4-land-nest__cap {
+        font-size: 0.78rem;
+        font-weight: 500;
+        font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+        line-height: 1.35;
+        text-align: left;
+        margin-left: 0;
+        margin-right: auto;
+        max-width: 100%;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-land-nest__desc {
+        margin: 0;
+        padding-top: 0.15rem;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        letter-spacing: 0.02em;
+        color: rgba(55, 42, 32, 0.9);
+        text-align: center;
+      }
+      /* ④ 花卉：第二张稿 — 上排 4 + 下排 5 统一圆图，右侧文案；沿革时轴 */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .yuhua-v4-panel--flowers {
+        border-radius: 22px;
+        background: linear-gradient(165deg, #fdf9f3 0%, #faf5e9 50%, #f4ead8 100%);
+        border: 1px solid rgba(200, 175, 130, 0.26);
+        box-shadow: 0 8px 22px rgba(120, 95, 55, 0.09);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-panel--flowers .taihe-card__inner {
+        padding: 1.1rem 1.2rem 1.2rem;
+        gap: 0.75rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flowers-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.75rem;
+        margin-bottom: 0.1rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flowers-head .taihe-card__title {
+        font-size: clamp(1.22rem, 2.6vw, 1.5rem);
+        color: #4a3728;
+        margin: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flowers-head__en {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        color: rgba(74, 55, 38, 0.55);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flowers-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+        gap: 0.45rem 1.1rem;
+        align-items: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid {
+        --flower-chip: clamp(5.25rem, 13.5vw, 7.25rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.68rem;
+        min-width: 0;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid__row {
+        display: grid;
+        gap: 0.58rem 1.85rem;
+        justify-content: start;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid__row--4 {
+        grid-template-columns: repeat(4, var(--flower-chip));
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid__row--5 {
+        grid-template-columns: repeat(5, var(--flower-chip));
+        margin-left: clamp(2.1rem, 10vw, 4.75rem);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid figure {
+        margin: 0;
+        width: var(--flower-chip);
+        text-align: center;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid img {
+        width: var(--flower-chip);
+        height: var(--flower-chip);
         border-radius: 50%;
         object-fit: cover;
+        object-position: center 42%;
         border: 1px solid rgba(125, 82, 36, 0.22);
+        display: block;
+        margin: 0 auto;
+        box-sizing: border-box;
       }
-      body.page-yuhua-hotspots .yuhua-v4-flower-chips figcaption {
-        margin-top: 0.22rem;
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid figcaption {
+        margin-top: 0.28rem;
         font-size: 0.74rem;
+        line-height: 1.3;
         color: rgba(42, 28, 14, 0.88);
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid__row--4 figure:nth-child(3) figcaption,
+      body.page-yuhua-hotspots .yuhua-v4-flower-grid__row--5 figure:nth-child(3) figcaption {
+        font-size: 0.8rem;
+        font-weight: 500;
+        font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+        text-align: left;
+        padding-left: 0.1rem;
+        margin-top: 0.3rem;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-copy {
+        justify-self: end;
+        align-self: start;
+        width: fit-content;
+        max-width: min(22rem, 100%);
+        margin-left: auto;
+        margin-top: 0;
+        padding-right: clamp(0.2rem, 1.5vw, 0.85rem);
+        box-sizing: border-box;
+      }
+      body.page-yuhua-hotspots .yuhua-v4-flower-copy .taihe-card__desc {
+        margin: 0;
+        font-size: 0.86rem;
+        line-height: 1.78;
+        letter-spacing: 0.02em;
+        color: rgba(55, 40, 28, 0.92);
+        text-align: right;
       }
       body.page-yuhua-hotspots .yuhua-v4-timeline-row {
         display: flex;
@@ -1379,17 +1683,45 @@
       }
       @media (max-width: 900px) {
         body.page-yuhua-hotspots .yuhua-v4-season-row,
-        body.page-yuhua-hotspots .yuhua-v4-zaojing-grid,
-        body.page-yuhua-hotspots .yuhua-v4-land-grid,
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-layout,
+        body.page-yuhua-hotspots .yuhua-v4-land-body,
         body.page-yuhua-hotspots .yuhua-v4-flowers-row {
           grid-template-columns: 1fr;
         }
-        body.page-yuhua-hotspots .yuhua-v4-zaojing-circle {
-          width: min(100%, 280px);
+        body.page-yuhua-hotspots .yuhua-v4-land-nest {
+          flex-direction: column;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-land-nest__titles {
+          flex-direction: row;
+          align-items: baseline;
+          max-width: none;
+          gap: 0.45rem 0.65rem;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-land-nest__en {
+          margin-top: 0;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-col-left__pair {
+          margin-top: 0;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-hero {
+          max-width: min(100%, 280px);
           margin: 0 auto;
         }
-        body.page-yuhua-hotspots .yuhua-v4-flower-chips {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+        body.page-yuhua-hotspots .yuhua-v4-zaojing-pair img {
+          max-height: min(220px, 55vw);
+        }
+        body.page-yuhua-hotspots .yuhua-v4-flower-grid {
+          --flower-chip: clamp(4.25rem, 26vw, 5.75rem);
+        }
+        body.page-yuhua-hotspots .yuhua-v4-flower-copy {
+          justify-self: stretch;
+          width: 100%;
+          max-width: none;
+          margin-left: 0;
+          padding-right: 0;
+        }
+        body.page-yuhua-hotspots .yuhua-v4-flower-copy .taihe-card__desc {
+          text-align: left;
         }
         body.page-yuhua-hotspots .yuhua-v4-season-pair-lines p {
           font-size: 0.95rem;
@@ -3044,129 +3376,216 @@
           row1.append(figs, copy1);
           i1.appendChild(row1);
 
-          const { art: c2, inner: i2 } = mkPanel("藻井");
+          const { art: c2, inner: i2 } = mkPanel("");
+          c2.classList.add("yuhua-v4-panel--zaojing");
+          const zHead = document.createElement("div");
+          zHead.className = "yuhua-v4-zaojing-head";
+          const hZ = document.createElement("h3");
+          hZ.className = "taihe-card__title";
+          hZ.textContent = "藻井";
+          const enZ = document.createElement("span");
+          enZ.className = "yuhua-v4-zaojing-head__en";
+          enZ.lang = "en";
+          enZ.textContent = "Sunk panel";
+          zHead.append(hZ, enZ);
+          i2.appendChild(zHead);
+
           const gZ = document.createElement("div");
-          gZ.className = "yuhua-v4-zaojing-grid";
+          gZ.className = "yuhua-v4-zaojing-layout";
           const zL = document.createElement("div");
-          zL.appendChild(
-            mkDesc(
-              "藻井位于殿亭内部天花重点部位，以叠涩退缩与彩画向上收束视线。木构建筑重防火，藻井亦有「以水克火」的象征意涵，与琉璃瓦顶、金柱彩画共同形成层次丰富的室内天穹。"
-            )
-          );
+          zL.className = "yuhua-v4-zaojing-col-left";
+          const zIntro = document.createElement("p");
+          zIntro.className = "yuhua-v4-zaojing-intro";
+          zIntro.textContent =
+            "藻井是中国古代建筑中的独特元素。由于古建筑多为木质结构，防火至关重要。因此，古人将「井」建在屋顶，以压制火魔，保护建筑安全。";
+          zL.appendChild(zIntro);
+          const pairWrap = document.createElement("div");
+          pairWrap.className = "yuhua-v4-zaojing-col-left__pair";
           const pairZ = document.createElement("div");
           pairZ.className = "yuhua-v4-zaojing-pair";
           const fz1 = document.createElement("figure");
-          fz1.appendChild(mkImg(`${B}/image3.jpeg`, "万春亭内藻井顶棚"));
+          fz1.appendChild(mkImg(`${B}/image3.jpeg`, "御花园 · 万春亭藻井"));
           const cz1 = document.createElement("figcaption");
-          cz1.textContent = "万春亭 · 亭内藻井";
+          cz1.textContent = "御花园 · 万春亭";
           fz1.appendChild(cz1);
           const fz2 = document.createElement("figure");
-          fz2.appendChild(mkImg(`${B}/image4.jpeg`, "千秋亭内藻井顶棚"));
+          fz2.appendChild(mkImg(`${B}/image4.jpeg`, "御花园 · 千秋亭藻井"));
           const cz2 = document.createElement("figcaption");
-          cz2.textContent = "千秋亭 · 亭内藻井";
+          cz2.textContent = "御花园 · 千秋亭";
           fz2.appendChild(cz2);
           pairZ.append(fz1, fz2);
-          zL.appendChild(pairZ);
+          pairWrap.appendChild(pairZ);
+          zL.appendChild(pairWrap);
+
           const zM = document.createElement("div");
-          zM.appendChild(
-            mkDesc(
-              "几何纹样与龙纹等主题层层递进，与攒尖顶、圆形亭身形成「天圆地方」的视觉呼应，既承托结构亦寄托吉祥。"
-            )
-          );
+          zM.className = "yuhua-v4-zaojing-col-mid";
+          const zMidP = document.createElement("p");
+          zMidP.className = "yuhua-v4-zaojing-mid-text";
+          zMidP.textContent =
+            "中心盘龙衔珠浮雕搭配环绕的双凤与龙凤纹样，层叠井架构成天圆地方的布局，边缘饰以火焰纹，工艺精巧繁复，呈现龙凤呈祥的皇家气象，寄寓了吉祥安康、天地和谐的文化祈愿。";
+          zM.appendChild(zMidP);
+
           const zR = document.createElement("div");
+          zR.className = "yuhua-v4-zaojing-col-right";
           const fc = document.createElement("figure");
-          fc.className = "yuhua-v4-zaojing-circle";
-          fc.appendChild(mkImg(`${B}/image3.jpeg`, "藻井细部"));
+          fc.className = "yuhua-v4-zaojing-hero";
+          fc.appendChild(
+            mkImg("./assets/taihe-doc-wood.jpeg", "太和殿木雕藻井")
+          );
           zR.appendChild(fc);
+
           gZ.append(zL, zM, zR);
           i2.appendChild(gZ);
 
-          const { art: c3, inner: i3 } = mkPanel("景观");
-          const pLead = document.createElement("p");
-          pLead.className = "taihe-card__desc yuhua-v4-land-lead";
-          pLead.textContent =
+          const { art: c3, inner: i3 } = mkPanel("");
+          c3.classList.add("yuhua-v4-panel--land");
+          const landHead = document.createElement("div");
+          landHead.className = "yuhua-v4-land-head";
+          const landBrand = document.createElement("div");
+          landBrand.className = "yuhua-v4-land-head__brand";
+          const hLand = document.createElement("h3");
+          hLand.className = "taihe-card__title";
+          hLand.textContent = "景观";
+          const enLand = document.createElement("span");
+          enLand.className = "yuhua-v4-land-head__en";
+          enLand.lang = "en";
+          enLand.textContent = "Landscape";
+          landBrand.append(hLand, enLand);
+          const landLead = document.createElement("p");
+          landLead.className = "yuhua-v4-land-head__lead";
+          landLead.textContent =
             "园内散布各类奇石，与建筑、植物相互映衬，营造「虽由人作，宛自天开」的意境。";
-          i3.appendChild(pLead);
-          const gLand = document.createElement("div");
-          gLand.className = "yuhua-v4-land-grid";
-          gLand.appendChild(mkImg(`${B}/image5.png`, "堆秀山与御景亭", "yuhua-v4-land-hero"));
-          const side = document.createElement("div");
-          side.className = "yuhua-v4-land-side";
-          const boxStone = document.createElement("div");
-          boxStone.className = "yuhua-v4-mini-box";
-          boxStone.appendChild(mkSub("奇石"));
-          boxStone.appendChild(
-            mkDesc(
-              "拜斗石、海参石、木化石等名石点缀园中，与路径、植栽形成对景与框景，是皇家园林叠山理石传统的缩影。"
-            )
-          );
-          const miniS = document.createElement("div");
-          miniS.className = "yuhua-v4-mini-grid";
-          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例一"));
-          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例二"));
-          miniS.appendChild(mkImg(`${B}/image9.png`, "奇石示例三"));
-          boxStone.appendChild(miniS);
-          const boxTree = document.createElement("div");
-          boxTree.className = "yuhua-v4-mini-box yuhua-v4-mini-box--green";
-          boxTree.appendChild(mkSub("古树"));
-          boxTree.appendChild(
-            mkDesc(
-              "蟠龙槐、连理柏、人字柏等古木与御花园共生，冠盖参天，见证宫苑岁月。"
-            )
-          );
-          const miniT = document.createElement("div");
-          miniT.className = "yuhua-v4-mini-grid";
-          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例一"));
-          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例二"));
-          miniT.appendChild(mkImg(`${B}/image10.jpeg`, "古树示例三"));
-          boxTree.appendChild(miniT);
-          side.append(boxStone, boxTree);
-          gLand.appendChild(side);
-          i3.appendChild(gLand);
+          landHead.append(landBrand, landLead);
+          i3.appendChild(landHead);
 
-          const { art: c4, inner: i4 } = mkPanel("花卉");
+          const mkLandNest = (kind, zh, en, desc, items) => {
+            const nest = document.createElement("div");
+            nest.className = `yuhua-v4-land-nest yuhua-v4-land-nest--${kind}`;
+            const titles = document.createElement("div");
+            titles.className = "yuhua-v4-land-nest__titles";
+            const szh = document.createElement("span");
+            szh.className = "yuhua-v4-land-nest__zh";
+            szh.textContent = zh;
+            const sen = document.createElement("span");
+            sen.className = "yuhua-v4-land-nest__en";
+            sen.lang = "en";
+            sen.textContent = en;
+            titles.append(szh, sen);
+            const main = document.createElement("div");
+            main.className = "yuhua-v4-land-nest__main";
+            const gallery = document.createElement("div");
+            gallery.className = "yuhua-v4-land-nest__gallery";
+            items.forEach(([cap, file]) => {
+              const fig = document.createElement("figure");
+              fig.appendChild(mkImg(`${B}/${file}`, cap));
+              const capEl = document.createElement("div");
+              capEl.className = "yuhua-v4-land-nest__cap";
+              capEl.textContent = cap;
+              fig.appendChild(capEl);
+              gallery.appendChild(fig);
+            });
+            const pdesc = document.createElement("p");
+            pdesc.className = "yuhua-v4-land-nest__desc";
+            pdesc.textContent = desc;
+            main.append(gallery, pdesc);
+            nest.append(titles, main);
+            return nest;
+          };
+
+          const landBody = document.createElement("div");
+          landBody.className = "yuhua-v4-land-body";
+          const landColLeft = document.createElement("div");
+          landColLeft.className = "yuhua-v4-land-col-left";
+          const duixiuP = document.createElement("p");
+          duixiuP.className = "yuhua-v4-land-duixiu";
+          duixiuP.textContent =
+            "堆秀山用太湖石叠筑，山势险峻，磴道陡峭，叠石手法新颖，山上御景亭是帝后重阳节登高之处。";
+          const figLand = document.createElement("figure");
+          figLand.className = "yuhua-v4-land-hero";
+          figLand.appendChild(mkImg(`${B}/image5.png`, "堆秀山与御景亭"));
+          landColLeft.append(duixiuP, figLand);
+          const landStack = document.createElement("div");
+          landStack.className = "yuhua-v4-land-stack";
+          landStack.append(
+            mkLandNest(
+              "stone",
+              "奇石",
+              "Exotic stones",
+              "拜斗石、海参石、木化石等名石点缀园中，与路径、植栽形成对景与框景，是皇家园林叠山理石传统的缩影。",
+              [
+                ["拜斗石", "image7.png"],
+                ["海参石", "image8.jpeg"],
+                ["木化石", "image9.png"],
+              ]
+            ),
+            mkLandNest(
+              "tree",
+              "古树",
+              "Old trees",
+              "蟠龙槐、连理柏、人字柏等古木与御花园共生，冠盖参天，见证宫苑岁月。",
+              [
+                ["蟠龙槐", "image10.jpeg"],
+                ["连理柏", "image11.png"],
+                ["人字柏", "image12.jpeg"],
+              ]
+            )
+          );
+          landBody.append(landColLeft, landStack);
+          i3.appendChild(landBody);
+
+          const { art: c4, inner: i4 } = mkPanel("");
+          c4.classList.add("yuhua-v4-panel--flowers");
+          const flowerHead = document.createElement("div");
+          flowerHead.className = "yuhua-v4-flowers-head";
+          const hFlower = document.createElement("h3");
+          hFlower.className = "taihe-card__title";
+          hFlower.textContent = "花卉";
+          const enFlower = document.createElement("span");
+          enFlower.className = "yuhua-v4-flowers-head__en";
+          enFlower.lang = "en";
+          enFlower.textContent = "Flowers";
+          flowerHead.append(hFlower, enFlower);
+          i4.appendChild(flowerHead);
+
+          const mkFlowerFig = (name, file) => {
+            const fig = document.createElement("figure");
+            fig.appendChild(mkImg(`${B}/${file}`, name));
+            const cap = document.createElement("figcaption");
+            cap.textContent = name;
+            fig.appendChild(cap);
+            return fig;
+          };
           const rowF = document.createElement("div");
           rowF.className = "yuhua-v4-flowers-row";
-          const chips = document.createElement("div");
-          chips.className = "yuhua-v4-flower-chips";
+          const flowerGrid = document.createElement("div");
+          flowerGrid.className = "yuhua-v4-flower-grid";
+          const rowTop = document.createElement("div");
+          rowTop.className = "yuhua-v4-flower-grid__row yuhua-v4-flower-grid__row--4";
           [
             ["玉兰", "image13.jpeg"],
             ["榆叶梅", "image14.jpeg"],
             ["梨花", "image15.jpeg"],
             ["丁香", "image16.jpeg"],
-            ["紫玉兰", "image17.jpeg"],
-          ].forEach(([name, file]) => {
-            const fig = document.createElement("figure");
-            fig.appendChild(mkImg(`${B}/${file}`, name));
-            const cap = document.createElement("figcaption");
-            cap.textContent = name;
-            fig.appendChild(cap);
-            chips.appendChild(fig);
-          });
-          const fText = document.createElement("div");
-          fText.appendChild(
-            mkDesc(
-              "玉兰、榆叶梅、梨花、丁香与海棠、芍药等次第开放，与亭台楼阁相映成趣，寄托吉祥与生机，亦承载宫廷岁时游赏与审美传统。"
-            )
-          );
-          rowF.append(chips, fText);
-          i4.appendChild(rowF);
-          const rowF2 = document.createElement("div");
-          rowF2.className = "yuhua-v4-flower-chips yuhua-v4-flower-chips--second";
+          ].forEach(([name, file]) => rowTop.appendChild(mkFlowerFig(name, file)));
+          const rowBot = document.createElement("div");
+          rowBot.className = "yuhua-v4-flower-grid__row yuhua-v4-flower-grid__row--5";
           [
+            ["紫玉兰", "image17.jpeg"],
             ["海棠", "image18.jpeg"],
             ["桃花", "image19.jpeg"],
             ["楸树", "image20.jpeg"],
             ["芍药", "image21.jpeg"],
-          ].forEach(([name, file]) => {
-            const fig = document.createElement("figure");
-            fig.appendChild(mkImg(`${B}/${file}`, name));
-            const cap = document.createElement("figcaption");
-            cap.textContent = name;
-            fig.appendChild(cap);
-            rowF2.appendChild(fig);
-          });
-          i4.appendChild(rowF2);
+          ].forEach(([name, file]) => rowBot.appendChild(mkFlowerFig(name, file)));
+          flowerGrid.append(rowTop, rowBot);
+          const fText = document.createElement("div");
+          fText.className = "yuhua-v4-flower-copy";
+          const pFlower = document.createElement("p");
+          pFlower.className = "taihe-card__desc";
+          pFlower.textContent =
+            "玉兰、榆叶梅、梨花、丁香与海棠、芍药等次第开放，与亭台楼阁相映成趣，寄托吉祥与生机，亦承载宫廷岁时游赏与审美传统。";
+          fText.appendChild(pFlower);
+          rowF.append(flowerGrid, fText);
+          i4.appendChild(rowF);
           i4.appendChild(mkSub("御花园历史精华时轴"));
           const tlRow = document.createElement("div");
           tlRow.className = "yuhua-v4-timeline-row taihe-timeline-row";

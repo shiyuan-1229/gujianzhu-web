@@ -112,18 +112,24 @@
         background: #000;
       }
 
-      /* 太和殿左侧竖排古风标题 */
+      /* 太和殿左侧竖排大字：叠在背景图上（非卡片内）。须高于热区层 z40，否则会被整幅底图盖住 */
       .taihe-vertical-title {
         position: absolute;
         left: 2rem;
         top: 35%;
         transform: translateY(-50%);
-        z-index: 15;
+        z-index: 35;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.5rem;
         pointer-events: none;
+      }
+      body.page-taihe-hotspots .taihe-vertical-title {
+        top: 16%;
+        left: 5.75rem;
+        transform: none;
+        z-index: 45;
       }
       .taihe-vertical-title .taihe-char {
         font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
@@ -137,6 +143,14 @@
         letter-spacing: 0.15em;
         line-height: 1.2;
       }
+      /* 黑色竖排，轻描边避免与浅色底完全糊在一起；不压纹样 */
+      body.page-taihe-hotspots .taihe-vertical-title .taihe-char {
+        font-size: clamp(2.75rem, 6vw, 4.5rem);
+        color: #141414;
+        text-shadow:
+          0 0 1px rgba(255, 255, 255, 0.65),
+          0 1px 2px rgba(255, 255, 255, 0.35);
+      }
       /* 仅在太和殿页面显示 */
       .hero:not(.hero--cinematic):not(.hero--yuhua) .taihe-vertical-title {
         display: flex;
@@ -148,6 +162,10 @@
       @media (max-width: 768px) {
         .taihe-vertical-title {
           left: 1rem;
+        }
+        body.page-taihe-hotspots .taihe-vertical-title {
+          left: 3rem;
+          top: 12%;
         }
         .taihe-vertical-title .taihe-char {
           font-size: 2rem;
@@ -496,16 +514,67 @@
         background-color: rgba(232, 226, 211, 0.35);
       }
 
-      .hero.hero--yuhua .hero-svg-hotspot-layer .hero-svg-hotspot-base {
-        inset: auto;
-        left: 50%;
-        top: 48%;
-        width: 89%;
+      /*
+        御花园：与太和殿相同，热区按整图 1460×830 与 viewBox 对齐，须 object-fit:contain 且底图在层内有确定宽高。
+        原先 89% 宽 + height:auto 在解码前易出现 img 高度为 0 → syncAnchor 直接 return，锚点 0×0、悬停全无。
+      */
+      body.page-yuhua-hotspots .hero-svg-hotspot-layer .hero-svg-hotspot-base {
+        inset: 0;
+        left: auto;
+        top: auto;
+        width: 100%;
+        height: 100%;
         max-width: none;
-        height: auto;
-        max-height: 95%;
-        transform: translate(-50%, -50%);
+        max-height: none;
+        transform: none;
         object-fit: contain;
+        /* 须与 #detailPlateBase、热区标注时用的「整图居中」一致；勿用 48% 等纵向偏移，否则与 translate/path 坐标系不一致 */
+        object-position: center center;
+        background-color: var(--mosaic-bg, #f7f4ed);
+      }
+
+      body.page-yuhua-hotspots #detailPlateBase {
+        object-fit: contain !important;
+        object-position: center center;
+        background-color: rgba(247, 244, 237, 0.45);
+      }
+
+      /* 御花园：默认即显示 path 描边（全局 .map-hotspot-path 为 stroke:transparent，否则「什么都没有」） */
+      body.page-yuhua-hotspots #heroSvgYuhua .map-hotspot-path,
+      body.page-yuhua-hotspots #detailPlateYuhuaSvg .map-hotspot-path {
+        stroke: rgba(255, 220, 120, 0.72) !important;
+        stroke-width: 1.5px !important;
+        filter: drop-shadow(0 0 4px rgba(255, 160, 0, 0.4));
+      }
+
+      body.page-yuhua-hotspots #heroSvgYuhua .map-hotspot-g:hover .map-hotspot-path,
+      body.page-yuhua-hotspots #heroSvgYuhua .map-hotspot-path:hover,
+      body.page-yuhua-hotspots #detailPlateYuhuaSvg .map-hotspot-g:hover .map-hotspot-path,
+      body.page-yuhua-hotspots #detailPlateYuhuaSvg .map-hotspot-path:hover {
+        stroke: #ffe566 !important;
+        stroke-width: 3px !important;
+        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+          drop-shadow(0 0 40px rgba(255, 140, 0, 0.55));
+      }
+
+      /*
+        Hero / 画册锚点内叠放两套 SVG（1800×1259 太和殿 与 1460×830 御花园）。
+        仅用 [hidden] 在个别环境下仍可能与 .map-hotspot-svg{display:block} 叠层异常；
+        按详情页 body 类名强制只显示当前建筑对应的一层，避免御花园底图上出现庑殿顶轮廓。
+      */
+      body.page-yuhua-hotspots #heroSvgTaihe,
+      body.page-yuhua-hotspots #detailPlateTaiheSvg {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      body.page-taihe-hotspots #heroSvgYuhua,
+      body.page-taihe-hotspots #detailPlateYuhuaSvg {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
       }
 
       /* 太和殿 / 御花园鸟瞰：右侧固定信息卡（与首页地图区分） */
@@ -541,6 +610,25 @@
         letter-spacing: 0.06em;
         text-align: justify;
         font-feature-settings: "kern" 1;
+      }
+
+      /* 太和殿：参考深棕圆角卡 + 半透明毛玻璃，尽量少挡底图纹样 */
+      body.page-taihe-hotspots .map-hotspot-info-card.map-hotspot-info-card--detailHero.map-hotspot-info-card--taihe {
+        max-width: min(520px, calc(100vw - 40px));
+        width: min(520px, calc(100vw - 40px));
+        padding: 0;
+        overflow: hidden;
+        border-radius: 14px;
+        background: linear-gradient(165deg, rgba(52, 30, 22, 0.78), rgba(30, 16, 12, 0.72));
+        border: 1px solid rgba(255, 210, 140, 0.42);
+        box-shadow:
+          0 0 0 1px rgba(255, 200, 100, 0.1),
+          0 14px 42px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      body.page-taihe-hotspots .map-hotspot-info-card--taihe .map-hotspot-info-card__main {
+        padding: 1rem 1.15rem 1.15rem;
       }
 
       /* 下滑拼贴区：与上方照片同色底，避免断层 */
@@ -996,33 +1084,54 @@
       /* 太和殿 · 文档素材拼贴（左：历史位置 + 雕饰 B；右：雕饰 A + 沿革 + 价值） */
       .mosaic-grid--taihe-v2 {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.88fr);
-        grid-template-rows: minmax(300px, auto) minmax(110px, auto) minmax(220px, auto);
-        align-items: stretch;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        gap: 1rem;
+        max-width: 1000px;
+        margin: 0 auto;
       }
       .taihe-v2-loc {
         grid-column: 1;
-        grid-row: 1 / span 2;
-        min-height: 0;
+        grid-row: 1;
       }
       .taihe-v2-feat-a {
-        grid-column: 2;
-        grid-row: 1;
-        min-height: 300px;
-      }
-      .taihe-v2-time {
-        grid-column: 2;
+        grid-column: 1;
         grid-row: 2;
       }
-      .taihe-v2-feat-b {
+      .taihe-v2-time {
         grid-column: 1;
         grid-row: 3;
       }
       .taihe-v2-value {
-        grid-column: 2;
-        grid-row: 3;
+        grid-column: 1;
+        grid-row: 4;
+      }
+      .taihe-v2-feat-b {
+        display: none; /* 隐藏左侧历史位置卡片，因为内容已合并到主卡片 */
       }
 
+      /* 横向长方形卡片样式 */
+      .taihe-card--horizontal {
+        grid-column: 1 !important;
+        max-height: 120px;
+      }
+      .taihe-card--horizontal .taihe-card__inner {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.2rem;
+      }
+      .taihe-card--horizontal .taihe-card__title {
+        flex: 0 0 120px;
+        font-size: 1.05rem;
+        margin: 0;
+      }
+      .taihe-card--horizontal .taihe-card__desc {
+        flex: 1;
+        margin: 0;
+        font-size: 0.82rem;
+        line-height: 1.6;
+      }
+      
       /* 右边三个部分的高亮效果 */
       .mosaic-grid--taihe-v2 .taihe-v2-feat-a,
       .mosaic-grid--taihe-v2 .taihe-v2-time,
@@ -1552,13 +1661,6 @@
       </div>
       <div class="hero-vignette" aria-hidden="true"></div>
 
-      <!-- 左侧竖排古风标题 -->
-      <div id="taiheVerticalTitle" class="taihe-vertical-title" aria-hidden="true">
-        <span class="taihe-char">太</span>
-        <span class="taihe-char">和</span>
-        <span class="taihe-char">殿</span>
-      </div>
-
       <div id="heroForeground" class="relative z-10 h-full">
         <div class="mx-auto max-w-6xl h-full px-6 flex items-center">
           <div id="heroCopy" class="hero-copy w-full">
@@ -1601,10 +1703,10 @@
             <g class="map-hotspot-g" transform="translate(178, 491)">
               <path
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋顶"
+                data-name-zh="重檐庑殿顶"
                 data-name-en="Double-eave hip roof (wudian)"
                 data-category="屋顶形制"
-                data-card-placement="top"
+                data-card-placement="top-center"
                 data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
                 d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
               />
@@ -1612,10 +1714,10 @@
             <g class="map-hotspot-g" transform="translate(1103, 677.5)">
               <path
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋檐角"
+                data-name-zh="脊兽"
                 data-name-en="Ridge figures"
                 data-category="屋脊陈设"
-                data-card-placement="top"
+                data-card-placement="top-center"
                 data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
                 d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
               />
@@ -1623,10 +1725,10 @@
             <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
               <path
                 class="map-hotspot-path"
-                data-name-zh="太和殿屋檐底"
+                data-name-zh="溜金斗拱"
                 data-name-en="Gilded dougong (bracket sets)"
                 data-category="檐下木构"
-                data-card-placement="top"
+                data-card-placement="top-center"
                 data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
                 d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
               />
@@ -1640,28 +1742,37 @@
             xmlns="http://www.w3.org/2000/svg"
             hidden
           >
-            <g class="map-hotspot-g" transform="translate(541.5, 434.5)">
+            <!-- 坐标系须与 assets/yuhuayuan-plate-base.png 像素一致（1460×830）；path/translate 请在该图上导出 -->
+            <g class="map-hotspot-g" transform="translate(539.5, 435)">
               <path
                 class="map-hotspot-path"
                 data-name-zh="钦安殿"
                 data-name-en="Hall of Imperial Peace (Qin'an)"
                 data-category="内廷 · 祠庙"
                 data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间，与周围古柏、奇石形成肃静深远的庭院氛围。"
-                d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
+                d="M83.0609 34.2526V20.2526H107.061L128.561 9.75259L136.561 0.752594L144.561 9.75259H266.061V0.752594H271.061H276.061V7.25259L301.061 20.2526H321.561V34.2526M83.0609 34.2526H32.5609H24.0609L0.560913 238.253H37.5609H48.5609L60.5609 231.253H69.0609L83.0609 238.253H98.0609L107.061 243.253H118.561L125.061 237.253L128.561 238.253H144.561H159.561V257.253L172.061 263.253L180.561 270.753V247.253L193.561 243.253L206.561 247.253V270.753H228.061H245.561L254.061 263.253V257.253L261.561 247.253L271.061 250.753L279.561 247.253L283.061 240.253L404.061 237.253L380.561 34.2526H321.561M83.0609 34.2526V43.2526H69.0609L60.5609 130.253V168.753H151.061V202.253H223.061V168.753H345.061L338.561 44.2526L321.561 34.2526"
               />
             </g>
-            <g class="map-hotspot-g" transform="translate(902, 271.5)">
+            <g class="map-hotspot-g" transform="translate(901, 267.5)">
               <path
                 class="map-hotspot-path"
                 data-name-zh="堆秀亭"
                 data-name-en="Duixiu Pavilion"
                 data-category="园林 · 叠山"
+                data-card-placement="top-right"
                 data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的焦点，与山道、蹬道共同构成立体的游观体验。"
-                d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
+                d="M27 53.6656L24.5 36.6656L21.5 26.6656V18.6656L27 22.1656H36.5H42L61 15.1656V4.16565L65.5 0.665649L69 4.16565V15.1656L81 22.1656H92.5L99.5 18.6656V46.6656L106.5 53.6656M27 53.6656L21.5 50.1656H17.5L12 53.6656L9 64.6656V85.1656L3 89.1656V95.6656L5.5 102.666L0.5 108.166V118.666L5.5 133.166L3 140.166V166.166L12 143.666V153.666L17.5 160.166L21.5 166.166L12 173.166V180.666L27 187.666V180.666L34.5 189.166L42 187.666L44 174.666L51 180.666L57 177.166L51 166.166L61 173.166L65.5 174.666L61 189.166L70 193.166L74 189.166L69 182.666L78.5 173.166L83.5 177.166L88.5 180.666V189.166L103.5 187.666L106.5 182.666L99.5 177.166L97 173.166L121.5 168.666L118.5 177.166V187.666L139 182.666V173.166V166.166L136 160.166H149L153 153.666L155.5 146.666L149 143.666V140.166L162 133.166L168 130.666V111.166V98.1656L162 91.6656L153 95.6656L149 91.6656L153 85.1656L149 74.1656L139 64.6656L130.5 68.6656H121.5L118.5 57.6656L113.5 44.1656L109.5 39.1656L103.5 44.1656L106.5 53.6656M27 53.6656V57.6656L34.5 60.6656V89.1656H39V63.6656L48.5 64.6656V89.1656H51V63.6656L78.5 64.6656V91.6656H83.5V64.6656H88.5V85.1656H92.5V64.6656L97 57.6656L106.5 53.6656"
               />
             </g>
           </svg>
         </div>
+      </div>
+
+      <!-- 太和殿竖排「太·和·殿」：叠在鸟瞰底图之上，须在 heroSvgHotspotLayer 之后且 z-index>40，否则会被整幅图盖住 -->
+      <div id="taiheVerticalTitle" class="taihe-vertical-title" aria-hidden="true">
+        <span class="taihe-char">太</span>
+        <span class="taihe-char">和</span>
+        <span class="taihe-char">殿</span>
       </div>
     </section>
 
@@ -1731,10 +1842,10 @@
                   <g class="map-hotspot-g" transform="translate(178, 491)">
                     <path
                       class="map-hotspot-path"
-                      data-name-zh="太和殿屋顶"
+                      data-name-zh="重檐庑殿顶"
                       data-name-en="Double-eave hip roof (wudian)"
                       data-category="屋顶形制"
-                      data-card-placement="top"
+                      data-card-placement="top-center"
                       data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
                       d="M335 47V28.5L345 42.5V28.5H351V47V61L682 36V21.5V11V0.5H690V11L699.5 17V0.5H704.5V17H713.5V42.5L760 91L845 157.5L916.5 192.5V211.5L829 186L747.5 201L564.5 211.5L317.5 225H173.5H0.5V211.5L80.5 192.5L153.5 168.5L218.5 140L272.5 110L324 71L317.5 61L324 47H335Z"
                     />
@@ -1742,10 +1853,10 @@
                   <g class="map-hotspot-g" transform="translate(1103, 677.5)">
                     <path
                       class="map-hotspot-path"
-                      data-name-zh="太和殿屋檐角"
+                      data-name-zh="脊兽"
                       data-name-en="Ridge figures"
                       data-category="屋脊陈设"
-                      data-card-placement="top"
+                      data-card-placement="top-center"
                       data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
                       d="M7 1.20709V9.20709L0.5 18.2071V37.2071L53 50.2071H70.5L74 47.7071H70.5V43.2071L74 39.2071V29.7071V27.2071L70.5 32.2071H68L66 29.7071L64 32.2071H61.5V27.2071H59.5V32.2071H57.5V25.2071H55.5V32.2071H53V25.2071H51V29.7071H47.5V25.2071H45.5V29.7071H42.5V21.7071L40.5 27.2071L38.5 21.7071L36.5 25.2071H32.5V21.7071L28.5 25.2071V18.2071L25.5 21.2071H23V15.2071L19.5 18.2071H15V12.2071L19.5 9.20709H15L7 1.20709Z"
                     />
@@ -1753,10 +1864,10 @@
                   <g class="map-hotspot-g" transform="translate(998.5, 773.5)">
                     <path
                       class="map-hotspot-path"
-                      data-name-zh="太和殿屋檐底"
+                      data-name-zh="溜金斗拱"
                       data-name-en="Gilded dougong (bracket sets)"
                       data-category="檐下木构"
-                      data-card-placement="top"
+                      data-card-placement="top-center"
                       data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
                       d="M0.5 31V8V0.5H19.5L25.5 8V21L19.5 31L15 36.5H6.5L0.5 31Z"
                     />
@@ -1769,24 +1880,25 @@
                   preserveAspectRatio="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g class="map-hotspot-g" transform="translate(541.5, 434.5)">
+                  <g class="map-hotspot-g" transform="translate(539.5, 435)">
                     <path
                       class="map-hotspot-path"
                       data-name-zh="钦安殿"
                       data-name-en="Hall of Imperial Peace (Qin'an)"
                       data-category="内廷 · 祠庙"
                       data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间，与周围古柏、奇石形成肃静深远的庭院氛围。"
-                      d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
+                      d="M83.0609 34.2526V20.2526H107.061L128.561 9.75259L136.561 0.752594L144.561 9.75259H266.061V0.752594H271.061H276.061V7.25259L301.061 20.2526H321.561V34.2526M83.0609 34.2526H32.5609H24.0609L0.560913 238.253H37.5609H48.5609L60.5609 231.253H69.0609L83.0609 238.253H98.0609L107.061 243.253H118.561L125.061 237.253L128.561 238.253H144.561H159.561V257.253L172.061 263.253L180.561 270.753V247.253L193.561 243.253L206.561 247.253V270.753H228.061H245.561L254.061 263.253V257.253L261.561 247.253L271.061 250.753L279.561 247.253L283.061 240.253L404.061 237.253L380.561 34.2526H321.561M83.0609 34.2526V43.2526H69.0609L60.5609 130.253V168.753H151.061V202.253H223.061V168.753H345.061L338.561 44.2526L321.561 34.2526"
                     />
                   </g>
-                  <g class="map-hotspot-g" transform="translate(902, 271.5)">
+                  <g class="map-hotspot-g" transform="translate(901, 267.5)">
                     <path
                       class="map-hotspot-path"
                       data-name-zh="堆秀亭"
                       data-name-en="Duixiu Pavilion"
                       data-category="园林 · 叠山"
+                      data-card-placement="top-right"
                       data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的焦点，与山道、蹬道共同构成立体的游观体验。"
-                      d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
+                      d="M27 53.6656L24.5 36.6656L21.5 26.6656V18.6656L27 22.1656H36.5H42L61 15.1656V4.16565L65.5 0.665649L69 4.16565V15.1656L81 22.1656H92.5L99.5 18.6656V46.6656L106.5 53.6656M27 53.6656L21.5 50.1656H17.5L12 53.6656L9 64.6656V85.1656L3 89.1656V95.6656L5.5 102.666L0.5 108.166V118.666L5.5 133.166L3 140.166V166.166L12 143.666V153.666L17.5 160.166L21.5 166.166L12 173.166V180.666L27 187.666V180.666L34.5 189.166L42 187.666L44 174.666L51 180.666L57 177.166L51 166.166L61 173.166L65.5 174.666L61 189.166L70 193.166L74 189.166L69 182.666L78.5 173.166L83.5 177.166L88.5 180.666V189.166L103.5 187.666L106.5 182.666L99.5 177.166L97 173.166L121.5 168.666L118.5 177.166V187.666L139 182.666V173.166V166.166L136 160.166H149L153 153.666L155.5 146.666L149 143.666V140.166L162 133.166L168 130.666V111.166V98.1656L162 91.6656L153 95.6656L149 91.6656L153 85.1656L149 74.1656L139 64.6656L130.5 68.6656H121.5L118.5 57.6656L113.5 44.1656L109.5 39.1656L103.5 44.1656L106.5 53.6656M27 53.6656V57.6656L34.5 60.6656V89.1656H39V63.6656L48.5 64.6656V89.1656H51V63.6656L78.5 64.6656V91.6656H83.5V64.6656H88.5V85.1656H92.5V64.6656L97 57.6656L106.5 53.6656"
                     />
                   </g>
                 </svg>
@@ -2350,150 +2462,61 @@
         in1.append(t1, d1, f0, d1b, f1, d1c);
         c1.appendChild(in1);
 
+        // 重檐庑殿顶卡片
         const c2 = document.createElement("article");
-        c2.className = "mosaic-card taihe-v2-feat-a taihe-card";
+        c2.className = "mosaic-card taihe-v2-feat-a taihe-card taihe-card--horizontal";
         const in2 = document.createElement("div");
         in2.className = "taihe-card__inner";
         const t2 = document.createElement("h3");
         t2.className = "taihe-card__title";
-        t2.textContent = "特色雕饰与纹样";
+        t2.textContent = "重檐庑殿顶";
         const d2a = document.createElement("p");
         d2a.className = "taihe-card__desc";
-        d2a.textContent =
-          "太和殿的丹陛石雕、木结构雕刻与琉璃装饰，以极致工艺彰显皇家威仪，是中国古建筑装饰艺术的巅峰之作。";
-        const triple = document.createElement("div");
-        triple.className = "taihe-triple";
-        const figStone = document.createElement("figure");
-        figStone.appendChild(img("./assets/taihe-doc-stone.jpeg", "丹陛云龙石石雕"));
-        const cs = document.createElement("figcaption");
-        cs.textContent = "石雕 · 丹陛云龙石";
-        figStone.appendChild(cs);
-        const figWood = document.createElement("figure");
-        figWood.appendChild(img("./assets/taihe-doc-wood.jpeg", "太和殿木雕藻井"));
-        const cw = document.createElement("figcaption");
-        cw.textContent = "木雕";
-        figWood.appendChild(cw);
-        const figGlaze = document.createElement("figure");
-        figGlaze.appendChild(img("./assets/taihe-doc-glaze.jpeg", "琉璃雕饰"));
-        const cg = document.createElement("figcaption");
-        cg.textContent = "琉璃雕";
-        figGlaze.appendChild(cg);
-        triple.append(figStone, figWood, figGlaze);
-        const twinRow = document.createElement("div");
-        twinRow.className = "taihe-twin-row";
-        const colBeast = document.createElement("div");
-        colBeast.className = "taihe-twin-col";
-        const fb = document.createElement("figure");
-        fb.className = "taihe-card__figure taihe-twin-figure";
-        fb.appendChild(img("./assets/taihe-doc-ridge-beasts.jpeg", "太和殿屋脊兽", "taihe-card__img"));
-        const lb = document.createElement("div");
-        lb.className = "taihe-section-label";
-        lb.textContent = "屋脊兽";
-        const db = document.createElement("p");
-        db.className = "taihe-card__desc";
-        db.textContent =
-          "太和殿的装饰上共有10个屋脊兽。这些小兽依次排列在高高的檐角处，象征着消灾灭祸、逢凶化吉，并含有剪除邪恶、主持公道之意。";
-        colBeast.append(fb, lb, db);
-        const colSpout = document.createElement("div");
-        colSpout.className = "taihe-twin-col";
-        const fsp = document.createElement("figure");
-        fsp.className = "taihe-card__figure taihe-twin-figure";
-        fsp.appendChild(
-          img("./assets/taihe-doc-dragon-spouts.png", "太和殿丹陛石阶与汉白玉栏杆（石雕龙头排水）", "taihe-card__img")
-        );
-        const lsp = document.createElement("div");
-        lsp.className = "taihe-section-label";
-        lsp.textContent = "石雕龙头排水";
-        const dsp = document.createElement("p");
-        dsp.className = "taihe-card__desc";
-        dsp.textContent = "栏杆下安有排水用的石雕龙头，每逢雨季，可呈现「千龙吐水」的奇观。";
-        colSpout.append(fsp, lsp, dsp);
-        twinRow.append(colBeast, colSpout);
-        in2.append(t2, d2a, triple, twinRow);
+        d2a.textContent = "庑殿顶是中国古代建筑中最高等级的屋顶形式，太和殿采用重檐庑殿顶，由两层屋檐组成，体现了皇家建筑的至尊地位。其屋面四坡五脊，正脊两端饰有龙吻，垂脊上列有脊兽，展现了中国传统建筑的精湛工艺。";
+        in2.append(t2, d2a);
         c2.appendChild(in2);
 
+        // 脊兽卡片
         const c4 = document.createElement("article");
-        c4.className = "mosaic-card taihe-v2-time taihe-card taihe-card--timeline-ochre";
+        c4.className = "mosaic-card taihe-v2-time taihe-card taihe-card--horizontal";
         const in4 = document.createElement("div");
         in4.className = "taihe-card__inner";
-        const row4 = document.createElement("div");
-        row4.className = "taihe-timeline-row";
-        const vl = document.createElement("span");
-        vl.className = "taihe-vertical-label";
-        vl.textContent = "历史沿革";
-        row4.appendChild(vl);
-        const twrap = document.createElement("div");
-        twrap.className = "taihe-timeline-img-wrap";
-        twrap.appendChild(img("./assets/taihe-doc-timeline.png", "太和殿历史沿革年表"));
-        row4.appendChild(twrap);
-        in4.appendChild(row4);
+        const t4 = document.createElement("h3");
+        t4.className = "taihe-card__title";
+        t4.textContent = "脊兽";
+        const d4 = document.createElement("p");
+        d4.className = "taihe-card__desc";
+        d4.textContent = "太和殿檐角排列着10个脊兽，数量为中国古建筑之最，象征着消灾灭祸、逢凶化吉。从骑凤仙人开始，依次为龙、凤、狮子、天马、海马、狻猊、狎鱼、獬豸、斗牛、行什，每个脊兽都有其独特的寓意和象征意义。";
+        in4.append(t4, d4);
         c4.appendChild(in4);
 
+        // 溜金斗拱卡片
+        const c5 = document.createElement("article");
+        c5.className = "mosaic-card taihe-v2-value taihe-card taihe-card--horizontal";
+        const in5 = document.createElement("div");
+        in5.className = "taihe-card__inner";
+        const t5 = document.createElement("h3");
+        t5.className = "taihe-card__title";
+        t5.textContent = "溜金斗拱";
+        const d5 = document.createElement("p");
+        d5.className = "taihe-card__desc";
+        d5.textContent = "溜金斗拱是清代官式建筑中最高等级的斗拱形式，太和殿檐下的溜金斗拱体量宏大，工艺精湛。它不仅是结构构件，传递屋面荷载至柱身，也是重要的装饰元素，与和玺彩画相互辉映，展现了皇家建筑的奢华与威严。";
+        in5.append(t5, d5);
+        c5.appendChild(in5);
+
+        // 左侧历史位置卡片保持不变
         const c3 = document.createElement("article");
         c3.className = "mosaic-card taihe-v2-feat-b taihe-card";
         const in3 = document.createElement("div");
         in3.className = "taihe-card__inner";
         const t3 = document.createElement("h3");
         t3.className = "taihe-card__title";
-        t3.textContent = "特色雕饰与纹样";
-        const l3a = document.createElement("div");
-        l3a.className = "taihe-section-label";
-        l3a.textContent = "汉白玉赤道式日晷";
+        t3.textContent = "历史位置";
         const d3a = document.createElement("p");
         d3a.className = "taihe-card__desc";
-        d3a.style.fontSize = "0.84rem";
-        d3a.textContent = "日晷在丹陛的左侧，以汉白玉石制成晷盘圆形，中央有金属晷针。";
-        const f3a = document.createElement("figure");
-        f3a.className = "taihe-card__figure";
-        f3a.style.minHeight = "160px";
-        f3a.appendChild(img("./assets/taihe-doc-sundial.jpeg", "汉白玉赤道式日晷", "taihe-card__img"));
-        const l3b = document.createElement("div");
-        l3b.className = "taihe-section-label taihe-section-label--sm";
-        l3b.textContent = "金龙和玺彩画";
-        const pair = document.createElement("div");
-        pair.className = "taihe-paint-pair";
-        const fg = document.createElement("figure");
-        fg.appendChild(img("./assets/taihe-doc-dragon-pattern.jpeg", "龙纹"));
-        const fgc = document.createElement("figcaption");
-        fgc.textContent = "龙纹";
-        fg.appendChild(fgc);
-        const fc = document.createElement("figure");
-        fc.appendChild(img("./assets/taihe-doc-cloud-pattern.jpeg", "祥云纹"));
-        const fcc = document.createElement("figcaption");
-        fcc.textContent = "祥云纹";
-        fc.appendChild(fcc);
-        pair.append(fg, fc);
-        in3.append(t3, l3a, d3a, f3a, l3b, pair);
+        d3a.textContent = "太和殿位于紫禁城外朝核心，明清北京城中轴线上，与中和殿、保和殿同立于三层汉白玉须弥座台基之上，是皇宫礼仪空间的主序列。历史上，登基、大婚、万寿节等重大国家典礼多在此举行。";
+        in3.append(t3, d3a);
         c3.appendChild(in3);
-
-        const c5 = document.createElement("article");
-        c5.className = "mosaic-card taihe-v2-value taihe-card taihe-card--red";
-        const in5 = document.createElement("div");
-        in5.className = "taihe-card__inner";
-        const t5 = document.createElement("h3");
-        t5.className = "taihe-card__title";
-        t5.textContent = "历史价值";
-        const d5 = document.createElement("p");
-        d5.className = "taihe-card__desc";
-        d5.textContent =
-          "太和殿是中国现存等级最高、形制最完备的皇家木结构大殿之一，集中体现明清皇家宫殿建筑的体制与工艺水平，是礼制、营造技艺、空间美学与传统哲学观念相互叠合的典型实例，对东亚地区宫殿类建筑的形制与审美具有广泛影响。";
-        const fv = document.createElement("figure");
-        fv.className = "taihe-value-figure";
-        fv.appendChild(
-          img("./assets/taihe-value-facade.png", "太和殿正立面与三层汉白玉台基", "taihe-card__img")
-        );
-        const d5b = document.createElement("p");
-        d5b.className = "taihe-card__desc";
-        d5b.style.marginTop = "0.35rem";
-        d5b.textContent =
-          "殿宇立于须弥座台基之上，重檐庑殿顶覆黄琉璃瓦，檐下施斗栱与和玺彩画，屋脊饰脊兽，均体现清代官式建筑的等级做法。白石栏杆、御路石雕与铜龟铜鹤等陈设，共同构成外朝大典的视觉中心。作为紫禁城开放参观的重要节点，太和殿承担着文化遗产展示与公众历史教育的现实功能。";
-        const d5c = document.createElement("p");
-        d5c.className = "taihe-card__desc";
-        d5c.style.marginTop = "0.3rem";
-        d5c.textContent =
-          "从文物价值看，太和殿木构架、屋面瓦作、石作与油饰彩画等构件系统，是研究明清皇家工程制度、材料加工与修缮史的实物标本；其与广场、台基、丹陛的组合关系，也是理解中国传统都城轴线与宫廷礼仪空间的关键案例。";
-        in5.append(t5, d5, fv, d5b, d5c);
-        c5.appendChild(in5);
 
         grid.append(c1, c2, c4, c3, c5);
       };
@@ -2933,6 +2956,15 @@
         const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB["故宫太和殿"];
 
         document.body.classList.toggle("page-taihe-hotspots", building.name === "故宫太和殿");
+        document.body.classList.toggle("page-yuhua-hotspots", building.name === "故宫御花园");
+
+        const taiheVerticalTitleEl = document.getElementById("taiheVerticalTitle");
+        if (taiheVerticalTitleEl) {
+          taiheVerticalTitleEl.setAttribute(
+            "aria-hidden",
+            building.name === "故宫太和殿" ? "false" : "true"
+          );
+        }
 
         // 更新标题
         document.title = `${building.name} · 华夏建筑选集`;
@@ -3043,6 +3075,7 @@
               anchor: heroSvgHotspotAnchor,
               svg: heroSvgYuhua,
               cardClass: "map-hotspot-info-card--detailHero",
+              forceReinit: true,
             });
           }
         } else {
@@ -3211,7 +3244,7 @@
           detailPlateTaiheSvg.hidden = true;
           detailPlateYuhuaSvg.hidden = false;
           if (detailPlateCaption) {
-            detailPlateCaption.textContent = "PLATE 01 · 悬停鸟瞰热区可览钦安殿与堆秀亭";
+            detailPlateCaption.textContent = "PLATE 01 · 悬停主图热区可览钦安殿与堆秀亭";
           }
           window.initMapSvgHotspots({
             root: detailPlateWrap,
@@ -3219,6 +3252,7 @@
             anchor: detailPlateSvgAnchor,
             svg: detailPlateYuhuaSvg,
             cardClass: "map-hotspot-info-card--detailHero",
+            forceReinit: true,
           });
         } else if (detailPlateSvgAnchor) {
           detailPlateSvgAnchor.hidden = true;

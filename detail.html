@@ -2336,6 +2336,9 @@
         background: linear-gradient(165deg, rgba(245, 231, 204, 0.96), rgba(233, 212, 178, 0.95));
         color: rgba(54, 36, 20, 0.92);
         border: 1px solid rgba(143, 104, 58, 0.28);
+        box-sizing: border-box;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
       .paper-quiz-board__head {
         display: flex;
@@ -2440,8 +2443,8 @@
         border-radius: 8px;
         background: rgba(255, 247, 233, 0.68);
         border: 1px dashed rgba(140, 98, 50, 0.34);
-        font-size: 0.72rem;
-        line-height: 1.55;
+        font-size: 0.68rem;
+        line-height: 1.45;
         color: rgba(75, 49, 24, 0.88);
       }
       .paper-quiz-board__facts p {
@@ -2934,7 +2937,7 @@
               />
               <div
                 id="paperQuizBoard"
-                class="paper-quiz-board w-full h-[min(42vw,220px)] sm:h-[240px]"
+                class="paper-quiz-board w-full h-[min(46vw,280px)] sm:h-[300px]"
                 hidden
                 aria-hidden="true"
               >

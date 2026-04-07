@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/map-svg-hotspots.css?v=20260406-2" />
+    <link rel="stylesheet" href="./css/site-nav.css" />
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -155,6 +156,55 @@
         }
       }
 
+      /* 太和殿首屏：竖排标题右侧空白区的导语（与 .taihe-char 同字体栈；不拦截热区） */
+      .taihe-hero-intro {
+        display: none;
+        position: absolute;
+        /* 再靠左贴近竖排标题；右侧多留空避免叠在细节图与引线上 */
+        left: clamp(7.5rem, 19vw, 14.5rem);
+        right: clamp(32%, 37vw, 45%);
+        top: clamp(4.35rem, 8.5vh, 5.75rem);
+        z-index: 48;
+        max-width: min(34rem, calc(100vw - 11rem));
+        box-sizing: border-box;
+        pointer-events: none;
+      }
+      body.page-taihe-hotspots .taihe-hero-intro {
+        display: block;
+      }
+      .taihe-hero-intro__text {
+        margin: 0;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(1.02rem, 1.85vw, 1.22rem);
+        font-weight: 500;
+        line-height: 1.85;
+        letter-spacing: 0.06em;
+        /* 左齐更易避免末行单字；pretty 在支持的浏览器里优化断行、减少孤字 */
+        text-align: left;
+        text-wrap: pretty;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+        color: #141414;
+        text-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 1px 2px rgba(255, 255, 255, 0.22);
+      }
+      .taihe-hero-intro__tail {
+        white-space: nowrap;
+      }
+      @media (max-width: 768px) {
+        .taihe-hero-intro {
+          left: clamp(6.25rem, 17vw, 9rem);
+          right: clamp(1rem, 6vw, 1.5rem);
+          top: 4.1rem;
+          max-width: min(24rem, calc(100vw - 7.75rem));
+        }
+        .taihe-hero-intro__text {
+          font-size: 0.95rem;
+          line-height: 1.78;
+        }
+      }
+
       .hero-bg {
         position: absolute;
         inset: -10% 0 -10% 0;
@@ -168,10 +218,10 @@
 
       /* 御花园主图：略缩小并留白；比例介于「不挡字」与「不过窄」之间 */
       .hero.hero--yuhua {
-        background: var(--mosaic-bg, #f7f4ed);
+        background: var(--mosaic-bg, #f9f0e3);
       }
       .hero.hero--yuhua .hero-bg {
-        background-color: var(--mosaic-bg, #f7f4ed);
+        background-color: var(--mosaic-bg, #f9f0e3);
         background-size: 89% auto;
         background-repeat: no-repeat;
         background-position: center 48%;
@@ -195,7 +245,7 @@
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
-        padding: 0.35rem clamp(1.5rem, 6vw, 5rem) 0 clamp(1rem, 4vw, 3.5rem);
+        padding: 0.35rem clamp(4.75rem, 12vw, 9.25rem) 0 clamp(1rem, 4vw, 3.5rem);
         pointer-events: none;
       }
       body.page-yuhua-hotspots .hero-yuhua-page-header__intro {
@@ -219,10 +269,52 @@
       body.page-yuhua-hotspots .hero-yuhua-page-header__line:last-child {
         margin-bottom: 0;
       }
+      /* 御花园热区联动图：悬浮钦安殿/堆秀亭时在右上空白位显示对应配图 */
+      .hero-yuhua-hover-preview {
+        position: absolute;
+        top: clamp(3.55rem, 6.8vh, 4.75rem);
+        right: clamp(1rem, 3.2vw, 2.25rem);
+        z-index: 46;
+        width: clamp(13.2rem, 22.5vw, 19.5rem);
+        aspect-ratio: 4 / 3;
+        border-radius: 0.7rem;
+        overflow: hidden;
+        border: 1px solid rgba(120, 95, 70, 0.35);
+        box-shadow: 0 10px 28px rgba(42, 31, 22, 0.18);
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: opacity 180ms ease, transform 180ms ease;
+        pointer-events: none;
+      }
+      .hero-yuhua-hover-preview.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .hero-yuhua-hover-preview__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #f9f0e3;
+      }
       @media (max-width: 720px) {
         body.page-yuhua-hotspots .hero-yuhua-page-header {
           top: 4rem;
         }
+        .hero-yuhua-hover-preview {
+          top: 3.45rem;
+          right: 0.75rem;
+          width: min(42vw, 14.5rem);
+        }
+      }
+
+      /* 御花园热区卡片：改为古建智寻同款字体（仅改字体，不改字号） */
+      .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua .map-hotspot-info-card__brand,
+      .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua .map-hotspot-info-card__tag,
+      .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua .map-hotspot-info-card__title,
+      .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua .map-hotspot-info-card__en,
+      .map-hotspot-info-card--detailHero.map-hotspot-info-card--yuhua .map-hotspot-info-card__desc {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
       }
 
       /* 视差作用在外壳上，内部视频用 translate 居中 + min 尺寸铺满，避免与 GSAP 抢 transform */
@@ -366,6 +458,26 @@
       .hero-carousel__dot.is-active {
         background: rgba(255, 236, 200, 0.92);
         transform: scale(1.15);
+      }
+      .hero-gugong-art {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 7;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        gap: clamp(0.25rem, 1.4vw, 0.8rem);
+        pointer-events: none;
+        color: rgba(255, 245, 220, 0.86);
+        text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 24px rgba(110, 54, 22, 0.28);
+      }
+      .hero-gugong-art span {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(4.8rem, 13vw, 11rem);
+        line-height: 0.92;
+        letter-spacing: 0.06em;
+        opacity: 0.95;
       }
       @media (prefers-reduced-motion: reduce) {
         .hero-carousel__slide {
@@ -590,7 +702,7 @@
         -webkit-backdrop-filter: blur(8px);
       }
       .map-hotspot-info-card--detailHero .map-hotspot-info-card__tag {
-        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "Source Han Serif SC", serif;
         letter-spacing: 0.18em;
       }
       .map-hotspot-info-card--detailHero .map-hotspot-info-card__title {
@@ -600,13 +712,13 @@
         color: #ffe8c4;
       }
       .map-hotspot-info-card--detailHero .map-hotspot-info-card__en {
-        font-family: "Noto Sans SC", system-ui, sans-serif;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "Source Han Serif SC", serif;
         font-size: 11px;
         letter-spacing: 0.08em;
         opacity: 0.85;
       }
       .map-hotspot-info-card--detailHero .map-hotspot-info-card__desc {
-        font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "Source Han Serif SC", serif;
         font-size: 0.95rem;
         line-height: 1.75;
         letter-spacing: 0.06em;
@@ -2053,19 +2165,46 @@
       }
 
       .hero-scroll-cue {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
         pointer-events: none;
+      }
+
+      .hero-scroll-cue__label {
+        opacity: 0.9;
       }
 
       .hero.hero--cinematic .hero-scroll-cue {
         pointer-events: auto;
-        cursor: default;
-        border: 1px solid rgba(240, 240, 240, 0.28);
-        background: rgba(0, 0, 0, 0.28);
-        padding: 0.45rem 1.35rem;
-        border-radius: 9999px;
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
-        color: rgba(240, 240, 240, 0.78);
+        cursor: pointer;
+      }
+
+      .hero-enter-tour-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        text-decoration: none;
+        border: 1px solid rgba(255, 228, 176, 0.72);
+        background: linear-gradient(180deg, rgba(132, 28, 28, 0.88), rgba(76, 16, 16, 0.9));
+        color: rgba(255, 246, 228, 0.98);
+        padding: 0.54rem 1.34rem;
+        border-radius: 999px;
+        font-family: "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: 0.94rem;
+        letter-spacing: 0.2em;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 215, 140, 0.24);
+        transition: transform 0.18s ease, filter 0.18s ease;
+      }
+
+      .hero-enter-tour-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+      }
+
+      .hero-enter-tour-btn.hidden {
+        display: none !important;
       }
 
       .hero-vignette {
@@ -2203,31 +2342,25 @@
     <!-- 顶栏：与首页 / 列表页同系故宫红金渐变 -->
     <nav
       id="detailTopNav"
-      class="fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_6px_18px_rgba(44,8,8,0.38)] backdrop-blur-xl"
+      class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_6px_18px_rgba(44,8,8,0.38)] backdrop-blur-xl"
       style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52))"
       aria-label="主导航"
     >
-      <div class="container mx-auto flex flex-nowrap items-center justify-between gap-3 px-3 py-1 md:px-4 md:py-1.5">
-        <div class="select-none leading-tight">
-          <a href="./index.html" class="font-ancient text-[1.2rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.35rem]">古建智寻</a>
-          <div class="mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
+      <div class="site-nav-container container mx-auto flex flex-nowrap items-center justify-between gap-3 px-3 py-1 md:px-4 md:py-1.5">
+        <div class="site-nav-brand-wrap select-none leading-tight">
+          <a href="./index.html" class="site-nav-brand">古建智寻</a>
+          <div class="site-nav-sub mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
       </div>
 
         <div class="flex shrink-0 items-center gap-x-4 md:gap-x-6 font-flow text-lg font-medium tracking-[0.14em] text-amber-50/95 md:text-xl md:tracking-[0.16em]">
           <a
             href="javascript:void(0)"
             onclick="if (history.length > 1) { history.back(); } else { location.href='./list.html'; }"
-            class="whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100"
+            class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100"
             >返回上一页</a
           >
-          <a href="./index.html" class="whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
-          <a
-            id="detailNavEnterTour"
-            href="./gugong-explore.html"
-            class="hidden whitespace-nowrap rounded-md border border-amber-200/50 bg-[#6b1a1a]/78 px-3 py-1 font-flow text-base font-medium tracking-[0.12em] text-amber-50 shadow-sm transition-colors hover:border-amber-200/65 hover:bg-[#7b1f1f]/88 md:px-4 md:text-lg md:tracking-[0.14em]"
-            aria-hidden="true"
-            >进入游览</a
-          >
+          <a href="./index.html" class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
+
         </div>
       </div>
     </nav>
@@ -2243,15 +2376,15 @@
       <img id="heroHoverHighlight" src="" alt="" aria-hidden="true" hidden />
       <div id="heroHoverHotspot" hidden aria-label="建筑主殿悬浮高亮区域"></div>
       <div class="hero-video-shell" id="heroVideoShell" aria-hidden="true">
-        <video
-          id="heroVideo"
-          class="hero-video"
-          muted
-          playsinline
-          loop
-          preload="metadata"
-          aria-hidden="true"
-        ></video>
+      <video
+        id="heroVideo"
+        class="hero-video"
+        muted
+        playsinline
+        loop
+        preload="metadata"
+        aria-hidden="true"
+      ></video>
         <div
           id="heroCarousel"
           class="hero-carousel hero-carousel--hidden"
@@ -2268,6 +2401,9 @@
             ›
           </button>
           <div class="hero-carousel__dots" id="heroCarouselDots" role="tablist" aria-label="轮播页码"></div>
+        </div>
+        <div id="heroGugongArt" class="hero-gugong-art" hidden aria-hidden="true">
+          <span>故</span><span>宫</span>
         </div>
       </div>
       <div id="heroLionDecor" class="hero-lion-decor" hidden aria-hidden="true">
@@ -2301,12 +2437,29 @@
           </p>
         </div>
       </div>
+      <div id="heroYuhuaHoverPreview" class="hero-yuhua-hover-preview" aria-hidden="true">
+        <img
+          id="heroYuhuaHoverPreviewImg"
+          class="hero-yuhua-hover-preview__img"
+          src=""
+          alt=""
+          decoding="async"
+          loading="eager"
+        />
+      </div>
 
       <!-- 左侧竖排古风标题 -->
       <div id="taiheVerticalTitle" class="taihe-vertical-title" aria-hidden="true">
         <span class="taihe-char">太</span>
         <span class="taihe-char">和</span>
         <span class="taihe-char">殿</span>
+      </div>
+
+      <!-- 太和殿：首屏导语（仅故宫太和殿；pointer-events:none 不挡热区） -->
+      <div id="taiheHeroIntro" class="taihe-hero-intro" aria-hidden="true">
+        <p class="taihe-hero-intro__text">
+          太和殿是紫禁城内体量最大、等级最高的建筑，其建筑规制及装饰手法，堪列中国的建筑之首。如今经过大规模古建筑维修保护，太和殿内外重现清朝鼎盛时期的<span class="taihe-hero-intro__tail">样貌。</span>
+        </p>
       </div>
 
       <div id="heroForeground" class="relative z-10 h-full">
@@ -2333,7 +2486,13 @@
         id="heroScrollCue"
         class="hero-scroll-cue absolute bottom-10 left-1/2 z-10 -translate-x-1/2 select-none text-qianbai/55 text-xs tracking-[0.36em]"
       >
-        SCROLL
+        <a
+          id="detailNavEnterTour"
+          href="./gugong-explore.html"
+          class="hero-enter-tour-btn hidden"
+          aria-hidden="true"
+          >进入游览</a
+        >
       </div>
 
       <!-- 置于 Hero 末尾、z-index 最高，保证路径热区在最上层接收指针 -->
@@ -2544,7 +2703,7 @@
                     />
                   </g>
                 </svg>
-              </div>
+            </div>
             </div>
             <div
               id="detailPlateCaption"
@@ -2628,7 +2787,7 @@
                 alt="故宫图片5"
                 loading="lazy"
               />
-            </div>
+                </div>
             <div
               id="paperPlateCornerCap"
               class="mt-2.5 text-xs tracking-[0.22em]"
@@ -2703,7 +2862,7 @@
           province: "北京",
           year: "明永乐十八年（1420年）",
           desc: "御花园位于乾清宫后方，是明清宫廷休憩赏景之所。园内以亭、石、柏与曲径组织空间，在中轴秩序中形成精巧而层次丰富的园林节点。",
-          pageBg: "#f7f4ed",
+          pageBg: "#F9F0E3",
           heroImage: "./assets/yuhuayuan-plate-base.png",
           heroHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
           detailImage: "./assets/yuhuayuan-plate-base.png",
@@ -3763,6 +3922,59 @@
         });
       }
 
+      const YUHUA_HOVER_PREVIEW_IMAGES = {
+        "堆秀亭":
+          "./assets/yuhua-duixiuting-hover.png",
+        "钦安殿":
+          "./assets/yuhua-qinandian-hover.png",
+      };
+
+      function setupYuhuaHeroHoverPreview(active, yuhuaSvg) {
+        const previewEl = document.getElementById("heroYuhuaHoverPreview");
+        const previewImgEl = document.getElementById("heroYuhuaHoverPreviewImg");
+        if (!previewEl || !previewImgEl) return;
+
+        const hidePreview = () => {
+          previewEl.classList.remove("is-visible");
+          previewEl.setAttribute("aria-hidden", "true");
+          previewImgEl.removeAttribute("src");
+          previewImgEl.alt = "";
+        };
+
+        if (!active || !yuhuaSvg) {
+          hidePreview();
+          return;
+        }
+
+        const showPreviewByName = (hotspotName) => {
+          const imageSrc = YUHUA_HOVER_PREVIEW_IMAGES[hotspotName];
+          if (!imageSrc) {
+            hidePreview();
+            return;
+          }
+          if (previewImgEl.getAttribute("src") !== imageSrc) {
+            previewImgEl.src = imageSrc;
+          }
+          previewImgEl.alt = hotspotName;
+          previewEl.setAttribute("aria-hidden", "false");
+          previewEl.classList.add("is-visible");
+        };
+
+        if (yuhuaSvg.dataset.previewBound === "1") return;
+        yuhuaSvg.dataset.previewBound = "1";
+
+        yuhuaSvg.querySelectorAll(".map-hotspot-path").forEach((path) => {
+          const onEnter = () => showPreviewByName(path.getAttribute("data-name-zh") || "");
+          const onLeave = () => hidePreview();
+          path.addEventListener("mouseenter", onEnter);
+          path.addEventListener("mouseleave", onLeave);
+          path.addEventListener("pointerenter", onEnter);
+          path.addEventListener("pointerleave", onLeave);
+          path.addEventListener("touchstart", onEnter, { passive: true });
+          path.addEventListener("touchend", onLeave, { passive: true });
+        });
+      }
+
       // 更新页面内容
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
@@ -3780,10 +3992,14 @@
           heroYuhuaPageHeader.hidden = building.name !== "故宫御花园";
         }
 
+        const showTaiheSideTitle = building.name === "故宫太和殿";
         const taiheVerticalTitleEl = document.getElementById("taiheVerticalTitle");
         if (taiheVerticalTitleEl) {
-          const showTaiheSideTitle = building.name === "故宫太和殿";
           taiheVerticalTitleEl.setAttribute("aria-hidden", showTaiheSideTitle ? "false" : "true");
+        }
+        const taiheHeroIntroEl = document.getElementById("taiheHeroIntro");
+        if (taiheHeroIntroEl) {
+          taiheHeroIntroEl.setAttribute("aria-hidden", showTaiheSideTitle ? "false" : "true");
         }
 
         // 更新标题
@@ -3811,6 +4027,11 @@
           carouselItems.length > 0 &&
           !isMosaicDetail &&
           building.name === "北京故宫";
+        const heroGugongArtEl = document.getElementById("heroGugongArt");
+        if (heroGugongArtEl) {
+          heroGugongArtEl.hidden = !useCarousel;
+          heroGugongArtEl.setAttribute("aria-hidden", useCarousel ? "false" : "true");
+        }
         setupGugongHeroLions(!!useCarousel);
         const videoSrc = building.heroVideo;
 
@@ -3829,26 +4050,26 @@
         } else {
           hideHeroCarousel();
           if (videoSrc && heroVideo && !isMosaicDetail) {
-            heroVideo.classList.add("is-active");
-            if (heroVideo.getAttribute("src") !== videoSrc) {
-              heroVideo.src = videoSrc;
-            }
-            heroVideo.play().catch(() => {});
-            heroBg.style.backgroundImage = "none";
-            heroBg.style.backgroundColor = "#000";
-            heroSection?.classList.add("hero--cinematic");
-            document.body.classList.add("body--cinematic-hero");
-          } else {
+          heroVideo.classList.add("is-active");
+          if (heroVideo.getAttribute("src") !== videoSrc) {
+            heroVideo.src = videoSrc;
+          }
+          heroVideo.play().catch(() => {});
+          heroBg.style.backgroundImage = "none";
+          heroBg.style.backgroundColor = "#000";
+          heroSection?.classList.add("hero--cinematic");
+          document.body.classList.add("body--cinematic-hero");
+        } else {
             if (heroVideo) {
-              heroVideo.classList.remove("is-active");
-              heroVideo.pause();
-              heroVideo.removeAttribute("src");
-              heroVideo.load();
+          heroVideo.classList.remove("is-active");
+          heroVideo.pause();
+          heroVideo.removeAttribute("src");
+          heroVideo.load();
             }
-            heroBg.style.backgroundColor = "";
-            heroBg.style.backgroundImage = `url('${building.heroImage}')`;
-            heroSection?.classList.remove("hero--cinematic");
-            document.body.classList.remove("body--cinematic-hero");
+          heroBg.style.backgroundColor = "";
+          heroBg.style.backgroundImage = `url('${building.heroImage}')`;
+          heroSection?.classList.remove("hero--cinematic");
+          document.body.classList.remove("body--cinematic-hero");
           }
         }
 
@@ -3863,6 +4084,7 @@
         const heroSvgHotspotAnchor = document.getElementById("heroSvgHotspotAnchor");
         const heroSvgTaihe = document.getElementById("heroSvgTaihe");
         const heroSvgYuhua = document.getElementById("heroSvgYuhua");
+        setupYuhuaHeroHoverPreview(building.name === "故宫御花园", heroSvgYuhua);
         if (
           isMosaicDetail &&
           heroSvgHotspotLayer &&
@@ -4142,15 +4364,15 @@
       const heroHoverHighlightEl = document.getElementById("heroHoverHighlight");
       if (heroHoverHighlightEl) {
         gsap.to(heroHoverHighlightEl, {
-          y: 140,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
+        y: 140,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
       }
 
       if (heroVideoShell) {
@@ -4191,3 +4413,4 @@
     <script src="./js/ai-chat-widget.js"></script>
   </body>
 </html>
+

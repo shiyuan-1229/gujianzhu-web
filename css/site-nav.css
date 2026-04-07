@@ -1,0 +1,81 @@
+.site-nav {
+  --nav-btn-border: rgba(212, 175, 120, 0.52);
+  --nav-btn-bg: rgba(25, 12, 12, 0.2);
+  --nav-btn-bg-hover: rgba(70, 30, 22, 0.34);
+}
+
+:root {
+  --site-nav-offset: 3.1rem;
+}
+
+.site-nav .site-nav-container {
+  padding-top: 0.55rem !important;
+  padding-bottom: 0.55rem !important;
+}
+
+.site-nav .site-nav-brand-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.site-nav .site-nav-brand {
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif !important;
+  font-size: clamp(1.5rem, 2.4vw, 1.95rem) !important;
+  line-height: 1 !important;
+  letter-spacing: 0.06em !important;
+  color: #f5efe3 !important;
+  text-decoration: none !important;
+  text-shadow:
+    0 1px 0 rgba(255, 245, 224, 0.36),
+    0 2px 0 rgba(134, 86, 52, 0.48),
+    0 8px 12px rgba(0, 0, 0, 0.35);
+}
+
+.site-nav .site-nav-sub {
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0.16em !important;
+  color: rgba(226, 208, 182, 0.8) !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.site-nav .site-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.34rem 0.85rem;
+  border: 1px solid var(--nav-btn-border);
+  border-radius: 0.45rem;
+  background: var(--nav-btn-bg);
+  color: rgba(250, 240, 220, 0.95) !important;
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1.1 !important;
+  text-decoration: none !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.site-nav .site-nav-btn:hover {
+  border-color: rgba(241, 210, 158, 0.84);
+  background: var(--nav-btn-bg-hover);
+  transform: translateY(-1px);
+}
+
+.site-nav .site-nav-btn.site-nav-btn--current {
+  border-color: rgba(250, 224, 178, 0.88);
+  background: rgba(98, 38, 30, 0.45);
+}
+
+.site-nav .site-nav-input {
+  font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif !important;
+  font-size: 0.95rem !important;
+}
+
+.site-main-offset {
+  padding-top: var(--site-nav-offset) !important;
+}

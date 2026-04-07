@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./css/site-nav.css" />
 
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -495,19 +496,19 @@
 
     <main class="h-screen w-screen relative z-10">
       <!-- 顶部导航栏（对齐首页视觉，不改筛选/交互逻辑） -->
-      <nav class="fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
-        <div class="container mx-auto flex items-center justify-between px-4 py-3">
-          <div class="select-none">
-            <div class="font-ancient text-[1.65rem] font-normal leading-none tracking-[0.06em] text-stone-100 md:text-[1.9rem]">古建智寻</div>
-            <div class="mt-1 font-flow text-xs tracking-[0.2em] text-zinc-400">华夏建筑选集</div>
+      <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
+        <div class="site-nav-container container mx-auto flex items-center justify-between px-4 py-3">
+          <div class="site-nav-brand-wrap select-none">
+            <div class="site-nav-brand">古建智寻</div>
+            <div class="site-nav-sub mt-1 font-flow text-xs tracking-[0.2em] text-zinc-400">华夏建筑选集</div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2 md:gap-3">
-            <button class="filter-btn active rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50 transition-all duration-300 hover:bg-[#7b1f1f]/90 md:px-4" data-category="all">全部</button>
-            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="民居">民居</button>
-            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="皇宫">皇宫</button>
-            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="官府">官府</button>
-            <button class="filter-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="桥梁">桥梁</button>
+            <button class="filter-btn site-nav-btn active rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50 transition-all duration-300 hover:bg-[#7b1f1f]/90 md:px-4" data-category="all">全部</button>
+            <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="民居">民居</button>
+            <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="皇宫">皇宫</button>
+            <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="官府">官府</button>
+            <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="桥梁">桥梁</button>
           </div>
         </div>
       </nav>

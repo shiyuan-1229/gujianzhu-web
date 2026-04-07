@@ -157,7 +157,7 @@
         card.style.width =
           "min(640px, calc(100vw - " + pad * 2 + "px - min(12rem, 18vw)))";
       } else if (card.classList.contains("map-hotspot-info-card--yuhua")) {
-        var maxCardW = Math.min(640, vw - pad * 2);
+        var maxCardW = Math.min(600, vw - pad * 2);
         card.style.left = Math.max(pad, Math.round((vw - maxCardW) / 2)) + "px";
         card.style.transform = "none";
         card.style.width = maxCardW + "px";

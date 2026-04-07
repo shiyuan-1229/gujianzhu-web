@@ -269,6 +269,10 @@
       body.page-yuhua-hotspots .hero-yuhua-page-header__line:last-child {
         margin-bottom: 0;
       }
+      body.page-yuhua-hotspots.yuhua-card-active .hero-yuhua-page-header {
+        opacity: 0;
+        visibility: hidden;
+      }
       /* 御花园热区联动图：悬浮钦安殿/堆秀亭时在右上空白位显示对应配图 */
       .hero-yuhua-hover-preview {
         position: absolute;
@@ -471,15 +475,15 @@
         align-items: center;
         gap: clamp(0.25rem, 1.4vw, 0.8rem);
         pointer-events: none;
-        color: rgba(255, 245, 220, 0.86);
-        text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 24px rgba(110, 54, 22, 0.28);
+        color: #000;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.26), 0 0 16px rgba(80, 42, 20, 0.2);
       }
       .hero-gugong-art span {
         font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
         font-size: clamp(4.8rem, 13vw, 11rem);
         line-height: 0.92;
         letter-spacing: 0.06em;
-        opacity: 0.95;
+        opacity: 0.9;
       }
       @media (prefers-reduced-motion: reduce) {
         .hero-carousel__slide {
@@ -2315,6 +2319,13 @@
         border: 1px solid rgba(120, 90, 48, 0.28);
         background: rgba(255, 252, 245, 0.92);
       }
+      body[data-active-building="北京故宫"] .paper-frame .plate img {
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+      body[data-active-building="北京故宫"] .paper-frame .plate img:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(78, 52, 24, 0.2);
+      }
 
       /* 故宫画册右下角：互动答题卡（仅北京故宫显示） */
       .paper-quiz-board {
@@ -4090,6 +4101,7 @@
           previewEl.setAttribute("aria-hidden", "true");
           previewImgEl.removeAttribute("src");
           previewImgEl.alt = "";
+          document.body.classList.remove("yuhua-card-active");
         };
 
         if (!active || !yuhuaSvg) {
@@ -4115,7 +4127,10 @@
         yuhuaSvg.dataset.previewBound = "1";
 
         yuhuaSvg.querySelectorAll(".map-hotspot-path").forEach((path) => {
-          const onEnter = () => showPreviewByName(path.getAttribute("data-name-zh") || "");
+          const onEnter = () => {
+            document.body.classList.add("yuhua-card-active");
+            showPreviewByName(path.getAttribute("data-name-zh") || "");
+          };
           const onLeave = () => hidePreview();
           path.addEventListener("mouseenter", onEnter);
           path.addEventListener("mouseleave", onLeave);

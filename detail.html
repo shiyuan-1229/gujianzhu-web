@@ -277,10 +277,11 @@
         z-index: 46;
         width: clamp(13.2rem, 22.5vw, 19.5rem);
         aspect-ratio: 4 / 3;
-        border-radius: 0.7rem;
-        overflow: hidden;
-        border: 1px solid rgba(120, 95, 70, 0.35);
-        box-shadow: 0 10px 28px rgba(42, 31, 22, 0.18);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
         opacity: 0;
         transform: translateY(-6px);
         transition: opacity 180ms ease, transform 180ms ease;
@@ -294,8 +295,9 @@
         display: block;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        background: #f9f0e3;
+        object-fit: contain;
+        object-position: center center;
+        background: transparent;
       }
       @media (max-width: 720px) {
         body.page-yuhua-hotspots .hero-yuhua-page-header {

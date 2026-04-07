@@ -1206,6 +1206,14 @@
         flex-direction: column;
         gap: 0.75rem;
       }
+      /* 御花园 v4：图片悬浮微上浮，增强交互感 */
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 img {
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+      body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 img:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(66, 42, 24, 0.18);
+      }
       body.page-yuhua-hotspots .mosaic-grid--yuhua-v4 .taihe-card__title {
         font-size: clamp(1.2rem, 2.6vw, 1.45rem);
         font-weight: 800;
@@ -2308,6 +2316,130 @@
         background: rgba(255, 252, 245, 0.92);
       }
 
+      /* 故宫画册右下角：互动答题卡（仅北京故宫显示） */
+      .paper-quiz-board {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        padding: 0.9rem 0.95rem;
+        background: linear-gradient(165deg, rgba(245, 231, 204, 0.96), rgba(233, 212, 178, 0.95));
+        color: rgba(54, 36, 20, 0.92);
+        border: 1px solid rgba(143, 104, 58, 0.28);
+      }
+      .paper-quiz-board__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.6rem;
+      }
+      .paper-quiz-board__title {
+        margin: 0;
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: 1.12rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: #6b3f16;
+      }
+      .paper-quiz-board__meta {
+        font-size: 0.64rem;
+        letter-spacing: 0.12em;
+        color: rgba(95, 67, 37, 0.72);
+      }
+      .paper-quiz-board__question {
+        margin: 0.15rem 0 0.1rem;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.55;
+        color: rgba(48, 31, 18, 0.92);
+      }
+      .paper-quiz-board__opts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.38rem 0.42rem;
+      }
+      .paper-quiz-option {
+        border: 1px solid rgba(144, 103, 56, 0.28);
+        border-radius: 8px;
+        background: rgba(255, 251, 242, 0.85);
+        color: rgba(62, 40, 22, 0.9);
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.35;
+        text-align: left;
+        padding: 0.38rem 0.48rem;
+        transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+      }
+      .paper-quiz-option:hover {
+        transform: translateY(-1px);
+        border-color: rgba(162, 112, 31, 0.52);
+      }
+      .paper-quiz-option.is-right {
+        border-color: rgba(62, 138, 82, 0.6);
+        background: rgba(230, 246, 234, 0.92);
+      }
+      .paper-quiz-option.is-wrong {
+        border-color: rgba(170, 76, 57, 0.55);
+        background: rgba(252, 235, 228, 0.92);
+      }
+      .paper-quiz-board__foot {
+        margin-top: 0.35rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .paper-quiz-board__feedback {
+        margin: 0;
+        font-size: 0.76rem;
+        font-weight: 600;
+        line-height: 1.45;
+        color: rgba(72, 48, 28, 0.84);
+      }
+      .paper-quiz-board__next {
+        border: 1px solid rgba(138, 91, 45, 0.58);
+        border-radius: 999px;
+        padding: 0.28rem 0.72rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: rgba(88, 56, 26, 0.94);
+        background: linear-gradient(180deg, #fff5df 0%, #f1dcb4 100%);
+        box-shadow:
+          0 2px 0 rgba(118, 75, 36, 0.45),
+          0 6px 12px rgba(96, 62, 30, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        transition: transform 140ms ease, box-shadow 140ms ease;
+      }
+      .paper-quiz-board__next:hover:not([disabled]) {
+        transform: translateY(-1px);
+      }
+      .paper-quiz-board__next:active:not([disabled]) {
+        transform: translateY(1px);
+        box-shadow:
+          0 1px 0 rgba(118, 75, 36, 0.45),
+          0 3px 8px rgba(96, 62, 30, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      }
+      .paper-quiz-board__next[disabled] {
+        opacity: 0.45;
+      }
+      .paper-quiz-board__facts {
+        margin: 0.2rem 0 0;
+        padding: 0.5rem 0.6rem;
+        border-radius: 8px;
+        background: rgba(255, 247, 233, 0.68);
+        border: 1px dashed rgba(140, 98, 50, 0.34);
+        font-size: 0.72rem;
+        line-height: 1.55;
+        color: rgba(75, 49, 24, 0.88);
+      }
+      .paper-quiz-board__facts p {
+        margin: 0 0 0.28rem;
+      }
+      .paper-quiz-board__facts p:last-child {
+        margin-bottom: 0;
+      }
+
       /* 御花园：叠放高亮图，热区内悬停立即显示（无过渡） */
       #detailPlateWrap {
         position: relative;
@@ -2789,7 +2921,24 @@
                 alt="故宫图片5"
                 loading="lazy"
               />
+              <div
+                id="paperQuizBoard"
+                class="paper-quiz-board w-full h-[min(42vw,220px)] sm:h-[240px]"
+                hidden
+                aria-hidden="true"
+              >
+                <div class="paper-quiz-board__head">
+                  <h4 class="paper-quiz-board__title">古建小测</h4>
+                  <span id="paperQuizMeta" class="paper-quiz-board__meta">Q1 / 3</span>
                 </div>
+                <p id="paperQuizQuestion" class="paper-quiz-board__question"></p>
+                <div id="paperQuizOptions" class="paper-quiz-board__opts"></div>
+                <div class="paper-quiz-board__foot">
+                  <p id="paperQuizFeedback" class="paper-quiz-board__feedback">请选择一个答案</p>
+                  <button id="paperQuizNext" type="button" class="paper-quiz-board__next" disabled>下一题</button>
+                </div>
+              </div>
+            </div>
             <div
               id="paperPlateCornerCap"
               class="mt-2.5 text-xs tracking-[0.22em]"
@@ -3977,6 +4126,116 @@
         });
       }
 
+      const GUGONG_QUIZ_ITEMS = [
+        {
+          q: "太和殿屋顶在官式建筑中属于哪种等级形制？",
+          options: ["重檐庑殿顶", "歇山顶", "悬山顶", "硬山顶"],
+          answer: 0,
+          explain: "太和殿采用重檐庑殿顶，是最高等级形制之一。",
+        },
+        {
+          q: "御花园中轴北端、内奉玄天上帝的建筑是？",
+          options: ["中和殿", "钦安殿", "堆秀亭", "保和殿"],
+          answer: 1,
+          explain: "钦安殿是御花园轴线上重要祠庙建筑。",
+        },
+        {
+          q: "外朝礼仪核心“三大殿”不包括以下哪一座？",
+          options: ["太和殿", "中和殿", "保和殿", "坤宁宫"],
+          answer: 3,
+          explain: "外朝三大殿为太和殿、中和殿、保和殿。",
+        },
+      ];
+
+      function setupGugongPaperQuiz(active) {
+        const quizBoard = document.getElementById("paperQuizBoard");
+        const quizMeta = document.getElementById("paperQuizMeta");
+        const quizQuestion = document.getElementById("paperQuizQuestion");
+        const quizOptions = document.getElementById("paperQuizOptions");
+        const quizFeedback = document.getElementById("paperQuizFeedback");
+        const quizNextBtn = document.getElementById("paperQuizNext");
+        if (!quizBoard || !quizMeta || !quizQuestion || !quizOptions || !quizFeedback || !quizNextBtn) return;
+
+        if (!active) {
+          quizBoard.hidden = true;
+          quizBoard.setAttribute("aria-hidden", "true");
+          return;
+        }
+
+        quizBoard.hidden = false;
+        quizBoard.setAttribute("aria-hidden", "false");
+
+        if (quizBoard.dataset.bound === "1") return;
+        quizBoard.dataset.bound = "1";
+
+        const state = { index: 0, score: 0, picked: false };
+
+        const render = () => {
+          const item = GUGONG_QUIZ_ITEMS[state.index];
+          quizMeta.textContent = `Q${state.index + 1} / ${GUGONG_QUIZ_ITEMS.length}`;
+          quizQuestion.textContent = item.q;
+          quizOptions.innerHTML = item.options
+            .map(
+              (option, idx) =>
+                `<button type="button" class="paper-quiz-option" data-idx="${idx}">${String.fromCharCode(65 + idx)}. ${option}</button>`
+            )
+            .join("");
+          quizFeedback.textContent = "请选择一个答案";
+          quizNextBtn.textContent = state.index === GUGONG_QUIZ_ITEMS.length - 1 ? "查看结果" : "下一题";
+          quizNextBtn.disabled = true;
+          state.picked = false;
+        };
+
+        quizOptions.addEventListener("click", (event) => {
+          const btn = event.target.closest(".paper-quiz-option");
+          if (!btn || state.picked) return;
+
+          const picked = Number(btn.getAttribute("data-idx"));
+          const item = GUGONG_QUIZ_ITEMS[state.index];
+          state.picked = true;
+
+          quizOptions.querySelectorAll(".paper-quiz-option").forEach((el) => {
+            const idx = Number(el.getAttribute("data-idx"));
+            if (idx === item.answer) el.classList.add("is-right");
+            if (idx === picked && idx !== item.answer) el.classList.add("is-wrong");
+            el.disabled = true;
+          });
+
+          if (picked === item.answer) {
+            state.score += 1;
+            quizFeedback.textContent = `回答正确。${item.explain}`;
+          } else {
+            quizFeedback.textContent = `正确答案：${item.options[item.answer]}。${item.explain}`;
+          }
+          quizNextBtn.disabled = false;
+        });
+
+        quizNextBtn.addEventListener("click", () => {
+          if (!state.picked) return;
+          if (state.index < GUGONG_QUIZ_ITEMS.length - 1) {
+            state.index += 1;
+            render();
+            return;
+          }
+          quizQuestion.textContent = `答题完成：共答对 ${state.score} / ${GUGONG_QUIZ_ITEMS.length} 题。`;
+          quizOptions.innerHTML =
+            '<div class="paper-quiz-board__facts"><p>• 太和殿重檐庑殿顶，代表皇家建筑最高等级之一。</p><p>• 紫禁城外朝三大殿：太和殿、中和殿、保和殿。</p><p>• 御花园北端钦安殿是宫城中重要的道教祭祀空间。</p></div>';
+          quizFeedback.textContent = "点击右侧按钮可重新开始。";
+          quizMeta.textContent = "完成";
+          quizNextBtn.textContent = "重新开始";
+          quizNextBtn.disabled = false;
+          state.index = 0;
+          state.score = 0;
+          state.picked = false;
+          quizNextBtn.onclick = () => {
+            quizNextBtn.onclick = null;
+            render();
+          };
+        });
+
+        render();
+      }
+
       // 更新页面内容
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
@@ -4334,6 +4593,19 @@
             building.paperCornerImage || building.subImages?.[0] || building.detailImage;
           paperPlateCorner.alt = `${building.name} · 局部景观`;
         }
+
+        const showPaperQuiz = building.name === "北京故宫";
+        const paperQuizBoard = document.getElementById("paperQuizBoard");
+        const paperPlateCornerCap = document.getElementById("paperPlateCornerCap");
+        if (paperQuizBoard && paperPlateCorner) {
+          paperQuizBoard.hidden = !showPaperQuiz;
+          paperQuizBoard.setAttribute("aria-hidden", showPaperQuiz ? "false" : "true");
+          paperPlateCorner.hidden = showPaperQuiz;
+        }
+        if (paperPlateCornerCap && showPaperQuiz) {
+          paperPlateCornerCap.textContent = "INTERACTIVE QUIZ · 故宫建筑问答";
+        }
+        setupGugongPaperQuiz(showPaperQuiz);
       };
 
       // 初始化页面；下一帧再解除隐藏，避免与首帧合成之间夹一帧占位内容

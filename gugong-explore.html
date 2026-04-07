@@ -109,6 +109,15 @@
         outline: 2px solid rgba(212, 175, 55, 0.85);
         outline-offset: 4px;
       }
+      /* 按钮悬浮联动：让整块故宫热区持续高亮 */
+      #gugongJourney1HotspotSvg .map-hotspot-path.is-active {
+        fill: rgba(0, 0, 0, 0.02);
+        stroke: #ffe566;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
+      }
 
       .palace-link--static:hover,
       .palace-link--static:focus-visible {
@@ -519,19 +528,26 @@
     </script>
     <script>
       (function () {
+        var hotspotSvg = document.getElementById("gugongJourney1HotspotSvg");
+        var hotspotPath = document.querySelector('#gugongJourney1HotspotSvg .map-hotspot-path[data-name-zh="故宫"]');
+        var setHotspotActive = function (active) {
+          if (!hotspotPath) return;
+          hotspotPath.classList.toggle("is-active", !!active);
+        };
         var trigger = document.getElementById("jadeGugong");
         var mask = document.getElementById("gugongTransition");
         var transitioning = false;
         if (!trigger || !mask) return;
 
-        trigger.addEventListener("click", function (e) {
+        var playTransitionTo = function (href) {
+          var targetHref = href || trigger.getAttribute("href");
+          if (!targetHref) return;
           var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          if (prefersReducedMotion) return;
-          if (transitioning) {
-            e.preventDefault();
+          if (prefersReducedMotion) {
+            window.location.href = targetHref;
             return;
           }
-          e.preventDefault();
+          if (transitioning) return;
           transitioning = true;
           document.body.classList.add("is-gugong-transition");
           mask.classList.add("transition-mask--play");
@@ -539,9 +555,33 @@
             mask.style.opacity = "0";
           }, 2550);
           window.setTimeout(function () {
-            window.location.href = trigger.getAttribute("href");
+            window.location.href = targetHref;
           }, 2860);
+        };
+
+        trigger.addEventListener("mouseenter", function () { setHotspotActive(true); });
+        trigger.addEventListener("mouseleave", function () { setHotspotActive(false); });
+        trigger.addEventListener("focus", function () { setHotspotActive(true); });
+        trigger.addEventListener("blur", function () { setHotspotActive(false); });
+
+        trigger.addEventListener("click", function (e) {
+          e.preventDefault();
+          playTransitionTo(trigger.getAttribute("href"));
         });
+
+        hotspotSvg?.addEventListener(
+          "click",
+          function (e) {
+            var path = e.target && e.target.closest
+              ? e.target.closest('.map-hotspot-path[data-name-zh="故宫"]')
+              : null;
+            if (!path) return;
+            e.preventDefault();
+            e.stopPropagation();
+            playTransitionTo(path.getAttribute("data-href"));
+          },
+          true
+        );
       })();
     </script>
       <!-- AI 导览悬浮组件 -->

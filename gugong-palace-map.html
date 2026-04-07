@@ -116,6 +116,15 @@
         outline: 2px solid rgba(212, 175, 55, 0.85);
         outline-offset: 3px;
       }
+      /* 按钮悬浮联动：太和殿 / 御花园热区持续高亮 */
+      #gugongPalaceHotspotSvg .map-hotspot-path.is-active {
+        fill: rgba(0, 0, 0, 0.02);
+        stroke: #ffe566;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
+          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
+          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
+      }
 
       .gugong-palace-map-media {
         position: absolute;
@@ -381,29 +390,68 @@
     </script>
     <script>
       (function () {
+        var hotspotSvg = document.getElementById("gugongPalaceHotspotSvg");
+        var setPathActive = function (nameZh, active) {
+          if (!hotspotSvg || !nameZh) return;
+          var path = hotspotSvg.querySelector('.map-hotspot-path[data-name-zh="' + nameZh + '"]');
+          if (!path) return;
+          path.classList.toggle("is-active", !!active);
+        };
+
+        document.querySelectorAll(".map-pill--link").forEach(function (link) {
+          var label = (link.textContent || "").trim();
+          var nameZh = label === "太和殿" ? "太和殿区域" : label === "御花园" ? "御花园区域" : "";
+          if (!nameZh) return;
+          link.addEventListener("mouseenter", function () { setPathActive(nameZh, true); });
+          link.addEventListener("mouseleave", function () { setPathActive(nameZh, false); });
+          link.addEventListener("focus", function () { setPathActive(nameZh, true); });
+          link.addEventListener("blur", function () { setPathActive(nameZh, false); });
+        });
+
         var transition = document.getElementById("detailTransition");
         var title = document.getElementById("detailTransitionTitle");
         if (!transition || !title) return;
         var locking = false;
+        var playDetailTransition = function (href, label) {
+          var targetHref = href || "";
+          if (!targetHref) return;
+          var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (prefersReducedMotion) {
+            window.location.href = targetHref;
+            return;
+          }
+          if (locking) return;
+          locking = true;
+          title.textContent = label ? "入" + label + "细览" : "入殿细览";
+          document.body.classList.add("is-detail-transition");
+          transition.classList.add("detail-transition--play");
+          window.setTimeout(function () {
+            window.location.href = targetHref;
+          }, 920);
+        };
+
         document.querySelectorAll(".map-pill--link").forEach(function (link) {
           link.addEventListener("click", function (e) {
-            var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            if (prefersReducedMotion) return;
-            if (locking) {
-              e.preventDefault();
-              return;
-            }
             e.preventDefault();
-            locking = true;
             var label = (link.textContent || "").trim();
-            title.textContent = label ? "入" + label + "细览" : "入殿细览";
-            document.body.classList.add("is-detail-transition");
-            transition.classList.add("detail-transition--play");
-            window.setTimeout(function () {
-              window.location.href = link.getAttribute("href");
-            }, 920);
+            playDetailTransition(link.getAttribute("href"), label);
           });
         });
+
+        hotspotSvg?.addEventListener(
+          "click",
+          function (e) {
+            var path = e.target && e.target.closest ? e.target.closest(".map-hotspot-path") : null;
+            if (!path) return;
+            var nameZh = path.getAttribute("data-name-zh") || "";
+            if (nameZh !== "太和殿区域" && nameZh !== "御花园区域") return;
+            e.preventDefault();
+            e.stopPropagation();
+            var label = nameZh === "太和殿区域" ? "太和殿" : "御花园";
+            playDetailTransition(path.getAttribute("data-href"), label);
+          },
+          true
+        );
       })();
     </script>
       <!-- AI 导览悬浮组件 -->

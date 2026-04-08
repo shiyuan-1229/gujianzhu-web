@@ -36,6 +36,7 @@
 
 .map-hotspot-g:hover .map-hotspot-path,
 .map-hotspot-path:hover,
+.map-hotspot-path.is-linked-hover,
 .map-hotspot-path:focus-visible {
   fill: rgba(0, 0, 0, 0.02);
   stroke: #ffe566;

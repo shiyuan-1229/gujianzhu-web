@@ -16,6 +16,31 @@
     "</div>" +
     "</div>";
 
+  // 通过 data-link-group 将不同 SVG 中的同类热区联动高亮
+  var linkedHoverRegistry = new Map();
+
+  function getLinkGroupKey(element) {
+    return element && element.getAttribute("data-link-group");
+  }
+
+  function registerLinkedPath(path) {
+    var key = getLinkGroupKey(path);
+    if (!key) return;
+    if (!linkedHoverRegistry.has(key)) linkedHoverRegistry.set(key, new Set());
+    linkedHoverRegistry.get(key).add(path);
+  }
+
+  function setLinkedHover(path, active) {
+    var key = getLinkGroupKey(path);
+    if (!key) return;
+    var group = linkedHoverRegistry.get(key);
+    if (!group) return;
+    group.forEach(function (el) {
+      if (!el || !el.isConnected) return;
+      el.classList.toggle("is-linked-hover", !!active);
+    });
+  }
+
   function ensureCard(extraClass) {
     var base = "map-hotspot-info-card";
     var fullClass = extraClass ? base + " " + String(extraClass).trim() : base;
@@ -218,6 +243,7 @@
     card.classList.remove("is-visible");
     void card.offsetWidth;
     card.classList.add("is-visible");
+    document.body.classList.add("map-hotspot-card-visible");
     positionCard(card, clientX, clientY, d.placement);
   }
 
@@ -227,6 +253,9 @@
     var anchor = opts.anchor;
     var svg = opts.svg;
     if (!root || !img || !anchor || !svg) return;
+
+    // 每次初始化时把当前文档可见热区重新登记，保证跨 Hero/Detail 两组 SVG 可联动
+    document.querySelectorAll(".map-hotspot-path[data-link-group]").forEach(registerLinkedPath);
 
     if (svg.parentNode !== anchor) anchor.appendChild(svg);
 
@@ -254,6 +283,7 @@
 
     function hideCard() {
       card.classList.remove("is-visible");
+      document.body.classList.remove("map-hotspot-card-visible");
     }
 
     function bindPath(path) {
@@ -262,6 +292,7 @@
           clearTimeout(hideTimer);
           hideTimer = null;
         }
+        setLinkedHover(path, true);
         showCard(card, path, e.clientX || 24, e.clientY || 84);
       }
 
@@ -270,6 +301,7 @@
       }
 
       function onLeave() {
+        setLinkedHover(path, false);
         hideTimer = setTimeout(hideCard, 100);
       }
 
@@ -288,6 +320,7 @@
           clearTimeout(hideTimer);
           hideTimer = null;
         }
+        setLinkedHover(path, true);
         showCard(card, path, 24, 84);
       }, { passive: true });
 

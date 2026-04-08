@@ -1315,11 +1315,11 @@
         }
       })();
 
-      /* 北京：点击省界热区 → 北京故宫详情页（轮播 + 顶栏「进入游览」；与 path 上 data-href 一致） */
+      /* 北京：点击省界热区 → 故宫探秘长卷（gugong-explore）；在长卷中点击「故宫」再进北京故宫详情轮播页 */
       (function bindBeijingToForbiddenCityDetail() {
         var svg = document.getElementById("chinaMapHotspotSvg");
         if (!svg) return;
-        var detailUrl = "./detail.html?building=" + encodeURIComponent("北京故宫");
+        var detailUrl = "./gugong-explore.html";
         svg.addEventListener(
           "click",
           function (e) {

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胶片和BGM测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #d4af37;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #b8860b;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            width: 400px;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>胶片和BGM测试</h1>
+    
+    <div class="test-section">
+        <h2>功能测试</h2>
+        <button onclick="playTest()">播放BGM和胶片</button>
+        <button onclick="stopTest()">停止</button>
+        <button onclick="pauseTest()">暂停</button>
+        <button onclick="resumeTest()">恢复</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>北京点击模拟</h2>
+        <button onclick="simulateBeijingClick()">模拟点击北京</button>
+    </div>
+    
+    <div class="status">
+        <p>状态: <span id="status">等待测试...</span></p>
+        <p>BGM文件: <span id="bgmStatus">检查中...</span></p>
+        <p>胶片状态: <span id="filmStatus">未初始化</span></p>
+    </div>
+    
+    <script src="./js/bgm-film.js"></script>
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        function updateFilmStatus(message) {
+            document.getElementById('filmStatus').textContent = message;
+        }
+        
+        // 检查BGM文件
+        fetch('./assets/bgm.mp3', {method: 'HEAD'})
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('bgmStatus').textContent = '文件存在';
+                    document.getElementById('bgmStatus').style.color = '#0f0';
+                } else {
+                    document.getElementById('bgmStatus').textContent = '文件不存在或无法访问';
+                    document.getElementById('bgmStatus').style.color = '#f00';
+                }
+            })
+            .catch(error => {
+                document.getElementById('bgmStatus').textContent = '检查失败: ' + error.message;
+                document.getElementById('bgmStatus').style.color = '#f00';
+            });
+        
+        function playTest() {
+            updateStatus('正在播放...');
+            updateFilmStatus('显示中');
+            console.log('测试播放');
+            if (typeof window.playBeijingBGM === 'function') {
+                window.playBeijingBGM();
+            } else {
+                updateStatus('错误: playBeijingBGM函数未定义');
+            }
+        }
+        
+        function stopTest() {
+            updateStatus('已停止');
+            updateFilmStatus('隐藏');
+            console.log('测试停止');
+            if (typeof window.stopBeijingBGM === 'function') {
+                window.stopBeijingBGM();
+            }
+        }
+        
+        function pauseTest() {
+            updateStatus('已暂停');
+            updateFilmStatus('暂停');
+            console.log('测试暂停');
+            if (typeof window.pauseBeijingBGM === 'function') {
+                window.pauseBeijingBGM();
+            }
+        }
+        
+        function resumeTest() {
+            updateStatus('正在播放...');
+            updateFilmStatus('播放中');
+            console.log('测试恢复');
+            if (typeof window.resumeBeijingBGM === 'function') {
+                window.resumeBeijingBGM();
+            }
+        }
+        
+        function simulateBeijingClick() {
+            updateStatus('模拟点击北京...');
+            console.log('模拟点击北京');
+            
+            if (typeof window.playBeijingBGM === 'function') {
+                window.playBeijingBGM();
+            }
+            
+            // 模拟延迟跳转
+            setTimeout(function() {
+                updateStatus('跳转到详情页');
+                console.log('跳转到详情页');
+                // 这里不实际跳转，只是模拟
+            }, 1500);
+        }
+        
+        // 检查全局函数是否定义
+        window.addEventListener('load', function() {
+            console.log('页面加载完成');
+            console.log('playBeijingBGM:', typeof window.playBeijingBGM);
+            console.log('stopBeijingBGM:', typeof window.stopBeijingBGM);
+            console.log('pauseBeijingBGM:', typeof window.pauseBeijingBGM);
+            console.log('resumeBeijingBGM:', typeof window.resumeBeijingBGM);
+        });
+    </script>
+</body>
+</html>

@@ -28,6 +28,7 @@
     </noscript>
     <!-- AI 导览：defer + 提前声明，与首屏并行下载，不阻塞下方主逻辑 -->
     <script defer src="./js/ai-chat-widget.js"></script>
+    <script src="./js/bgm-film.js"></script>
     <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
     <link rel="stylesheet" href="./css/site-nav.css" />
 
@@ -355,6 +356,37 @@
       .ink-wash {
         display: none;
       }
+
+      /* 胶片动画样式 */
+      .film-reel {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 120px;
+        height: 120px;
+        z-index: 15;
+        opacity: 0;
+        transform: scale(0.8) rotate(0deg);
+        transition: all 0.5s ease;
+      }
+
+      .film-reel.visible {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+
+      .film-reel.spinning {
+        animation: spin 10s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: scale(1) rotate(0deg);
+        }
+        to {
+          transform: scale(1) rotate(360deg);
+        }
+      }
     </style>
   </head>
 
@@ -472,7 +504,6 @@
                       <g class="map-hotspot-g" transform="translate(2155.5, 769)">
                         <path
                           class="map-hotspot-path"
-                          data-href="./detail.html?building=%E5%8C%97%E4%BA%AC%E6%95%85%E5%AE%AB"
                           data-name-zh="北京"
                           data-name-en="Beijing"
                           data-category="都城 · 直辖市"
@@ -1296,7 +1327,19 @@
             if (!path || path.getAttribute("data-name-zh") !== "北京") return;
             e.preventDefault();
             e.stopPropagation();
-            window.location.assign(detailUrl);
+            
+            var starter = null;
+            if (typeof window.triggerBeijingBgmFilm === "function") {
+              starter = window.triggerBeijingBgmFilm();
+            } else if (typeof window.playBeijingBGM === "function") {
+              starter = window.playBeijingBGM();
+            }
+
+            Promise.resolve(starter).finally(function () {
+              setTimeout(function () {
+                window.location.assign(detailUrl);
+              }, 600);
+            });
           },
           true
         );

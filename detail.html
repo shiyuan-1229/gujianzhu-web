@@ -119,7 +119,7 @@
         left: clamp(3.85rem, 12.5vw, 6.75rem);
         top: 22%;
         transform: translateY(-50%);
-        z-index: 48;
+        z-index: 44;
         display: none;
         flex-direction: column;
         align-items: center;
@@ -2484,6 +2484,104 @@
       .paper-quiz-board__facts p:last-child {
         margin-bottom: 0;
       }
+      .hero-compare-popup {
+        position: absolute;
+        left: clamp(1rem, 3.2vw, 2.4rem);
+        bottom: clamp(6.5rem, 15vh, 9rem);
+        z-index: 46;
+        width: min(28rem, calc(100vw - 2rem));
+        border: 1px solid rgba(230, 196, 139, 0.4);
+        border-radius: 14px;
+        padding: 0.75rem;
+        background: linear-gradient(180deg, rgba(27, 20, 15, 0.92), rgba(19, 14, 11, 0.95));
+        box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        color: rgba(241, 233, 219, 0.92);
+        pointer-events: auto;
+      }
+      .hero-compare-popup[hidden] {
+        display: none !important;
+      }
+      .hero-compare-popup__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.55rem;
+      }
+      .hero-compare-popup__title {
+        margin: 0;
+        color: #f4d49b;
+        font-family: var(--font-display);
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+      }
+      .hero-compare-popup__meta {
+        margin-top: 0.2rem;
+        color: rgba(224, 224, 224, 0.72);
+        font-size: 0.76rem;
+        letter-spacing: 0.12em;
+      }
+      .hero-compare-popup__close {
+        border: 1px solid rgba(224, 224, 224, 0.26);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.02);
+        color: rgba(224, 224, 224, 0.85);
+        font-size: 0.78rem;
+        line-height: 1;
+        padding: 0.3rem 0.5rem;
+      }
+      .hero-compare-popup__gallery {
+        margin-top: 0.65rem;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.62rem;
+      }
+      .hero-compare-popup__figure {
+        margin: 0;
+      }
+      .hero-compare-popup__img {
+        width: 100%;
+        height: clamp(106px, 12vw, 140px);
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(224, 224, 224, 0.23);
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .hero-compare-popup__cap {
+        margin-top: 0.32rem;
+        color: rgba(230, 228, 223, 0.84);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        line-height: 1.4;
+      }
+      .hero-compare-popup__copy {
+        margin-top: 0.64rem;
+        border-top: 1px dashed rgba(224, 224, 224, 0.22);
+        padding-top: 0.5rem;
+      }
+      .hero-compare-popup__copy p {
+        margin: 0.34rem 0 0;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        color: rgba(236, 231, 223, 0.9);
+      }
+      .hero-compare-popup__copy p:first-child {
+        margin-top: 0;
+      }
+      .hero-compare-popup__copy strong {
+        color: #f4d49b;
+        letter-spacing: 0.08em;
+      }
+      @media (max-width: 860px) {
+        .hero-compare-popup {
+          bottom: 6.2rem;
+          left: 0.8rem;
+          width: auto;
+        }
+        .hero-compare-popup__gallery {
+          grid-template-columns: 1fr;
+        }
+      }
 
       /* 御花园：叠放高亮图，热区内悬停立即显示（无过渡） */
       #detailPlateWrap {
@@ -2626,6 +2724,29 @@
           loading="eager"
         />
       </div>
+      <aside id="heroComparePopup" class="hero-compare-popup" hidden aria-hidden="true">
+        <div class="hero-compare-popup__head">
+          <div>
+            <h3 id="heroCompareTitle" class="hero-compare-popup__title">中巴建筑对照</h3>
+            <p id="heroCompareMeta" class="hero-compare-popup__meta"></p>
+          </div>
+          <button id="heroCompareClose" class="hero-compare-popup__close" type="button" aria-label="关闭对照弹层">关闭</button>
+        </div>
+        <div class="hero-compare-popup__gallery">
+          <figure class="hero-compare-popup__figure">
+            <img id="heroCompareChinaImg" class="hero-compare-popup__img" src="" alt="" loading="lazy" />
+            <figcaption id="heroCompareChinaCap" class="hero-compare-popup__cap"></figcaption>
+          </figure>
+          <figure class="hero-compare-popup__figure">
+            <img id="heroComparePakistanImg" class="hero-compare-popup__img" src="" alt="" loading="lazy" />
+            <figcaption id="heroComparePakistanCap" class="hero-compare-popup__cap"></figcaption>
+          </figure>
+        </div>
+        <div class="hero-compare-popup__copy">
+          <p id="heroCompareSimilarity"></p>
+          <p id="heroCompareDifference"></p>
+        </div>
+      </aside>
 
       <!-- 左侧竖排古风标题 -->
       <div id="taiheVerticalTitle" class="taihe-vertical-title" aria-hidden="true">
@@ -3472,6 +3593,55 @@
         plate05: "PLATE 05 · 园林与庭院一瞥",
       };
 
+      const HERO_CROSS_COMPARE_DATA = {
+        "故宫太和殿": {
+          "重檐庑殿顶": {
+            chinaImage: "./assets/compare-taihe-front.png",
+            pakistanImage: "./assets/compare-badshahi-front.png",
+            chinaCaption: "中国 · 太和殿屋顶层级",
+            pakistanCaption: "巴基斯坦 · 巴德夏希清真寺主立面",
+            similarity: "相似点：都以核心主体的高度与中轴对称，建立礼仪中心。",
+            difference: "差异点：太和殿以木构屋顶等级表达礼制，巴德夏希以石构体量和庭院尺度强化庄严感。",
+          },
+          脊兽: {
+            chinaImage: "./assets/taihe-doc-ridge-beasts.jpeg",
+            pakistanImage: "./assets/compare-badshahi-jishou.png",
+            chinaCaption: "中国 · 太和殿檐角脊兽",
+            pakistanCaption: "巴基斯坦 · 巴德夏希清真寺装饰细部",
+            similarity: "相似点：都通过高位装饰细部强化建筑识别度与精神象征。",
+            difference: "差异点：中国偏神兽与礼制符号，巴基斯坦偏几何、花饰与书法传统。",
+          },
+          溜金斗拱: {
+            chinaImage: "./assets/taihe-doc-glaze.jpeg",
+            pakistanImage:
+              "https://commons.wikimedia.org/wiki/Special:FilePath/Badshahi_Mosque_,Lahore_Pakistan.jpg?width=1400",
+            chinaCaption: "中国 · 太和殿檐下木作与彩饰",
+            pakistanCaption: "巴基斯坦 · 巴德夏希清真寺红砂岩与白色大理石",
+            similarity: "相似点：都用高规格工艺处理关键视觉部位，体现庄严与秩序。",
+            difference: "差异点：中国重木构与彩画体系，巴基斯坦重石材与镶嵌体系。",
+          },
+        },
+        "故宫御花园": {
+          钦安殿: {
+            chinaImage: "./assets/compare-yuhua-qinandian.png",
+            pakistanImage:
+              "https://commons.wikimedia.org/wiki/Special:FilePath/Badshahi_Mosuqe_Complete_View_Pakistan.jpg?width=1400",
+            chinaCaption: "中国 · 御花园中轴钦安殿",
+            pakistanCaption: "巴基斯坦 · 巴德夏希清真寺庭院与主殿",
+            similarity: "相似点：都以核心建筑统领庭院，形成“先院后殿”的空间秩序。",
+            difference: "差异点：御花园强调游赏和内廷尺度，巴德夏希强调礼拜与公共集聚。",
+          },
+          堆秀亭: {
+            chinaImage: "./assets/compare-yuhua-duixiuting-rockery.png",
+            pakistanImage: "./assets/compare-badshahi-alamgiri-gate.png",
+            chinaCaption: "中国 · 堆秀亭与叠山节点",
+            pakistanCaption: "巴基斯坦 · 巴德夏希清真寺入口层级",
+            similarity: "相似点：都通过路径与节点的递进，塑造进入核心空间的节奏。",
+            difference: "差异点：御花园是曲折园路与叠景，巴德夏希是开阔轴线与大尺度前场。",
+          },
+        },
+      };
+
       const applyPaperCopy = (copy) => {
         const set = (id, text) => {
           const el = document.getElementById(id);
@@ -3490,6 +3660,116 @@
         set("paperP4", copy.p4);
         set("paperPlateCornerCap", copy.plate05);
       };
+
+      let heroComparePinnedName = "";
+      let heroComparePinnedBuilding = "";
+
+      function setupHeroCrossComparePopup(buildingName, taiheSvg, yuhuaSvg) {
+        const popup = document.getElementById("heroComparePopup");
+        const titleEl = document.getElementById("heroCompareTitle");
+        const metaEl = document.getElementById("heroCompareMeta");
+        const closeBtn = document.getElementById("heroCompareClose");
+        const chinaImgEl = document.getElementById("heroCompareChinaImg");
+        const pakistanImgEl = document.getElementById("heroComparePakistanImg");
+        const chinaCapEl = document.getElementById("heroCompareChinaCap");
+        const pakistanCapEl = document.getElementById("heroComparePakistanCap");
+        const similarityEl = document.getElementById("heroCompareSimilarity");
+        const differenceEl = document.getElementById("heroCompareDifference");
+        if (
+          !popup ||
+          !titleEl ||
+          !metaEl ||
+          !closeBtn ||
+          !chinaImgEl ||
+          !pakistanImgEl ||
+          !chinaCapEl ||
+          !pakistanCapEl ||
+          !similarityEl ||
+          !differenceEl
+        ) {
+          return;
+        }
+
+        const buildingData = HERO_CROSS_COMPARE_DATA[buildingName];
+        const hidePopup = () => {
+          popup.hidden = true;
+          popup.setAttribute("aria-hidden", "true");
+        };
+        const showPopupByName = (hotspotName) => {
+          if (!buildingData) return;
+          const item = buildingData[hotspotName];
+          if (!item) {
+            hidePopup();
+            return;
+          }
+          titleEl.textContent = `中巴对照 · ${hotspotName}`;
+          metaEl.textContent = "";
+          chinaImgEl.src = item.chinaImage;
+          chinaImgEl.alt = item.chinaCaption;
+          pakistanImgEl.src = item.pakistanImage;
+          pakistanImgEl.alt = item.pakistanCaption;
+          chinaCapEl.textContent = item.chinaCaption;
+          pakistanCapEl.textContent = item.pakistanCaption;
+          similarityEl.innerHTML = `<strong>相似点：</strong>${item.similarity.replace(/^相似点：/, "")}`;
+          differenceEl.innerHTML = `<strong>差异点：</strong>${item.difference.replace(/^差异点：/, "")}`;
+          popup.hidden = false;
+          popup.setAttribute("aria-hidden", "false");
+        };
+
+        closeBtn.onclick = () => {
+          heroComparePinnedName = "";
+          heroComparePinnedBuilding = "";
+          hidePopup();
+        };
+
+        if (!buildingData) {
+          heroComparePinnedName = "";
+          heroComparePinnedBuilding = "";
+          hidePopup();
+          return;
+        }
+
+        const bindSvg = (svg) => {
+          if (!svg || svg.dataset.compareBound === "1") return;
+          svg.dataset.compareBound = "1";
+          svg.querySelectorAll(".map-hotspot-path").forEach((path) => {
+            const getName = () => path.getAttribute("data-name-zh") || "";
+            path.addEventListener("mouseenter", () => {
+              if (heroComparePinnedName && heroComparePinnedBuilding === buildingName) return;
+              showPopupByName(getName());
+            });
+            path.addEventListener("mouseleave", () => {
+              if (heroComparePinnedName && heroComparePinnedBuilding === buildingName) return;
+              hidePopup();
+            });
+            path.addEventListener("click", (event) => {
+              event.preventDefault();
+              const name = getName();
+              if (!name) return;
+              if (heroComparePinnedName === name && heroComparePinnedBuilding === buildingName) {
+                heroComparePinnedName = "";
+                heroComparePinnedBuilding = "";
+                hidePopup();
+                return;
+              }
+              heroComparePinnedName = name;
+              heroComparePinnedBuilding = buildingName;
+              showPopupByName(name);
+            });
+          });
+        };
+
+        bindSvg(taiheSvg);
+        bindSvg(yuhuaSvg);
+
+        if (heroComparePinnedBuilding === buildingName && heroComparePinnedName) {
+          showPopupByName(heroComparePinnedName);
+        } else {
+          heroComparePinnedName = "";
+          heroComparePinnedBuilding = "";
+          hidePopup();
+        }
+      }
 
       /** 太和殿拼贴：图文自 Word「太和殿1.5」导出，图见 assets/taihe-doc-* */
       const renderTaiheEditorialMosaic = (grid) => {
@@ -4686,6 +4966,7 @@
             applyPaperCopy(PAPER_COPY_DEFAULT);
           }
         }
+        setupHeroCrossComparePopup(building.name, heroSvgTaihe, heroSvgYuhua);
 
         const paperSub1 = document.getElementById("paperSubImg1");
         const paperSub2 = document.getElementById("paperSubImg2");

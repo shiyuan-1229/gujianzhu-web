@@ -5,22 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>首页 · 古建智寻</title>
 
-    <!-- 首屏两张远程 PNG：jsDelivr 主源（常比 raw 更稳）；并预连 GitHub raw 作回退 -->
+    <!-- 首屏地图：优先同仓库本地 PNG（避免 jsDelivr 在国内偶发极慢/超时）；缺文件时再走 onerror 回退 CDN -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
-    <link rel="preconnect" href="https://raw.githubusercontent.com" />
-    <!-- 首页地图底图：提前发起下载，与解析并行，减轻「地图半天不出来」 -->
-    <link
-      rel="preload"
-      as="image"
-      href="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png"
-    />
-    <link
-      rel="preload"
-      as="image"
-      href="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png"
-    />
+    <link rel="preload" as="image" href="./assets/index-bg.png" />
+    <link rel="preload" as="image" href="./assets/index-map-china.png" />
 
     <!-- Fonts：非阻塞加载，避免与首屏大图抢主线程/连接 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,7 +28,7 @@
     </noscript>
     <!-- AI 导览：defer + 提前声明，与首屏并行下载，不阻塞下方主逻辑 -->
     <script defer src="./js/ai-chat-widget.js"></script>
-    <script src="./js/bgm-film.js"></script>
+    <script defer src="./js/bgm-film.js"></script>
     <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
     <link rel="stylesheet" href="./css/site-nav.css" />
 
@@ -507,24 +496,24 @@
                 <img
                 id="mapHeroBg"
                 class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
-                src="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png"
+                src="./assets/index-bg.png"
                   alt=""
                   decoding="async"
                   fetchpriority="high"
                   referrerpolicy="no-referrer"
-                  onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/shiyuan-1229/gujianzhu-web/main/assets/%E8%83%8C%E6%99%AF.png'"
+                  onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png'"
                 />
               <div class="map-china-layer">
                 <div class="map-china-map-media absolute inset-0 z-[1]">
                   <img
                     id="mapChinaMap"
                     class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
-                    src="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png"
+                    src="./assets/index-map-china.png"
                     alt=""
                     decoding="async"
-                    fetchpriority="low"
+                    fetchpriority="high"
                     referrerpolicy="no-referrer"
-                    onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/shiyuan-1229/gujianzhu-web/main/assets/%E5%9C%B0%E5%9B%BE.png'"
+                    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png'"
                   />
                   <div id="chinaMapSvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
                     <svg

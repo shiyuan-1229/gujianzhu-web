@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/site-nav.css" />
@@ -426,6 +426,43 @@
       }
 
       /* 响应式：窄屏单列 */
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
+      html.lang-en .site-nav-btn {
+        letter-spacing: 0.1em;
+      }
+      html.lang-en .site-nav-brand {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        letter-spacing: 0.12em;
+      }
+      html.lang-en .page-eyebrow {
+        letter-spacing: 0.22em;
+      }
+      html.lang-en .page-title {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+      }
+      html.lang-en .stop__name {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+      html.lang-en .stop__desc {
+        letter-spacing: 0.02em;
+        line-height: 1.65;
+        max-width: 42ch;
+      }
+      html.lang-en .badge-360 {
+        font-family: "Cinzel", "Georgia", serif;
+      }
+      html.lang-en .gugong-cta {
+        font-family: "Cinzel", "Georgia", serif;
+        letter-spacing: 0.04em;
+      }
+
       @media (max-width: 720px) {
         .stop {
           grid-template-columns: 1fr;
@@ -490,32 +527,32 @@
 
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-y-3 px-4 py-4">
-        <div class="site-nav-brand">古建智寻</div>
+        <a id="exBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-flow text-base tracking-[0.22em] md:space-x-8">
           <div class="group relative">
-            <a href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+            <a id="exNavHome" href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
             <div
               class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100"
             >
-              <a href="./index.html" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
+              <a id="exSubMap" href="./index.html" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
             </div>
           </div>
           <div class="group relative">
-            <a href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
+            <a id="exNavList" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
             <div
               class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100"
             >
-              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
-              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
-              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
-              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
+              <a id="exCatResidence" href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
+              <a id="exCatPalace" href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
+              <a id="exCatBridge" href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
+              <a id="exCatYamen" href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
             </div>
           </div>
           <div>
-            <span class="site-nav-btn site-nav-btn--current text-amber-100/90">探索发现</span>
+            <span id="exNavExplore" class="site-nav-btn site-nav-btn--current text-amber-100/90">探索发现</span>
           </div>
         </div>
-        <div class="flex w-full items-center justify-end sm:w-auto">
+        <div class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
           <input
             type="text"
             id="searchInput"
@@ -529,13 +566,20 @@
           >
             搜索
           </button>
+          <button
+            id="exLangSwitchBtn"
+            type="button"
+            class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/40 bg-[#6b1a1a]/82 px-3 py-2 font-flow text-sm tracking-[0.12em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90"
+          >
+            EN
+          </button>
         </div>
       </div>
     </nav>
 
     <main class="explore-main">
-      <p class="page-eyebrow">GU JIAN · TAN MI</p>
-      <h1 class="page-title">古建探秘 · 年代长卷</h1>
+      <p id="exPageEyebrow" class="page-eyebrow">GU JIAN · TAN MI</p>
+      <h1 id="exPageTitle" class="page-title">古建探秘 · 年代长卷</h1>
 
       <div class="scroll-frame">
         <div class="scroll-roller scroll-roller--top" aria-hidden="true"></div>
@@ -551,8 +595,8 @@
             <article class="stop stop--left" data-index="0">
               <div class="stop__copy">
                 <div class="stop__year">1044</div>
-                <h2 class="stop__name">佛光寺东大殿</h2>
-                <p class="stop__desc">唐代木构遗珍，斗栱与梁架比例保存完整，是研究中国早期木构建筑的重要实物。</p>
+                <h2 id="exStop0Name" class="stop__name">佛光寺东大殿</h2>
+                <p id="exStop0Desc" class="stop__desc">唐代木构遗珍，斗栱与梁架比例保存完整，是研究中国早期木构建筑的重要实物。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -569,8 +613,8 @@
             <article class="stop stop--right" data-index="1">
               <div class="stop__copy">
                 <div class="stop__year">1113</div>
-                <h2 class="stop__name">独乐寺观音阁</h2>
-                <p class="stop__desc">辽代高阁与塑像同构一体，空间与构件比例极具代表性，展现早期寺观营造智慧。</p>
+                <h2 id="exStop1Name" class="stop__name">独乐寺观音阁</h2>
+                <p id="exStop1Desc" class="stop__desc">辽代高阁与塑像同构一体，空间与构件比例极具代表性，展现早期寺观营造智慧。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -587,8 +631,8 @@
             <article class="stop stop--left" data-index="2">
               <div class="stop__copy">
                 <div class="stop__year">1373</div>
-                <h2 class="stop__name">山西平遥古城墙</h2>
-                <p class="stop__desc">明代县城防御体系与街巷肌理共同构成完整古城样本，是明清县城规划的重要案例。</p>
+                <h2 id="exStop2Name" class="stop__name">山西平遥古城墙</h2>
+                <p id="exStop2Desc" class="stop__desc">明代县城防御体系与街巷肌理共同构成完整古城样本，是明清县城规划的重要案例。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -605,12 +649,13 @@
             <article class="stop stop--right stop--gugong" data-index="3">
               <div class="stop__copy">
                 <div class="stop__year">1406</div>
-                <h2 class="stop__name">北京故宫（样例）</h2>
-                <p class="stop__desc">中国皇家建筑的巅峰代表。点击旁侧建筑示意或 360 徽标，进入故宫博物院官方全景，沉浸式探索。</p>
+                <h2 id="exStop3Name" class="stop__name">北京故宫（样例）</h2>
+                <p id="exStop3Desc" class="stop__desc">中国皇家建筑的巅峰代表。点击旁侧建筑示意或 360 徽标，进入故宫博物院官方全景，沉浸式探索。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
                 <a
+                  id="exGugongHit"
                   class="gugong-hit"
                   href="https://pano.dpm.org.cn/#/"
                   target="_blank"
@@ -637,9 +682,9 @@
                       <circle cx="12" cy="14" r="3.2" stroke="#5c1a1a" stroke-width="1.2" fill="none" />
                     </svg>
                     360
-                    <span>全景</span>
+                    <span id="exBadgePan">全景</span>
                   </div>
-                  <p class="gugong-cta">点击体验 3D 全景 →</p>
+                  <p id="exGugongCta" class="gugong-cta">点击体验 3D 全景 →</p>
                 </a>
               </div>
             </article>
@@ -648,8 +693,8 @@
             <article class="stop stop--left" data-index="4">
               <div class="stop__copy">
                 <div class="stop__year">1579</div>
-                <h2 class="stop__name">应县木塔</h2>
-                <p class="stop__desc">辽代木塔经典，结构层次复杂，展现古代木构抗震与榫卯工艺的高度成熟。</p>
+                <h2 id="exStop4Name" class="stop__name">应县木塔</h2>
+                <p id="exStop4Desc" class="stop__desc">辽代木塔经典，结构层次复杂，展现古代木构抗震与榫卯工艺的高度成熟。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -667,8 +712,8 @@
             <article class="stop stop--right" data-index="5">
               <div class="stop__copy">
                 <div class="stop__year">1705</div>
-                <h2 class="stop__name">泸定桥</h2>
-                <p class="stop__desc">清代铁索桥代表，横跨激流，是古代交通工程与险要地形相结合的典范。</p>
+                <h2 id="exStop5Name" class="stop__name">泸定桥</h2>
+                <p id="exStop5Desc" class="stop__desc">清代铁索桥代表，横跨激流，是古代交通工程与险要地形相结合的典范。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -686,8 +731,8 @@
             <article class="stop stop--left" data-index="6">
               <div class="stop__copy">
                 <div class="stop__year">1750</div>
-                <h2 class="stop__name">颐和园</h2>
-                <p class="stop__desc">山水园林与宫苑礼制相融，长廊、湖山、殿宇形成完整叙事空间，体现皇家园林审美高峰。</p>
+                <h2 id="exStop6Name" class="stop__name">颐和园</h2>
+                <p id="exStop6Desc" class="stop__desc">山水园林与宫苑礼制相融，长廊、湖山、殿宇形成完整叙事空间，体现皇家园林审美高峰。</p>
               </div>
               <div class="stop__connector" aria-hidden="true"></div>
               <div class="stop__model-wrap">
@@ -705,11 +750,221 @@
       </div>
     </main>
 
+    <script src="./js/site-lang.js"></script>
     <script>
       (function () {
         "use strict";
+        const EX_I18N = {
+          zh: {
+            title: "探索发现 · 古建智寻",
+            brand: "古建智寻",
+            navHome: "首页",
+            navMap: "地图",
+            navCategories: "建筑分类",
+            navExplore: "探索发现",
+            catResidence: "民居",
+            catPalace: "皇宫",
+            catBridge: "桥梁",
+            catYamen: "官府",
+            searchPlaceholder: "搜索建筑名",
+            searchBtn: "搜索",
+            searchNotFound: "未找到匹配的建筑",
+            switchLabel: "切换为英文",
+            eyebrow: "GU JIAN · TAN MI",
+            pageTitle: "古建探秘 · 年代长卷",
+            stop0Name: "佛光寺东大殿",
+            stop0Desc: "唐代木构遗珍，斗栱与梁架比例保存完整，是研究中国早期木构建筑的重要实物。",
+            stop1Name: "独乐寺观音阁",
+            stop1Desc: "辽代高阁与塑像同构一体，空间与构件比例极具代表性，展现早期寺观营造智慧。",
+            stop2Name: "山西平遥古城墙",
+            stop2Desc: "明代县城防御体系与街巷肌理共同构成完整古城样本，是明清县城规划的重要案例。",
+            stop3Name: "北京故宫（样例）",
+            stop3Desc: "中国皇家建筑的巅峰代表。点击旁侧建筑示意或 360 徽标，进入故宫博物院官方全景，沉浸式探索。",
+            stop4Name: "应县木塔",
+            stop4Desc: "辽代木塔经典，结构层次复杂，展现古代木构抗震与榫卯工艺的高度成熟。",
+            stop5Name: "泸定桥",
+            stop5Desc: "清代铁索桥代表，横跨激流，是古代交通工程与险要地形相结合的典范。",
+            stop6Name: "颐和园",
+            stop6Desc: "山水园林与宫苑礼制相融，长廊、湖山、殿宇形成完整叙事空间，体现皇家园林审美高峰。",
+            gugongAria: "进入故宫博物院 3D 全景探索",
+            badgePan: "全景",
+            gugongCta: "点击体验 3D 全景 →",
+          },
+          en: {
+            title: "Explore · ArchiQuest",
+            brand: "ArchiQuest",
+            navHome: "Home",
+            navMap: "Map",
+            navCategories: "Categories",
+            navExplore: "Explore",
+            catResidence: "Residence",
+            catPalace: "Palace",
+            catBridge: "Bridge",
+            catYamen: "Yamen",
+            searchPlaceholder: "Search architecture",
+            searchBtn: "Search",
+            searchNotFound: "No matching architecture found",
+            switchLabel: "Switch to Chinese",
+            eyebrow: "HERITAGE · TIMELINE",
+            pageTitle: "Timeless Echoes · Chinese Heritage",
+            stop0Name: "Foguang Temple East Hall",
+            stop0Desc:
+              "Tang-dynasty timber frame with intact dougong and beam proportions—a touchstone for studying early Chinese wood construction.",
+            stop1Name: "Dule Temple Guanyin Pavilion",
+            stop1Desc:
+              "Liao-dynasty pavilion and colossal statue woven into one spatial system; a milestone in classical Buddhist architecture.",
+            stop2Name: "Pingyao Ancient City Wall",
+            stop2Desc:
+              "Ming county fortifications with a preserved street grid—among the most complete surviving walled county towns in China.",
+            stop3Name: "Forbidden City (sample)",
+            stop3Desc:
+              "The pinnacle of imperial Chinese architecture. Click the model or the 360 badge to open the Palace Museum official panorama.",
+            stop4Name: "Yingxian Wooden Pagoda",
+            stop4Desc:
+              "A Liao-dynasty timber pagoda whose stacked structure and joinery illustrate mature seismic thinking in wood.",
+            stop5Name: "Luding Bridge",
+            stop5Desc:
+              "A Qing iron-chain bridge across a torrent—bold engineering where transport meets dramatic terrain.",
+            stop6Name: "Summer Palace",
+            stop6Desc:
+              "Imperial garden landscape where hills, lakes, and halls form one narrative space—a high mark of Qing garden art.",
+            gugongAria: "Open the Palace Museum 3D panorama",
+            badgePan: "Pano",
+            gugongCta: "Open 3D panorama →",
+          },
+        };
+        const BUILDING_NAME_EN = {
+          "北京故宫": "Forbidden City, Beijing",
+          "北京四合院": "Beijing Siheyuan",
+          "卢沟桥": "Marco Polo Bridge",
+          "颐和园": "Summer Palace",
+          "乔家大院": "Qiao Family Compound",
+          "霍州署": "Huozhou Yamen",
+          "鱼沼飞梁": "Yuzhao Flying Bridge",
+          "平遥古城墙": "Pingyao City Wall",
+          "苏州拙政园": "Humble Administrator's Garden",
+          "淮安府衙": "Huai'an Prefecture Yamen",
+          "宝带桥": "Baodai Bridge",
+          "周庄民居": "Zhouzhuang Residence",
+          "阆中古城民居": "Langzhong Ancient Residence",
+          "泸州龙脑桥": "Luzhou Longnao Bridge",
+          "泸定桥": "Luding Bridge",
+          "陈家祠": "Chen Clan Ancestral Hall",
+          "潮州广济桥": "Guangji Bridge, Chaozhou",
+          "开平碉楼": "Kaiping Diaolou",
+        };
+        const ALL_BUILDING_NAMES = [
+          "北京故宫",
+          "北京四合院",
+          "卢沟桥",
+          "颐和园",
+          "乔家大院",
+          "霍州署",
+          "鱼沼飞梁",
+          "平遥古城墙",
+          "苏州拙政园",
+          "淮安府衙",
+          "宝带桥",
+          "周庄民居",
+          "阆中古城民居",
+          "泸州龙脑桥",
+          "泸定桥",
+          "陈家祠",
+          "潮州广济桥",
+          "开平碉楼",
+        ];
+        var exCurrentLang =
+          typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+        const exIsEn = () => exCurrentLang === "en";
+        const exT = (key) => (EX_I18N[exCurrentLang] && EX_I18N[exCurrentLang][key]) || EX_I18N.zh[key] || "";
 
-        // 滚动渐入
+        function applyExploreLang() {
+          document.documentElement.lang = exIsEn() ? "en" : "zh-CN";
+          document.documentElement.classList.toggle("lang-en", exIsEn());
+          document.title = exT("title");
+
+          const setText = (id, key) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = exT(key);
+          };
+          setText("exBrand", "brand");
+          setText("exNavHome", "navHome");
+          setText("exSubMap", "navMap");
+          setText("exNavList", "navCategories");
+          setText("exCatResidence", "catResidence");
+          setText("exCatPalace", "catPalace");
+          setText("exCatBridge", "catBridge");
+          setText("exCatYamen", "catYamen");
+          setText("exNavExplore", "navExplore");
+          setText("exPageEyebrow", "eyebrow");
+          setText("exPageTitle", "pageTitle");
+          for (let i = 0; i < 7; i++) {
+            setText("exStop" + i + "Name", "stop" + i + "Name");
+            setText("exStop" + i + "Desc", "stop" + i + "Desc");
+          }
+          setText("exBadgePan", "badgePan");
+          setText("exGugongCta", "gugongCta");
+          const gugongHit = document.getElementById("exGugongHit");
+          if (gugongHit) gugongHit.setAttribute("aria-label", exT("gugongAria"));
+
+          const q = encodeURIComponent(exCurrentLang);
+          const brand = document.getElementById("exBrand");
+          if (brand) brand.setAttribute("href", "./index.html?lang=" + q);
+          const home = document.getElementById("exNavHome");
+          if (home) home.setAttribute("href", "./index.html?lang=" + q);
+          const subMap = document.getElementById("exSubMap");
+          if (subMap) subMap.setAttribute("href", "./index.html?lang=" + q);
+          const list = document.getElementById("exNavList");
+          if (list) list.setAttribute("href", "./list.html?lang=" + q);
+          const catIds = [
+            ["exCatResidence", "民居"],
+            ["exCatPalace", "皇宫"],
+            ["exCatBridge", "桥梁"],
+            ["exCatYamen", "官府"],
+          ];
+          catIds.forEach(function (pair) {
+            const el = document.getElementById(pair[0]);
+            if (el) {
+              el.setAttribute(
+                "href",
+                "./list.html?category=" + encodeURIComponent(pair[1]) + "&lang=" + q
+              );
+            }
+          });
+
+          const searchInput = document.getElementById("searchInput");
+          if (searchInput) searchInput.placeholder = exT("searchPlaceholder");
+          const searchBtn = document.getElementById("searchBtn");
+          if (searchBtn) searchBtn.textContent = exT("searchBtn");
+          const langBtn = document.getElementById("exLangSwitchBtn");
+          if (langBtn) {
+            langBtn.textContent = exIsEn() ? "中" : "EN";
+            langBtn.setAttribute("aria-label", exT("switchLabel"));
+          }
+        }
+        applyExploreLang();
+
+        const exLangBtn = document.getElementById("exLangSwitchBtn");
+        if (exLangBtn) {
+          exLangBtn.addEventListener("click", function () {
+            exCurrentLang = exIsEn() ? "zh" : "en";
+            if (typeof persistSiteLang === "function") persistSiteLang(exCurrentLang);
+            applyExploreLang();
+          });
+        }
+
+        function findBuildingZhBySearch(term) {
+          var t = (term || "").trim();
+          if (!t) return null;
+          for (var i = 0; i < ALL_BUILDING_NAMES.length; i++) {
+            var zh = ALL_BUILDING_NAMES[i];
+            if (zh.indexOf(t) !== -1) return zh;
+            var en = BUILDING_NAME_EN[zh];
+            if (en && en.toLowerCase().indexOf(t.toLowerCase()) !== -1) return zh;
+          }
+          return null;
+        }
+
         var stops = document.querySelectorAll(".stop");
         if ("IntersectionObserver" in window) {
           var io = new IntersectionObserver(
@@ -731,40 +986,21 @@
           });
         }
 
-        // 与首页搜索行为一致（仅本页内建名称表，不修改 index.html）
-        var ALL_BUILDING_NAMES = [
-          "北京故宫",
-          "北京四合院",
-          "卢沟桥",
-          "颐和园",
-          "乔家大院",
-          "霍州署",
-          "鱼沼飞梁",
-          "平遥古城墙",
-          "苏州拙政园",
-          "淮安府衙",
-          "宝带桥",
-          "周庄民居",
-          "阆中古城民居",
-          "泸州龙脑桥",
-          "泸定桥",
-          "陈家祠",
-          "潮州广济桥",
-          "开平碉楼",
-        ];
         var btn = document.getElementById("searchBtn");
         var input = document.getElementById("searchInput");
         if (btn && input) {
           function searchBuilding() {
             var term = (input.value || "").trim();
             if (!term) return;
-            var matched = ALL_BUILDING_NAMES.find(function (name) {
-              return name.indexOf(term) !== -1;
-            });
+            var matched = findBuildingZhBySearch(term);
             if (matched) {
-              window.location.href = "./detail.html?building=" + encodeURIComponent(matched);
+              window.location.href =
+                "./detail.html?building=" +
+                encodeURIComponent(matched) +
+                "&lang=" +
+                encodeURIComponent(exCurrentLang);
             } else {
-              window.alert("未找到匹配的建筑");
+              window.alert(exT("searchNotFound"));
             }
           }
           btn.addEventListener("click", searchBuilding);

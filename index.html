@@ -10,6 +10,17 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
     <link rel="preconnect" href="https://raw.githubusercontent.com" />
+    <!-- 首页地图底图：提前发起下载，与解析并行，减轻「地图半天不出来」 -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png"
+    />
 
     <!-- Fonts：非阻塞加载，避免与首屏大图抢主线程/连接 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -379,6 +390,27 @@
         animation: spin 10s linear infinite;
       }
 
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
+      html.lang-en body {
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      html.lang-en .site-nav-brand {
+        letter-spacing: 0.04em;
+      }
+      html.lang-en .site-nav-btn {
+        letter-spacing: 0.08em;
+      }
+      html.lang-en #detail .font-serifCN {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif !important;
+      }
+      html.lang-en #buildingDesc {
+        line-height: 1.72;
+        letter-spacing: 0.02em;
+      }
+
       @keyframes spin {
         from {
           transform: scale(1) rotate(0deg);
@@ -398,26 +430,26 @@
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex items-center justify-between px-4 py-4">
         <!-- 网页名称 -->
-        <div class="site-nav-brand">古建智寻</div>
+        <div id="indexNavBrand" class="site-nav-brand">古建智寻</div>
 
         <!-- 导航项 -->
         <div class="flex items-center space-x-8 font-flow text-[17px] tracking-[0.22em] md:text-lg">
           <!-- 首页 -->
           <div class="group relative">
-            <a href="#" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+            <a id="indexNavHome" href="#" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
             <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a href="#" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
+              <a id="indexNavMap" href="#" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
             </div>
           </div>
 
           <!-- 建筑分类 -->
           <div class="group relative">
-            <a href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
+            <a id="indexNavCategories" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
             <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
-              <a href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
-              <a href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
-              <a href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
+              <a id="indexCatResidence" href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
+              <a id="indexCatPalace" href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
+              <a id="indexCatBridge" href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
+              <a id="indexCatYamen" href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
             </div>
           </div>
         </div>
@@ -433,6 +465,7 @@
           <button id="searchBtn" class="site-nav-btn rounded-r-md border border-amber-200/40 bg-[#6b1a1a]/82 px-4 py-2 font-flow text-amber-50 tracking-[0.12em] transition-colors hover:bg-[#7b1f1f]/90">
             搜索
           </button>
+          <button id="indexLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn ml-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-amber-50/90 transition-colors hover:border-amber-200/40 hover:text-amber-100">EN</button>
         </div>
       </div>
     </nav>
@@ -489,7 +522,7 @@
                     src="https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png"
                     alt=""
                     decoding="async"
-                    fetchpriority="high"
+                    fetchpriority="low"
                     referrerpolicy="no-referrer"
                     onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/shiyuan-1229/gujianzhu-web/main/assets/%E5%9C%B0%E5%9B%BE.png'"
                   />
@@ -584,7 +617,7 @@
                         广东
                       </div>
                       <div class="text-white/90 text-base tracking-wide">
-                        <span class="text-white">代表</span>
+                        <span id="indexDetailLabel" class="text-white">代表</span>
                         <span class="mx-1 text-white/60">·</span>
                         <span id="buildingName" class="text-white">陈家祠</span>
                       </div>
@@ -605,6 +638,7 @@
     <!-- GSAP + ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="./js/site-lang.js"></script>
     <script src="./js/map-svg-hotspots.js"></script>
 
     <script>
@@ -613,6 +647,101 @@
       document.documentElement.style.mozOsxFontSmoothing = "grayscale";
 
       gsap.registerPlugin(ScrollTrigger);
+
+      const INDEX_I18N = {
+        zh: {
+          title: "首页 · 古建智寻",
+          brand: "古建智寻",
+          navHome: "首页",
+          navMap: "地图",
+          navCategories: "建筑分类",
+          catResidence: "民居",
+          catPalace: "皇宫",
+          catBridge: "桥梁",
+          catYamen: "官府",
+          searchPlaceholder: "搜索建筑名",
+          searchBtn: "搜索",
+          detailLabel: "代表",
+          loading: "加载地图中",
+          searchEmpty: "请输入建筑名",
+          searchNotFound: "未找到匹配的建筑",
+          switchLabel: "切换为英文",
+          sichuanAria: "四川省，悬停查看代表建筑，点击进入列表",
+        },
+        en: {
+          title: "Home · ArchiQuest",
+          brand: "ArchiQuest",
+          navHome: "Home",
+          navMap: "Map",
+          navCategories: "Categories",
+          catResidence: "Residence",
+          catPalace: "Palace",
+          catBridge: "Bridge",
+          catYamen: "Yamen",
+          searchPlaceholder: "Search architecture",
+          searchBtn: "Search",
+          detailLabel: "Spotlight",
+          loading: "Loading map",
+          searchEmpty: "Please enter a building name",
+          searchNotFound: "No matching architecture found",
+          switchLabel: "Switch to Chinese",
+          sichuanAria: "Sichuan Province, hover to preview, click to open list",
+        },
+      };
+      const PROVINCE_NAME_EN = {
+        北京: "Beijing",
+        山西: "Shanxi",
+        江苏: "Jiangsu",
+        四川: "Sichuan",
+        广东: "Guangdong",
+      };
+      const BUILDING_NAME_EN = {
+        "北京故宫": "Forbidden City, Beijing",
+        "北京四合院": "Beijing Siheyuan",
+        "卢沟桥": "Marco Polo Bridge",
+        "颐和园": "Summer Palace",
+        "乔家大院": "Qiao Family Compound",
+        "霍州署": "Huozhou Yamen",
+        "鱼沼飞梁": "Yuzhao Flying Bridge",
+        "平遥古城墙": "Pingyao City Wall",
+        "苏州拙政园": "Humble Administrator's Garden",
+        "淮安府衙": "Huai'an Prefecture Yamen",
+        "宝带桥": "Baodai Bridge",
+        "周庄民居": "Zhouzhuang Residence",
+        "阆中古城民居": "Langzhong Ancient Residence",
+        "泸州龙脑桥": "Luzhou Longnao Bridge",
+        "泸定桥": "Luding Bridge",
+        "陈家祠": "Chen Clan Ancestral Hall",
+        "潮州广济桥": "Guangji Bridge, Chaozhou",
+        "开平碉楼": "Kaiping Diaolou",
+      };
+      const BUILDING_DESC_EN = {
+        "北京故宫": "Imperial palace of the Ming and Qing dynasties, and the largest surviving wooden palace complex in the world, begun in 1406.",
+        "北京四合院": "A classic northern courtyard-house type with axial symmetry and inward-facing layout, matured through Yuan to Qing periods.",
+        "卢沟桥": "Founded in 1189, one of North China's oldest surviving stone arch bridges, known for carved balustrade lions.",
+        "颐和园": "A Qing imperial garden and retreat palace complex, founded in 1750 and renowned for integrated landscape planning.",
+        "乔家大院": "A representative Shanxi merchant compound from the Qianlong era, known for deep courtyards and refined brick carving.",
+        "霍州署": "One of the best-preserved state-level yamen complexes in China, originally established in the Tang dynasty.",
+        "鱼沼飞梁": "A cross-shaped stone bridge in Jinci, tracing to Northern Wei, showing early Chinese bridge engineering wisdom.",
+        "平遥古城墙": "A Ming-era city wall, among the most complete surviving county-level defensive walls in China.",
+        "苏州拙政园": "A landmark Jiangnan garden founded in 1509, centered on water and literati landscape composition.",
+        "淮安府衙": "A well-preserved Ming-Qing prefectural office complex, founded in 1370, showing historical administrative planning.",
+        "宝带桥": "A multi-arch stone bridge founded in 816, among China's longest surviving ancient stone bridges.",
+        "周庄民居": "A water-town residence typology with white walls and dark tiles, reflecting Jiangnan urban daily life.",
+        "阆中古城民居": "A Northern Sichuan residence type from Ming-Qing times, combining courtyard logic with terrain adaptation.",
+        "泸州龙脑桥": "A Ming-era carved stone bridge noted for dragon-head motifs and local bridge artistry.",
+        "泸定桥": "A Qing iron-chain bridge founded in 1705 across the Dadu River, iconic in Chinese bridge history.",
+        "陈家祠": "A Lingnan masterpiece founded in 1888, famed for brick, ceramic and plaster ornamental craftsmanship.",
+        "潮州广济桥": "Founded in 1171, a composite bridge of beam, pontoon and arch sections, early in movable-bridge history.",
+        "开平碉楼": "Defensive residential towers from Ming to Republican periods, blending Chinese and Western forms in overseas-Chinese hometowns.",
+      };
+      let currentLang =
+        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+      const isEn = () => currentLang === "en";
+      const t = (key) => (INDEX_I18N[currentLang] && INDEX_I18N[currentLang][key]) || INDEX_I18N.zh[key] || "";
+      const localProvinceName = (nameZh) => (isEn() ? PROVINCE_NAME_EN[nameZh] || nameZh : nameZh);
+      const localBuildingName = (nameZh) => (isEn() ? BUILDING_NAME_EN[nameZh] || nameZh : nameZh);
+      const localBuildingDesc = (nameZh, fallbackZh) => (isEn() ? BUILDING_DESC_EN[nameZh] || fallbackZh : fallbackZh);
 
       // Canvas 星空粒子（随机位置、随机大小、随机透明度波动）
       (() => {
@@ -796,6 +925,66 @@
       const buildingNameEl = document.getElementById("buildingName");
       const buildingDescEl = document.getElementById("buildingDesc");
       const carouselContainer = document.getElementById("carouselContainer");
+      const mapStatusEl = document.getElementById("mapStatus");
+
+      const applyIndexLanguage = () => {
+        document.documentElement.lang = isEn() ? "en" : "zh-CN";
+        document.documentElement.classList.toggle("lang-en", isEn());
+        document.title = t("title");
+        const brandEl = document.getElementById("indexNavBrand");
+        if (brandEl) brandEl.textContent = t("brand");
+        const homeEl = document.getElementById("indexNavHome");
+        if (homeEl) homeEl.textContent = t("navHome");
+        const mapEl = document.getElementById("indexNavMap");
+        if (mapEl) mapEl.textContent = t("navMap");
+        const categoriesEl = document.getElementById("indexNavCategories");
+        if (categoriesEl) categoriesEl.textContent = t("navCategories");
+        const catResidenceEl = document.getElementById("indexCatResidence");
+        if (catResidenceEl) catResidenceEl.textContent = t("catResidence");
+        const catPalaceEl = document.getElementById("indexCatPalace");
+        if (catPalaceEl) catPalaceEl.textContent = t("catPalace");
+        const catBridgeEl = document.getElementById("indexCatBridge");
+        if (catBridgeEl) catBridgeEl.textContent = t("catBridge");
+        const catYamenEl = document.getElementById("indexCatYamen");
+        if (catYamenEl) catYamenEl.textContent = t("catYamen");
+        const searchInputEl = document.getElementById("searchInput");
+        if (searchInputEl) searchInputEl.placeholder = t("searchPlaceholder");
+        const searchBtnEl = document.getElementById("searchBtn");
+        if (searchBtnEl) searchBtnEl.textContent = t("searchBtn");
+        const detailLabelEl = document.getElementById("indexDetailLabel");
+        if (detailLabelEl) detailLabelEl.textContent = t("detailLabel");
+        if (mapStatusEl && mapStatusEl.firstElementChild) mapStatusEl.firstElementChild.textContent = t("loading");
+        const langBtn = document.getElementById("indexLangSwitchBtn");
+        if (langBtn) {
+          langBtn.textContent = isEn() ? "中" : "EN";
+          langBtn.setAttribute("aria-label", t("switchLabel"));
+        }
+        const sichuanBtn = document.querySelector(".map-sichuan-hit-face");
+        if (sichuanBtn) sichuanBtn.setAttribute("aria-label", t("sichuanAria"));
+
+        document.querySelectorAll('a[href^="./list.html?category="]').forEach((a) => {
+          const href = new URL(a.getAttribute("href"), window.location.href);
+          href.searchParams.set("lang", currentLang);
+          a.setAttribute("href", `${href.pathname}${href.search}`);
+        });
+
+        const listLink = document.getElementById("indexNavCategories");
+        if (listLink) {
+          const href = new URL(listLink.getAttribute("href"), window.location.href);
+          href.searchParams.set("lang", currentLang);
+          listLink.setAttribute("href", `${href.pathname}${href.search}`);
+        }
+
+        document.querySelectorAll('.map-hotspot-path[data-href]').forEach((path) => {
+          const raw = path.getAttribute("data-href");
+          if (!raw) return;
+          const href = new URL(raw, window.location.href);
+          href.searchParams.set("lang", currentLang);
+          path.setAttribute("data-href", `${href.pathname}${href.search}`);
+        });
+
+      };
+      applyIndexLanguage();
 
       // 详情卡片初始位移（避免和 CSS transform 叠加）
       gsap.set(detailEl, { y: 0, opacity: 0 });
@@ -1031,9 +1220,9 @@
         const imgList = await getBuildingImages(it.name);
         if (renderToken !== detailRenderToken) return; // 防止异步加载后覆盖新 hover 的内容
 
-        provinceNameEl.textContent = mappedProvince;
-        buildingNameEl.textContent = it.name;
-        buildingDescEl.textContent = it.desc;
+        provinceNameEl.textContent = localProvinceName(mappedProvince);
+        buildingNameEl.textContent = localBuildingName(it.name);
+        buildingDescEl.textContent = localBuildingDesc(it.name, it.desc);
         
         // 创建并更新轮播图
         createCarousel(imgList);
@@ -1173,7 +1362,7 @@
         sichuanHitBtn.type = "button";
         sichuanHitBtn.className = "map-sichuan-hit-face";
         sichuanHitBtn.dataset.province = "四川省";
-        sichuanHitBtn.setAttribute("aria-label", "四川省，悬停查看代表建筑，点击进入列表");
+        sichuanHitBtn.setAttribute("aria-label", t("sichuanAria"));
         sichuanWrap.appendChild(sichuanHitSvg);
         sichuanWrap.appendChild(sichuanHitBtn);
         mapHotspotsEl.appendChild(sichuanWrap);
@@ -1237,7 +1426,8 @@
           const province = sichuanBtn.dataset.province;
           if (!province) return;
           if (validClickNav.includes(province)) {
-            window.location.href = "list.html?province=" + encodeURIComponent(province);
+            window.location.href =
+              "list.html?province=" + encodeURIComponent(province) + "&lang=" + encodeURIComponent(currentLang);
           }
         });
 
@@ -1276,18 +1466,22 @@
       // 搜索函数
       const searchBuilding = () => {
         const searchTerm = searchInput.value.trim();
-        if (!searchTerm) return;
+        if (!searchTerm) {
+          alert(t("searchEmpty"));
+          return;
+        }
 
         // 查找匹配的建筑
         const matchedBuilding = allBuildings.find(building => 
-          building.name.includes(searchTerm)
+          building.name.includes(searchTerm) ||
+          (BUILDING_NAME_EN[building.name] || "").toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         if (matchedBuilding) {
           // 跳转到详情页
-          window.location.href = `detail.html?building=${encodeURIComponent(matchedBuilding.name)}`;
+          window.location.href = `detail.html?building=${encodeURIComponent(matchedBuilding.name)}&lang=${encodeURIComponent(currentLang)}`;
         } else {
-          alert('未找到匹配的建筑');
+          alert(t("searchNotFound"));
         }
       };
 
@@ -1302,6 +1496,16 @@
           if (e.key === 'Enter') {
             searchBuilding();
           }
+        });
+      }
+
+      const indexLangSwitchBtn = document.getElementById("indexLangSwitchBtn");
+      if (indexLangSwitchBtn) {
+        indexLangSwitchBtn.addEventListener("click", () => {
+          currentLang = isEn() ? "zh" : "en";
+          if (typeof persistSiteLang === "function") persistSiteLang(currentLang);
+          applyIndexLanguage();
+          if (activeProvince) updateDetailByIndex(activeProvince, activeImageIndex);
         });
       }
 
@@ -1337,7 +1541,7 @@
 
             Promise.resolve(starter).finally(function () {
               setTimeout(function () {
-                window.location.assign(detailUrl);
+                window.location.assign(detailUrl + "?lang=" + encodeURIComponent(currentLang));
               }, 600);
             });
           },

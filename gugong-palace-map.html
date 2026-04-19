@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
@@ -213,29 +213,68 @@
           transition: none !important;
         }
       }
+      /* 英文：与长卷页一致——横向排字，禁止竖排拉丁字母 */
+      html.lang-en .map-pill {
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        line-height: 1.22;
+        text-align: center;
+        white-space: pre-line;
+        overflow: visible;
+        padding: 0.32rem 0.5rem;
+        border-radius: 6px;
+      }
+      html.lang-en .map-pill::before {
+        border-radius: 4px;
+      }
+      html.lang-en .site-nav-btn {
+        letter-spacing: 0.1em;
+      }
+      html.lang-en .detail-title {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        font-weight: 600;
+        font-size: clamp(15px, 2.35vw, 28px);
+        letter-spacing: 0.14em;
+        line-height: 1.38;
+        max-width: min(92vw, 36rem);
+        padding: 0 1.25rem;
+        text-align: center;
+        text-wrap: balance;
+        white-space: pre-line;
+      }
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
     </style>
   </head>
-  <body>
+  <body class="font-sansCN">
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <a href="./index.html" class="site-nav-brand">古建智寻</a>
+        <a id="pmBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
-          <a href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
-          <a href="./gugong-explore.html" class="site-nav-btn text-amber-100">故宫探秘</a>
+          <a id="pmNavHome" href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+          <a id="pmNavExplore" href="./gugong-explore.html" class="site-nav-btn text-amber-100">故宫探秘</a>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-2 md:gap-3">
           <a
-            href="./gugong-explore.html"
+            id="pmBack"
+            href="javascript:void(0)"
             class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:px-5 md:text-lg md:tracking-[0.16em]"
           >
             返回上一页
           </a>
           <a
+            id="pmHomeReturn"
             href="./index.html"
             class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:px-5 md:text-lg md:tracking-[0.16em]"
           >
             返回首页
           </a>
+          <button id="pmLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#7b1f1f]/90">EN</button>
         </div>
       </div>
     </nav>
@@ -262,6 +301,7 @@
               <g class="map-hotspot-g" transform="translate(1305, 593.5)">
                 <path
                   class="map-hotspot-path"
+                  data-pill-key="taihe"
                   data-href="./detail.html?building=故宫太和殿"
                   data-name-zh="太和殿区域"
                   data-name-en="Hall of Supreme Harmony Precinct"
@@ -273,6 +313,7 @@
               <g class="map-hotspot-g" transform="translate(1093.5, 94)">
                 <path
                   class="map-hotspot-path"
+                  data-pill-key="yuhua"
                   data-href="./detail.html?building=故宫御花园"
                   data-name-zh="御花园区域"
                   data-name-en="Imperial Garden"
@@ -285,10 +326,12 @@
           </div>
         </div>
         <!-- data-map-cx/cy：中心在原图比例；rw/rh：横排按钮宽、高占原图比例。仅太和殿、御花园可点。 -->
-        <span class="map-pill map-pill--static" data-map-cx="0.118" data-map-cy="0.445" data-map-rw="0.032" data-map-rh="0.102">慈宁宫</span>
-        <span class="map-pill map-pill--static" data-map-cx="0.345" data-map-cy="0.415" data-map-rw="0.032" data-map-rh="0.098">养心殿</span>
+        <span id="pmPillCining" class="map-pill map-pill--static" data-map-cx="0.118" data-map-cy="0.445" data-map-rw="0.032" data-map-rh="0.102">慈宁宫</span>
+        <span id="pmPillYangxin" class="map-pill map-pill--static" data-map-cx="0.345" data-map-cy="0.415" data-map-rw="0.032" data-map-rh="0.098">养心殿</span>
         <a
+          id="pmPillYuhua"
           class="map-pill map-pill--link"
+          data-pill-key="yuhua"
           href="./detail.html?building=故宫御花园"
           aria-label="查看御花园详情"
           data-map-cx="0.63"
@@ -298,11 +341,13 @@
         >
           御花园
         </a>
-        <span class="map-pill map-pill--static" data-map-cx="0.52" data-map-cy="0.358" data-map-rw="0.032" data-map-rh="0.102">乾清宫</span>
-        <span class="map-pill map-pill--static" data-map-cx="0.745" data-map-cy="0.425" data-map-rw="0.032" data-map-rh="0.098">延禧宫</span>
-        <span class="map-pill map-pill--static" data-map-cx="0.905" data-map-cy="0.435" data-map-rw="0.031" data-map-rh="0.097">皇极殿</span>
+        <span id="pmPillQianqing" class="map-pill map-pill--static" data-map-cx="0.52" data-map-cy="0.358" data-map-rw="0.032" data-map-rh="0.102">乾清宫</span>
+        <span id="pmPillYanxi" class="map-pill map-pill--static" data-map-cx="0.745" data-map-cy="0.425" data-map-rw="0.032" data-map-rh="0.098">延禧宫</span>
+        <span id="pmPillHuangji" class="map-pill map-pill--static" data-map-cx="0.905" data-map-cy="0.435" data-map-rw="0.031" data-map-rh="0.097">皇极殿</span>
         <a
+          id="pmPillTaihe"
           class="map-pill map-pill--link"
+          data-pill-key="taihe"
           href="./detail.html?building=故宫太和殿"
           aria-label="查看太和殿详情"
           data-map-cx="0.53"
@@ -312,15 +357,164 @@
         >
           太和殿
         </a>
-        <span class="map-pill map-pill--static" data-map-cx="0.365" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">武英殿</span>
-        <span class="map-pill map-pill--static" data-map-cx="0.655" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">文华殿</span>
+        <span id="pmPillWuying" class="map-pill map-pill--static" data-map-cx="0.365" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">武英殿</span>
+        <span id="pmPillWenhua" class="map-pill map-pill--static" data-map-cx="0.655" data-map-cy="0.752" data-map-rw="0.032" data-map-rh="0.098">文华殿</span>
       </section>
     </main>
     <div id="detailTransition" class="detail-transition" aria-hidden="true">
       <div class="detail-scroll" aria-hidden="true"></div>
       <div id="detailTransitionTitle" class="detail-title">入殿细览</div>
     </div>
+    <script src="./js/site-lang.js"></script>
     <script src="./js/map-svg-hotspots.js"></script>
+    <script>
+      const PM_I18N = {
+        zh: {
+          title: "故宫内景 · 古建智寻",
+          brand: "古建智寻",
+          navHome: "首页",
+          navExplore: "故宫探秘",
+          back: "返回上一页",
+          homeReturn: "返回首页",
+          pillCining: "慈宁宫",
+          pillYangxin: "养心殿",
+          pillYuhua: "御花园",
+          pillQianqing: "乾清宫",
+          pillYanxi: "延禧宫",
+          pillHuangji: "皇极殿",
+          pillTaihe: "太和殿",
+          pillWuying: "武英殿",
+          pillWenhua: "文华殿",
+          imgAlt: "故宫建筑群鸟瞰",
+          ariaYuhua: "查看御花园详情",
+          ariaTaihe: "查看太和殿详情",
+          transitionDefault: "入殿细览",
+          transitionTaihe: "入太和殿细览",
+          transitionYuhua: "入御花园细览",
+          switchLabel: "切换为英文",
+        },
+        en: {
+          title: "Palace Interior Map · ArchiQuest",
+          brand: "ArchiQuest",
+          navHome: "Home",
+          navExplore: "Forbidden City Journey",
+          back: "Back",
+          homeReturn: "Home",
+          pillCining: "Cining",
+          pillYangxin: "Yangxin",
+          pillYuhua: "Imperial\nGarden",
+          pillQianqing: "Qianqing",
+          pillYanxi: "Yanxi",
+          pillHuangji: "Huangji",
+          pillTaihe: "Supreme\nHarmony",
+          pillWuying: "Wuying",
+          pillWenhua: "Wenhua",
+          imgAlt: "Aerial view of the Forbidden City palace complex",
+          ariaYuhua: "View Imperial Garden details",
+          ariaTaihe: "View Hall of Supreme Harmony details",
+          transitionDefault: "Opening\ndetails",
+          transitionTaihe: "Entering\nSupreme Harmony",
+          transitionYuhua: "Entering\nImperial Garden",
+          switchLabel: "Switch to Chinese",
+        },
+      };
+      let pmCurrentLang =
+        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+      const pmIsEn = () => pmCurrentLang === "en";
+      const pmT = (key) => (PM_I18N[pmCurrentLang] && PM_I18N[pmCurrentLang][key]) || PM_I18N.zh[key] || "";
+      function pmGetTransitionTitle(pillKey) {
+        if (!pillKey) return pmT("transitionDefault");
+        if (pillKey === "taihe") return pmT("transitionTaihe");
+        if (pillKey === "yuhua") return pmT("transitionYuhua");
+        return pmT("transitionDefault");
+      }
+      function pmApplyLang() {
+        document.documentElement.lang = pmIsEn() ? "en" : "zh-CN";
+        document.documentElement.classList.toggle("lang-en", pmIsEn());
+        document.title = pmT("title");
+        const setText = (id, key) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = pmT(key);
+        };
+        setText("pmBrand", "brand");
+        setText("pmNavHome", "navHome");
+        setText("pmNavExplore", "navExplore");
+        setText("pmBack", "back");
+        setText("pmHomeReturn", "homeReturn");
+        setText("pmPillCining", "pillCining");
+        setText("pmPillYangxin", "pillYangxin");
+        setText("pmPillYuhua", "pillYuhua");
+        setText("pmPillQianqing", "pillQianqing");
+        setText("pmPillYanxi", "pillYanxi");
+        setText("pmPillHuangji", "pillHuangji");
+        setText("pmPillTaihe", "pillTaihe");
+        setText("pmPillWuying", "pillWuying");
+        setText("pmPillWenhua", "pillWenhua");
+        const img = document.getElementById("gugongMapImg");
+        if (img) img.setAttribute("alt", pmT("imgAlt"));
+        const yuhua = document.getElementById("pmPillYuhua");
+        if (yuhua) yuhua.setAttribute("aria-label", pmT("ariaYuhua"));
+        const taihe = document.getElementById("pmPillTaihe");
+        if (taihe) taihe.setAttribute("aria-label", pmT("ariaTaihe"));
+        const brand = document.getElementById("pmBrand");
+        if (brand) brand.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        const navHome = document.getElementById("pmNavHome");
+        if (navHome) navHome.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        const navExplore = document.getElementById("pmNavExplore");
+        if (navExplore) navExplore.setAttribute("href", `./gugong-explore.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        const homeReturn = document.getElementById("pmHomeReturn");
+        if (homeReturn) homeReturn.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        const back = document.getElementById("pmBack");
+        if (back) {
+          back.onclick = function () {
+            if (history.length > 1) {
+              history.back();
+            } else {
+              location.href = "./gugong-explore.html?lang=" + encodeURIComponent(pmCurrentLang);
+            }
+          };
+        }
+        document.querySelectorAll("#gugongPalaceHotspotSvg .map-hotspot-path[data-pill-key]").forEach(function (path) {
+          const rawHref = path.getAttribute("data-href");
+          if (!rawHref) return;
+          const href = new URL(rawHref, window.location.href);
+          href.searchParams.set("lang", pmCurrentLang);
+          path.setAttribute("data-href", `${href.pathname}${href.search}`);
+        });
+        [yuhua, taihe].forEach(function (link) {
+          if (!link) return;
+          const rawHref = link.getAttribute("href");
+          if (!rawHref) return;
+          const href = new URL(rawHref, window.location.href);
+          href.searchParams.set("lang", pmCurrentLang);
+          link.setAttribute("href", `${href.pathname}${href.search}`);
+        });
+        const titleEl = document.getElementById("detailTransitionTitle");
+        if (titleEl) titleEl.textContent = pmT("transitionDefault");
+        const langBtn = document.getElementById("pmLangSwitchBtn");
+        if (langBtn) {
+          langBtn.textContent = pmIsEn() ? "中" : "EN";
+          langBtn.setAttribute("aria-label", pmT("switchLabel"));
+        }
+        window.requestAnimationFrame(function () {
+          if (typeof window.placeGugongHotspots === "function") {
+            window.placeGugongHotspots();
+          } else {
+            window.dispatchEvent(new Event("resize"));
+          }
+        });
+      }
+      pmApplyLang();
+      const pmLangBtn = document.getElementById("pmLangSwitchBtn");
+      if (pmLangBtn) {
+        pmLangBtn.addEventListener("click", function () {
+          pmCurrentLang = pmIsEn() ? "zh" : "en";
+          if (typeof persistSiteLang === "function") persistSiteLang(pmCurrentLang);
+          pmApplyLang();
+        });
+      }
+      window.pmGetTransitionTitle = pmGetTransitionTitle;
+    </script>
     <script>
       (function initGugongPalaceSvgHotspots() {
         var root = document.querySelector(".gugong-palace-map-media");
@@ -358,6 +552,7 @@
             offsetY = (ch - ih * scale) / 2;
           }
 
+          var isEn = document.documentElement.classList.contains("lang-en");
           stage.querySelectorAll("[data-map-cx]").forEach(function (el) {
             var cx = parseFloat(el.getAttribute("data-map-cx"));
             var cy = parseFloat(el.getAttribute("data-map-cy"));
@@ -370,10 +565,21 @@
             var top = offsetY + cy * ih * scale;
             el.style.left = left + "px";
             el.style.top = top + "px";
-            el.style.width = Math.max(30, w) + "px";
-            el.style.height = Math.max(76, h) + "px";
-            var fs = Math.max(13, Math.min(20, Math.round(w * 0.52)));
-            el.style.fontSize = fs + "px";
+            if (isEn) {
+              var baseW = Math.max(30, w);
+              var baseH = Math.max(76, h);
+              var pillW = Math.min(Math.max(baseW * 2.05, baseH * 0.92), 148);
+              var pillH = Math.max(42, Math.min(58, baseH * 0.52));
+              el.style.width = pillW + "px";
+              el.style.height = pillH + "px";
+              var fs = Math.max(10, Math.min(13, Math.round(pillW * 0.095)));
+              el.style.fontSize = fs + "px";
+            } else {
+              el.style.width = Math.max(30, w) + "px";
+              el.style.height = Math.max(76, h) + "px";
+              var fsZh = Math.max(13, Math.min(20, Math.round(w * 0.52)));
+              el.style.fontSize = fsZh + "px";
+            }
           });
         }
 
@@ -387,6 +593,7 @@
           var ro = new ResizeObserver(placeGugongHotspots);
           ro.observe(img.parentElement);
         }
+        window.placeGugongHotspots = placeGugongHotspots;
       })();
     </script>
     <script>
@@ -400,8 +607,8 @@
         };
 
         document.querySelectorAll(".map-pill--link").forEach(function (link) {
-          var label = (link.textContent || "").trim();
-          var nameZh = label === "太和殿" ? "太和殿区域" : label === "御花园" ? "御花园区域" : "";
+          var key = link.getAttribute("data-pill-key") || "";
+          var nameZh = key === "taihe" ? "太和殿区域" : key === "yuhua" ? "御花园区域" : "";
           if (!nameZh) return;
           link.addEventListener("mouseenter", function () { setPathActive(nameZh, true); });
           link.addEventListener("mouseleave", function () { setPathActive(nameZh, false); });
@@ -413,7 +620,7 @@
         var title = document.getElementById("detailTransitionTitle");
         if (!transition || !title) return;
         var locking = false;
-        var playDetailTransition = function (href, label) {
+        var playDetailTransition = function (href, pillKey) {
           var targetHref = href || "";
           if (!targetHref) return;
           var prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -423,7 +630,8 @@
           }
           if (locking) return;
           locking = true;
-          title.textContent = label ? "入" + label + "细览" : "入殿细览";
+          var getTitle = window.pmGetTransitionTitle;
+          title.textContent = typeof getTitle === "function" ? getTitle(pillKey || "") : "入殿细览";
           document.body.classList.add("is-detail-transition");
           transition.classList.add("detail-transition--play");
           window.setTimeout(function () {
@@ -434,8 +642,8 @@
         document.querySelectorAll(".map-pill--link").forEach(function (link) {
           link.addEventListener("click", function (e) {
             e.preventDefault();
-            var label = (link.textContent || "").trim();
-            playDetailTransition(link.getAttribute("href"), label);
+            var key = link.getAttribute("data-pill-key") || "";
+            playDetailTransition(link.getAttribute("href"), key);
           });
         });
 
@@ -444,12 +652,11 @@
           function (e) {
             var path = e.target && e.target.closest ? e.target.closest(".map-hotspot-path") : null;
             if (!path) return;
-            var nameZh = path.getAttribute("data-name-zh") || "";
-            if (nameZh !== "太和殿区域" && nameZh !== "御花园区域") return;
+            var pillKey = path.getAttribute("data-pill-key") || "";
+            if (pillKey !== "taihe" && pillKey !== "yuhua") return;
             e.preventDefault();
             e.stopPropagation();
-            var label = nameZh === "太和殿区域" ? "太和殿" : "御花园";
-            playDetailTransition(path.getAttribute("data-href"), label);
+            playDetailTransition(path.getAttribute("data-href"), pillKey);
           },
           true
         );

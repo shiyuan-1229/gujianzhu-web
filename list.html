@@ -478,6 +478,40 @@
         min-height: 220px;
         padding: 0;
       }
+
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
+      html.lang-en body {
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        letter-spacing: 0.5px;
+      }
+      html.lang-en .site-nav-brand {
+        letter-spacing: 0.04em;
+      }
+      html.lang-en .site-nav-sub {
+        letter-spacing: 0.1em !important;
+      }
+      html.lang-en .filter-btn,
+      html.lang-en #listHomeLink {
+        font-size: 0.78rem !important;
+        letter-spacing: 0.08em !important;
+        min-width: 78px;
+      }
+      html.lang-en .card-meta .font-serifCN {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif !important;
+        font-size: 1.04rem;
+        line-height: 1.2;
+      }
+      html.lang-en .card-meta .text-xs {
+        font-size: 0.72rem !important;
+        letter-spacing: 0.08em !important;
+      }
+      html.lang-en .detail-btn {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+      }
     </style>
   </head>
 
@@ -499,16 +533,22 @@
       <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
         <div class="site-nav-container container mx-auto flex items-center justify-between px-4 py-3">
           <div class="site-nav-brand-wrap select-none">
-            <div class="site-nav-brand">古建智寻</div>
-            <div class="site-nav-sub mt-1 font-flow text-xs tracking-[0.2em] text-zinc-400">华夏建筑选集</div>
+            <div id="listNavBrand" class="site-nav-brand">古建智寻</div>
+            <div id="listNavSub" class="site-nav-sub mt-1 font-flow text-xs tracking-[0.2em] text-zinc-400">华夏建筑选集</div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2 md:gap-3">
+            <a
+              id="listHomeLink"
+              href="./index.html"
+              class="site-nav-btn inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 no-underline transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4"
+              >首页</a>
             <button class="filter-btn site-nav-btn active rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50 transition-all duration-300 hover:bg-[#7b1f1f]/90 md:px-4" data-category="all">全部</button>
             <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="民居">民居</button>
             <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="皇宫">皇宫</button>
             <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="官府">官府</button>
             <button class="filter-btn site-nav-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4" data-category="桥梁">桥梁</button>
+            <button id="listLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-transparent bg-transparent px-3 py-2 font-flow text-sm tracking-[0.18em] text-amber-50/85 transition-all duration-300 hover:border-amber-200/40 hover:text-amber-100 md:px-4">EN</button>
           </div>
         </div>
       </nav>
@@ -852,12 +892,78 @@
     <!-- GSAP + ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="./js/site-lang.js"></script>
 
     <script>
       document.documentElement.style.webkitFontSmoothing = "antialiased";
       document.documentElement.style.mozOsxFontSmoothing = "grayscale";
 
       gsap.registerPlugin(ScrollTrigger);
+
+      const LIST_I18N = {
+        zh: {
+          title: "古建筑列表 · 华夏建筑选集",
+          brand: "古建智寻",
+          sub: "华夏建筑选集",
+          homeLabel: "首页",
+          homeAria: "返回首页",
+          filters: { all: "全部", "民居": "民居", "皇宫": "皇宫", "官府": "官府", "桥梁": "桥梁" },
+          detailBtn: "查看详细介绍",
+          switchLabel: "切换为英文",
+        },
+        en: {
+          title: "Architecture List · Huaxia Architecture Collection",
+          brand: "ArchiQuest",
+          sub: "Huaxia Architecture Collection",
+          homeLabel: "Home",
+          homeAria: "Back to home",
+          filters: { all: "All", "民居": "Residence", "皇宫": "Palace", "官府": "Yamen", "桥梁": "Bridge" },
+          detailBtn: "View Details",
+          switchLabel: "Switch to Chinese",
+        },
+      };
+      const BUILDING_NAME_EN = {
+        "北京故宫": "Forbidden City, Beijing",
+        "北京四合院": "Beijing Siheyuan",
+        "卢沟桥": "Marco Polo Bridge",
+        "乔家大院": "Qiao Family Compound",
+        "霍州署": "Huozhou Yamen",
+        "鱼沼飞梁": "Yuzhao Flying Bridge",
+        "平遥古城墙": "Pingyao City Wall",
+        "淮安府衙": "Huai'an Prefecture Yamen",
+        "宝带桥": "Baodai Bridge",
+        "周庄民居": "Zhouzhuang Residence",
+        "阆中古城民居": "Langzhong Ancient Residence",
+        "泸州龙脑桥": "Luzhou Longnao Bridge",
+        "泸定桥": "Luding Bridge",
+        "陈家祠": "Chen Clan Ancestral Hall",
+        "潮州广济桥": "Guangji Bridge, Chaozhou",
+        "开平碉楼": "Kaiping Diaolou",
+      };
+      const BUILDING_SUB_EN = {
+        "北京故宫": "Palace · Founded in 1406",
+        "北京四合院": "Residence · Yuan-to-Qing Type",
+        "卢沟桥": "Bridge · 1189",
+        "乔家大院": "Residence · Qianlong Period",
+        "霍州署": "Yamen · Founded in Tang",
+        "鱼沼飞梁": "Bridge · Northern Wei Origin",
+        "平遥古城墙": "Yamen · Ming City Wall",
+        "淮安府衙": "Yamen · 1370",
+        "宝带桥": "Bridge · 816",
+        "周庄民居": "Residence · Jiangnan Water Town",
+        "阆中古城民居": "Residence · Northern Sichuan (Ming-Qing)",
+        "泸州龙脑桥": "Bridge · Ming Hongwu Era",
+        "泸定桥": "Bridge · 1705",
+        "陈家祠": "Residence · 1888",
+        "潮州广济桥": "Bridge · 1171",
+        "开平碉楼": "Residence · Ming-Qing-Republican",
+      };
+      let currentLang =
+        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+      const isEn = () => currentLang === "en";
+      const t = (key) => (LIST_I18N[currentLang] && LIST_I18N[currentLang][key]) || LIST_I18N.zh[key] || "";
+      const localizedBuildingName = (nameZh) => (isEn() ? BUILDING_NAME_EN[nameZh] || nameZh : nameZh);
+      const localizedBuildingSub = (nameZh, fallbackZh) => (isEn() ? BUILDING_SUB_EN[nameZh] || fallbackZh : fallbackZh);
 
       // 左侧进场：从左滑入 + 淡入
       gsap.to("#leftPanel", { x: 0, opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.1 });
@@ -1084,12 +1190,16 @@
               meta.querySelector('[class*="text-gray-700"]') ||
               meta.querySelector('[class*="text-gray-800"]');
 
-            const buildingName = titleEl?.textContent?.trim() || "";
-            const subText = subEl?.textContent?.trim() || "";
+            const buildingNameZh = titleEl?.dataset.buildingZh || titleEl?.textContent?.trim() || "";
+            const subTextZh = subEl?.dataset.subZh || subEl?.textContent?.trim() || "";
             const engText = engEl?.textContent?.trim() || "";
+            if (titleEl && !titleEl.dataset.buildingZh) titleEl.dataset.buildingZh = buildingNameZh;
+            if (subEl && !subEl.dataset.subZh) subEl.dataset.subZh = subTextZh;
 
-            const detailUrl = `detail.html?building=${encodeURIComponent(buildingName)}`;
-            const backImgSrc = CARD_BACK_IMAGES[buildingName] || "";
+            const detailUrl = `detail.html?building=${encodeURIComponent(buildingNameZh)}`;
+            const backImgSrc = CARD_BACK_IMAGES[buildingNameZh] || "";
+            const displayName = localizedBuildingName(buildingNameZh);
+            const displaySub = localizedBuildingSub(buildingNameZh, subTextZh);
 
             const inner = document.createElement("div");
             inner.className = "jade-inner";
@@ -1109,10 +1219,10 @@
             back.innerHTML = `
               ${photoBlock}
               <div class="jade-back-text">
-                <div class="jade-back-title">${buildingName}</div>
-                <div class="jade-back-sub">${subText || "—"}</div>
+                <div class="jade-back-title">${displayName}</div>
+                <div class="jade-back-sub">${displaySub || "—"}</div>
                 <div class="jade-back-sub" style="opacity: 0.85;">${engText || ""}</div>
-                <a class="detail-btn" href="${detailUrl}">查看详细介绍</a>
+                <a class="detail-btn" href="${detailUrl}">${t("detailBtn")}</a>
               </div>
             `;
 
@@ -1138,6 +1248,59 @@
 
       initJadeCards();
 
+      const applyListLanguage = () => {
+        document.documentElement.lang = isEn() ? "en" : "zh-CN";
+        document.documentElement.classList.toggle("lang-en", isEn());
+        document.title = t("title");
+
+        const brandEl = document.getElementById("listNavBrand");
+        if (brandEl) brandEl.textContent = t("brand");
+        const subEl = document.getElementById("listNavSub");
+        if (subEl) subEl.textContent = t("sub");
+
+        const homeLink = document.getElementById("listHomeLink");
+        if (homeLink) {
+          homeLink.textContent = t("homeLabel");
+          homeLink.setAttribute("aria-label", t("homeAria"));
+          homeLink.href = `./index.html?lang=${encodeURIComponent(currentLang)}`;
+        }
+
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          const key = btn.getAttribute("data-category") || "all";
+          const label = LIST_I18N[currentLang].filters[key] || key;
+          btn.textContent = label;
+        });
+
+        document.querySelectorAll(".arch-card").forEach((card) => {
+          const titleEl = card.querySelector(".jade-front .font-serifCN");
+          const subMetaEl =
+            card.querySelector('.jade-front [class*="text-gray-800"]') ||
+            card.querySelector('.jade-front [class*="text-qianbai/60"]');
+          const zhName = titleEl?.dataset.buildingZh || titleEl?.textContent?.trim() || "";
+          const zhSub = subMetaEl?.dataset.subZh || subMetaEl?.textContent?.trim() || "";
+          if (titleEl) titleEl.textContent = localizedBuildingName(zhName);
+          if (subMetaEl) subMetaEl.textContent = localizedBuildingSub(zhName, zhSub);
+
+          const backTitleEl = card.querySelector(".jade-back-title");
+          const backSubEls = card.querySelectorAll(".jade-back-sub");
+          if (backTitleEl) backTitleEl.textContent = localizedBuildingName(zhName);
+          if (backSubEls[0]) backSubEls[0].textContent = localizedBuildingSub(zhName, zhSub);
+
+          const detailBtn = card.querySelector(".detail-btn");
+          if (detailBtn) {
+            detailBtn.textContent = t("detailBtn");
+            detailBtn.href = `detail.html?building=${encodeURIComponent(zhName)}&lang=${currentLang}`;
+          }
+        });
+
+        const langBtn = document.getElementById("listLangSwitchBtn");
+        if (langBtn) {
+          langBtn.textContent = isEn() ? "中" : "EN";
+          langBtn.setAttribute("aria-label", t("switchLabel"));
+        }
+      };
+      applyListLanguage();
+
       document.querySelectorAll(".arch-card").forEach((card) => {
         card.classList.remove("is-flipped");
         card.addEventListener("click", (e) => {
@@ -1154,6 +1317,15 @@
 
       // 重新排版一次（初始化翻面结构后）
       layoutVisibleJades();
+
+      const listLangSwitchBtn = document.getElementById("listLangSwitchBtn");
+      if (listLangSwitchBtn) {
+        listLangSwitchBtn.addEventListener("click", () => {
+          currentLang = isEn() ? "zh" : "en";
+          if (typeof persistSiteLang === "function") persistSiteLang(currentLang);
+          applyListLanguage();
+        });
+      }
 
       // 使用用户指定卷轴图片作为静态背景，不再生成/渲染 Three.js 卷轴纹理。
     </script>

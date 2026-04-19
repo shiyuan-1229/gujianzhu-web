@@ -223,22 +223,47 @@
 
   function showCard(card, path, clientX, clientY) {
     var d = readData(path);
+    var isEn =
+      typeof document !== "undefined" &&
+      document.documentElement &&
+      document.documentElement.classList.contains("lang-en");
+    var descEn = (path.getAttribute("data-desc-en") || "").trim();
+    var catEn = (path.getAttribute("data-category-en") || "").trim();
+    var brandEn = (path.getAttribute("data-brand-en") || "").trim();
     var tagEl = card.querySelector("[data-card=tag]");
-    tagEl.textContent = d.category || "";
-    tagEl.style.display = d.category ? "" : "none";
-    card.querySelector("[data-card=title]").textContent = d.zh;
+    var tagText = isEn && catEn ? catEn : d.category || "";
+    tagEl.textContent = tagText;
+    tagEl.style.display = tagText ? "" : "none";
+    var titleEl = card.querySelector("[data-card=title]");
+    var titleText = isEn && d.en ? d.en : d.zh;
+    titleEl.textContent = titleText;
     var enEl = card.querySelector("[data-card=en]");
-    enEl.textContent = d.en;
-    enEl.style.display = d.en ? "" : "none";
-    card.querySelector("[data-card=desc]").textContent = d.desc;
+    if (isEn && d.en) {
+      enEl.textContent = "";
+      enEl.style.display = "none";
+    } else {
+      enEl.textContent = d.en;
+      enEl.style.display = d.en ? "" : "none";
+    }
+    var descText = isEn && descEn ? descEn : d.desc;
+    card.querySelector("[data-card=desc]").textContent = descText;
     var brandEl = card.querySelector("[data-card=brand]");
     if (brandEl) {
-      var fallbackBrand = card.classList.contains("map-hotspot-info-card--yuhua")
+      var fallbackBrandZh = card.classList.contains("map-hotspot-info-card--yuhua")
         ? "御花园"
         : card.classList.contains("map-hotspot-info-card--taihe")
         ? "太和殿"
         : "";
-      brandEl.textContent = d.brand || fallbackBrand;
+      var fallbackBrandEn = card.classList.contains("map-hotspot-info-card--yuhua")
+        ? "Imperial Garden"
+        : card.classList.contains("map-hotspot-info-card--taihe")
+        ? "Hall of Supreme Harmony"
+        : "";
+      if (isEn) {
+        brandEl.textContent = brandEn || fallbackBrandEn;
+      } else {
+        brandEl.textContent = d.brand || fallbackBrandZh;
+      }
     }
     card.classList.remove("is-visible");
     void card.offsetWidth;

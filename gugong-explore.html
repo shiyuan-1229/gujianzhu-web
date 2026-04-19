@@ -74,6 +74,20 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
         transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
       }
+      html.lang-en .palace-link {
+        font-family: "Cinzel", "Georgia", "Times New Roman", serif;
+        font-size: 0.88rem;
+        letter-spacing: 0.08em;
+        min-width: 5.4rem;
+        padding: 0.5rem 0.9rem 0.54rem;
+      }
+      html.lang-en .site-nav-btn {
+        letter-spacing: 0.1em;
+      }
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
 
       button.palace-link {
         margin: 0;
@@ -388,24 +402,27 @@
   <body class="font-sansCN">
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <a href="./index.html" class="site-nav-brand">古建智寻</a>
+        <a id="gxBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
-          <a href="./index.html" class="site-nav-btn text-amber-100">首页</a>
-          <a href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
+          <a id="gxNavHome" href="./index.html" class="site-nav-btn text-amber-100">首页</a>
+          <a id="gxNavCategories" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-3">
           <a
+            id="gxBack"
             href="javascript:void(0)"
             onclick="if (history.length > 1) { history.back(); } else { location.href='./list.html'; }"
             class="site-nav-btn whitespace-nowrap rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:text-xl md:tracking-[0.16em]"
             >返回上一页</a
           >
           <a
+            id="gxHomeReturn"
             href="./index.html"
             class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:text-xl md:tracking-[0.16em]"
           >
             返回首页
           </a>
+          <button id="gxLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#7b1f1f]/90">EN</button>
         </div>
       </div>
     </nav>
@@ -450,6 +467,7 @@
           定位：left/top 为百分比，锚点在按钮中心（translate -50% -50%）。若与插图有偏差可微调 style。
         -->
         <button
+          id="gxBtnGongwang"
           type="button"
           class="palace-link palace-link--static"
           style="left: 64%; top: 26%"
@@ -459,6 +477,7 @@
           恭王府
         </button>
         <button
+          id="gxBtnWanning"
           type="button"
           class="palace-link palace-link--static"
           style="left: 50%; top: 30%"
@@ -468,6 +487,7 @@
           万宁桥
         </button>
         <button
+          id="gxBtnWanping"
           type="button"
           class="palace-link palace-link--static"
           style="left: 71%; top: 40%"
@@ -477,6 +497,7 @@
           宛平城
         </button>
         <button
+          id="gxBtnLugou"
           type="button"
           class="palace-link palace-link--static"
           style="left: 24%; top: 56%"
@@ -486,6 +507,7 @@
           卢沟桥
         </button>
         <button
+          id="gxBtnSiheyuan"
           type="button"
           class="palace-link palace-link--static"
           style="left: 84%; top: 72%"
@@ -510,12 +532,150 @@
       <div class="transition-door transition-door--right"></div>
       <div class="transition-scroll">
         <div class="scroll-ornament" aria-hidden="true"></div>
-        <div class="scroll-seal" aria-hidden="true">故宫</div>
+        <div id="gxScrollSeal" class="scroll-seal" aria-hidden="true">故宫</div>
       </div>
-      <div class="transition-text">启卷入宫</div>
-      <div class="transition-subtext">沿中轴，入紫禁</div>
+      <div id="gxTransitionTitle" class="transition-text">启卷入宫</div>
+      <div id="gxTransitionSubtext" class="transition-subtext">沿中轴，入紫禁</div>
     </div>
+    <script src="./js/site-lang.js"></script>
     <script src="./js/map-svg-hotspots.js"></script>
+    <script>
+      const GX_I18N = {
+        zh: {
+          title: "故宫探秘 · 古建智寻",
+          brand: "古建智寻",
+          navHome: "首页",
+          navCategories: "建筑分类",
+          back: "返回上一页",
+          homeReturn: "返回首页",
+          btnGongwang: "恭王府",
+          btnWanning: "万宁桥",
+          btnWanping: "宛平城",
+          btnLugou: "卢沟桥",
+          btnSiheyuan: "四合院",
+          btnGugong: "故宫",
+          staticAriaSuffix: "（示意）",
+          staticTitle: "敬请期待",
+          gugongAria: "跳转到北京故宫详情（轮播）",
+          seal: "故宫",
+          transitionTitle: "启卷入宫",
+          transitionSubtext: "沿中轴，入紫禁",
+          switchLabel: "切换为英文",
+        },
+        en: {
+          title: "Forbidden City Journey · ArchiQuest",
+          brand: "ArchiQuest",
+          navHome: "Home",
+          navCategories: "Categories",
+          back: "Back",
+          homeReturn: "Home",
+          btnGongwang: "Prince Gong",
+          btnWanning: "Wanning Br.",
+          btnWanping: "Wanping",
+          btnLugou: "Lugou Br.",
+          btnSiheyuan: "Siheyuan",
+          btnGugong: "Forbidden City",
+          staticAriaSuffix: " (preview)",
+          staticTitle: "Coming soon",
+          gugongAria: "Open Forbidden City detail carousel",
+          seal: "PALACE",
+          transitionTitle: "Unroll the Scroll",
+          transitionSubtext: "Follow the axis into the palace",
+          switchLabel: "Switch to Chinese",
+        },
+      };
+      let gxCurrentLang =
+        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+      const gxIsEn = () => gxCurrentLang === "en";
+      const gxT = (key) => (GX_I18N[gxCurrentLang] && GX_I18N[gxCurrentLang][key]) || GX_I18N.zh[key] || "";
+      const gxApplyLang = () => {
+        document.documentElement.lang = gxIsEn() ? "en" : "zh-CN";
+        document.documentElement.classList.toggle("lang-en", gxIsEn());
+        document.title = gxT("title");
+        const setText = (id, key) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = gxT(key);
+        };
+        setText("gxBrand", "brand");
+        setText("gxNavHome", "navHome");
+        setText("gxNavCategories", "navCategories");
+        setText("gxBack", "back");
+        setText("gxHomeReturn", "homeReturn");
+        setText("gxBtnGongwang", "btnGongwang");
+        setText("gxBtnWanning", "btnWanning");
+        setText("gxBtnWanping", "btnWanping");
+        setText("gxBtnLugou", "btnLugou");
+        setText("gxBtnSiheyuan", "btnSiheyuan");
+        setText("jadeGugong", "btnGugong");
+        setText("gxScrollSeal", "seal");
+        setText("gxTransitionTitle", "transitionTitle");
+        setText("gxTransitionSubtext", "transitionSubtext");
+        const brand = document.getElementById("gxBrand");
+        if (brand) brand.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+        const navHome = document.getElementById("gxNavHome");
+        if (navHome) navHome.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+        const mapButtons = [
+          { id: "gxBtnGongwang", key: "btnGongwang" },
+          { id: "gxBtnWanning", key: "btnWanning" },
+          { id: "gxBtnWanping", key: "btnWanping" },
+          { id: "gxBtnLugou", key: "btnLugou" },
+          { id: "gxBtnSiheyuan", key: "btnSiheyuan" },
+        ];
+        mapButtons.forEach(({ id, key }) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.setAttribute("aria-label", `${gxT(key)}${gxT("staticAriaSuffix")}`);
+          el.setAttribute("title", gxT("staticTitle"));
+        });
+        const jadeGugong = document.getElementById("jadeGugong");
+        if (jadeGugong) {
+          jadeGugong.setAttribute("aria-label", gxT("gugongAria"));
+          const href = new URL(jadeGugong.getAttribute("href"), window.location.href);
+          href.searchParams.set("lang", gxCurrentLang);
+          jadeGugong.setAttribute("href", `${href.pathname}${href.search}`);
+        }
+        const navCategories = document.getElementById("gxNavCategories");
+        if (navCategories) {
+          const href = new URL(navCategories.getAttribute("href"), window.location.href);
+          href.searchParams.set("lang", gxCurrentLang);
+          navCategories.setAttribute("href", `${href.pathname}${href.search}`);
+        }
+        const back = document.getElementById("gxBack");
+        if (back) {
+          back.onclick = function () {
+            if (history.length > 1) {
+              history.back();
+            } else {
+              location.href = "./list.html?lang=" + encodeURIComponent(gxCurrentLang);
+            }
+          };
+        }
+        const homeReturn = document.getElementById("gxHomeReturn");
+        if (homeReturn) homeReturn.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+
+        const path = document.querySelector('#gugongJourney1HotspotSvg .map-hotspot-path[data-name-zh="故宫"]');
+        if (path) {
+          const rawHref = path.getAttribute("data-href") || "./detail.html?building=北京故宫";
+          const href = new URL(rawHref, window.location.href);
+          href.searchParams.set("lang", gxCurrentLang);
+          path.setAttribute("data-href", `${href.pathname}${href.search}`);
+        }
+        const langBtn = document.getElementById("gxLangSwitchBtn");
+        if (langBtn) {
+          langBtn.textContent = gxIsEn() ? "中" : "EN";
+          langBtn.setAttribute("aria-label", gxT("switchLabel"));
+        }
+      };
+      gxApplyLang();
+      const gxLangBtn = document.getElementById("gxLangSwitchBtn");
+      if (gxLangBtn) {
+        gxLangBtn.addEventListener("click", () => {
+          gxCurrentLang = gxIsEn() ? "zh" : "en";
+          if (typeof persistSiteLang === "function") persistSiteLang(gxCurrentLang);
+          gxApplyLang();
+        });
+      }
+    </script>
     <script>
       (function initGugongJourney1Hotspots() {
         var root = document.querySelector("#scene1 .scene-journeyMotion");

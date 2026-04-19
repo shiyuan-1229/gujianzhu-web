@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./css/map-svg-hotspots.css?v=20260406-2" />
@@ -156,6 +156,114 @@
         }
       }
 
+      /* 英文：整句横排后旋转 -90°，避免 vertical-rl 下拉丁逐字碎裂；外层定宽定高居中，不撑破布局 */
+      .taihe-vertical-title--en {
+        gap: 0;
+      }
+      .taihe-vertical-title--en .taihe-title-en-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: clamp(2.6rem, 5.5vw, 4.1rem);
+        height: min(38vh, 26rem);
+        max-height: calc(100vh - 9rem);
+      }
+      .taihe-vertical-title--en .taihe-title-en {
+        display: inline-block;
+        font-family: "Cinzel", "Noto Serif SC", "Times New Roman", serif;
+        font-size: clamp(1.02rem, 1.75vw, 1.48rem);
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        line-height: 1;
+        color: #141414;
+        text-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 1px 2px rgba(255, 255, 255, 0.25);
+        text-transform: uppercase;
+        white-space: nowrap;
+        transform: rotate(90deg);
+        transform-origin: center center;
+      }
+      @media (max-width: 768px) {
+        .taihe-vertical-title--en .taihe-title-en-wrap {
+          height: min(34vh, 18rem);
+          width: clamp(2.2rem, 8vw, 3.4rem);
+        }
+        .taihe-vertical-title--en .taihe-title-en {
+          font-size: clamp(0.78rem, 2.85vw, 1.05rem);
+          letter-spacing: 0.12em;
+        }
+      }
+
+      /* 御花园：左上角横排「御花园」；中文与 .taihe-char 完全同字体栈，字号单独放大 */
+      .yuhua-vertical-title {
+        position: absolute;
+        left: clamp(2.85rem, 5.2vw, 5.5rem);
+        top: clamp(3.15rem, 6.5vh, 5.15rem);
+        z-index: 44;
+        display: none;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.45rem;
+        pointer-events: none;
+      }
+      body.page-yuhua-hotspots .yuhua-vertical-title {
+        display: flex !important;
+      }
+      body.page-taihe-hotspots .yuhua-vertical-title,
+      .hero--cinematic .yuhua-vertical-title {
+        display: none !important;
+      }
+      .yuhua-vertical-title .yuhua-char {
+        font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", serif;
+        font-size: clamp(3.65rem, 8.2vw, 6.25rem);
+        font-weight: 500;
+        color: #141414;
+        text-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 1px 2px rgba(255, 255, 255, 0.25);
+        letter-spacing: 0;
+        line-height: 1.2;
+      }
+      /* 英文标题略向左，避免相对中文偏右 */
+      html.lang-en .yuhua-vertical-title.yuhua-vertical-title--en {
+        left: clamp(1.75rem, 3.8vw, 4.15rem);
+      }
+      .yuhua-vertical-title--en {
+        gap: 0;
+      }
+      .yuhua-vertical-title--en .yuhua-title-en {
+        display: inline-block;
+        font-family: "Cinzel", "Noto Serif SC", "Times New Roman", serif;
+        font-size: clamp(1.65rem, 3.4vw, 2.65rem);
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        line-height: 1.15;
+        color: #141414;
+        text-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.35),
+          0 1px 2px rgba(255, 255, 255, 0.25);
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      @media (max-width: 768px) {
+        .yuhua-vertical-title {
+          left: clamp(2.2rem, 6.5vw, 4rem);
+          top: clamp(3.35rem, 9vh, 5.15rem);
+        }
+        .yuhua-vertical-title .yuhua-char {
+          font-size: clamp(2.85rem, 10vw, 3.65rem);
+        }
+        .yuhua-vertical-title--en .yuhua-title-en {
+          font-size: clamp(1.05rem, 4.2vw, 1.65rem);
+          letter-spacing: 0.08em;
+        }
+        html.lang-en .yuhua-vertical-title.yuhua-vertical-title--en {
+          left: clamp(1.2rem, 4.5vw, 3.1rem);
+        }
+      }
+
       /* 太和殿首屏：竖排标题右侧空白区的导语（与 .taihe-char 同字体栈；不拦截热区） */
       .taihe-hero-intro {
         display: none;
@@ -221,13 +329,13 @@
         transform: translate3d(0, 0, 0);
       }
 
-      /* 御花园主图：略缩小并留白；比例介于「不挡字」与「不过窄」之间 */
+      /* 御花园主图：尽量用足分辨率（勿过小缩放以免发糊）；略留边与底对齐 */
       .hero.hero--yuhua {
         background: var(--mosaic-bg, #f9f0e3);
       }
       .hero.hero--yuhua .hero-bg {
         background-color: var(--mosaic-bg, #f9f0e3);
-        background-size: 89% auto;
+        background-size: min(100%, 2400px) auto;
         background-repeat: no-repeat;
         background-position: center 48%;
       }
@@ -245,18 +353,23 @@
         position: absolute;
         left: 0;
         right: 0;
-        top: 4.25rem;
+        top: 3.15rem;
         z-index: 45;
         display: flex;
         justify-content: flex-end;
         align-items: flex-start;
         padding: 0.35rem clamp(4.75rem, 12vw, 9.25rem) 0 clamp(1rem, 4vw, 3.5rem);
         pointer-events: none;
+        transition: opacity 0.22s ease, visibility 0.22s ease;
       }
       body.page-yuhua-hotspots .hero-yuhua-page-header__intro {
         max-width: min(38rem, calc(100vw - 2.5rem));
         margin: 0;
         text-align: left;
+      }
+      /* 英文：左侧横排 IMPERIAL GARDEN 较宽，收窄导语区以免与标题横向重叠 */
+      html.lang-en body.page-yuhua-hotspots .hero-yuhua-page-header__intro {
+        max-width: min(38rem, calc(100vw - 2.5rem - clamp(11rem, 30vw, 21rem)));
       }
       body.page-yuhua-hotspots .hero-yuhua-page-header__line {
         margin: 0 0 0.45rem;
@@ -274,14 +387,15 @@
       body.page-yuhua-hotspots .hero-yuhua-page-header__line:last-child {
         margin-bottom: 0;
       }
-      body.page-yuhua-hotspots.yuhua-card-active .hero-yuhua-page-header {
+      body.page-yuhua-hotspots.yuhua-card-active .hero-yuhua-page-header,
+      body.page-yuhua-hotspots.map-hotspot-card-visible .hero-yuhua-page-header {
         opacity: 0;
         visibility: hidden;
       }
       /* 御花园热区联动图：悬浮钦安殿/堆秀亭时在右上空白位显示对应配图 */
       .hero-yuhua-hover-preview {
         position: absolute;
-        top: clamp(3.55rem, 6.8vh, 4.75rem);
+        top: clamp(2.85rem, 5.5vh, 4.15rem);
         right: clamp(1rem, 3.2vw, 2.25rem);
         z-index: 46;
         width: clamp(13.2rem, 22.5vw, 19.5rem);
@@ -310,10 +424,10 @@
       }
       @media (max-width: 720px) {
         body.page-yuhua-hotspots .hero-yuhua-page-header {
-          top: 4rem;
+          top: 3.1rem;
         }
         .hero-yuhua-hover-preview {
-          top: 3.45rem;
+          top: 2.85rem;
           right: 0.75rem;
           width: min(42vw, 14.5rem);
         }
@@ -377,6 +491,29 @@
         }
       }
 
+      /* 四合院实拍素材本身偏亮：不再叠故宫那套 brightness(1.58)，并略压高光、加对比，减轻「过曝」 */
+      .hero.hero--cinematic .hero-video.is-active.hero-video--siheyuan {
+        filter: brightness(0.86) contrast(1.14) saturate(1.05);
+        min-width: 100%;
+        min-height: 100%;
+        transform: translate(-50%, -50%);
+        object-position: center center;
+      }
+      @media (min-aspect-ratio: 16/10) {
+        .hero.hero--cinematic .hero-video.is-active.hero-video--siheyuan {
+          min-width: 100%;
+          min-height: 100%;
+        }
+      }
+      .hero.hero--cinematic.hero--siheyuan-hero .hero-vignette {
+        background: radial-gradient(1200px 720px at 50% 38%, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.22)),
+          linear-gradient(180deg, rgba(8, 8, 8, 0.05), rgba(12, 12, 12, 0.14));
+      }
+      .hero.hero--cinematic.hero--lugou-hero .hero-vignette {
+        background: radial-gradient(1200px 720px at 50% 38%, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.22)),
+          linear-gradient(180deg, rgba(8, 8, 8, 0.05), rgba(12, 12, 12, 0.14));
+      }
+
       /* 北京故宫：六图轮播（无视频滤镜，避免发糊） */
       .hero-carousel {
         position: absolute;
@@ -411,6 +548,16 @@
       .hero-carousel__slide.is-active {
         opacity: 1;
         z-index: 1;
+      }
+      /* 轮播实拍偏阴/偏灰时略提亮，减轻「发闷」 */
+      .hero.hero--cinematic .hero-carousel__slide {
+        filter: brightness(1.1) contrast(1.05) saturate(1.05);
+      }
+      .hero.hero--cinematic.hero--siheyuan-hero .hero-carousel__slide {
+        filter: brightness(1.14) contrast(1.06) saturate(1.06);
+      }
+      .hero.hero--cinematic.hero--lugou-hero .hero-carousel__slide {
+        filter: brightness(1.12) contrast(1.06) saturate(1.06);
       }
       .hero-carousel__btn {
         position: absolute;
@@ -489,6 +636,20 @@
         line-height: 0.92;
         letter-spacing: 0.06em;
         opacity: 0.9;
+      }
+      /* 北京四合院：与「故宫」同字号；五字横排略收紧字距与间距，减轻窄屏溢出 */
+      .hero-gugong-art.hero-siheyuan-art {
+        gap: clamp(0.06rem, 0.35vw, 0.45rem);
+      }
+      .hero-gugong-art.hero-siheyuan-art span {
+        letter-spacing: 0.02em;
+      }
+      /* 卢沟桥：三字横排，与故宫同字号 */
+      .hero-gugong-art.hero-lugou-art {
+        gap: clamp(0.08rem, 0.42vw, 0.5rem);
+      }
+      .hero-gugong-art.hero-lugou-art span {
+        letter-spacing: 0.03em;
       }
       @media (prefers-reduced-motion: reduce) {
         .hero-carousel__slide {
@@ -621,7 +782,9 @@
       }
 
       .body--minimal-detail .taihe-vertical-title,
-      .body--minimal-detail .taihe-vertical-title * {
+      .body--minimal-detail .taihe-vertical-title *,
+      .body--minimal-detail .yuhua-vertical-title,
+      .body--minimal-detail .yuhua-vertical-title * {
         pointer-events: none !important;
       }
 
@@ -2362,8 +2525,9 @@
       .paper-quiz-board {
         display: flex;
         flex-direction: column;
-        gap: 0.45rem;
-        padding: 0.9rem 0.95rem;
+        gap: 0.38rem;
+        padding: 0.75rem 0.9rem 0.8rem;
+        height: fit-content;
         background: linear-gradient(165deg, rgba(245, 231, 204, 0.96), rgba(233, 212, 178, 0.95));
         color: rgba(54, 36, 20, 0.92);
         border: 1px solid rgba(143, 104, 58, 0.28);
@@ -2610,6 +2774,59 @@
           letter-spacing: 0.04em;
         }
       }
+
+      .lang-switch-btn {
+        min-width: 64px;
+        text-align: center;
+      }
+      html.lang-en body {
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      }
+      html.lang-en .hero-title {
+        font-size: clamp(2.6rem, 8vw, 5rem) !important;
+        letter-spacing: 0.01em;
+        line-height: 1.08;
+        max-width: min(88vw, 920px);
+      }
+      html.lang-en #heroCopy {
+        max-width: min(92vw, 980px);
+      }
+      html.lang-en #heroIntroBlurb {
+        max-width: min(78ch, 78vw);
+        line-height: 1.7;
+      }
+      html.lang-en .hero-compare-popup__cap {
+        letter-spacing: 0.02em;
+        font-size: 0.68rem;
+      }
+      html.lang-en .hero-compare-popup__copy p {
+        line-height: 1.62;
+      }
+      html.lang-en .site-nav-btn {
+        letter-spacing: 0.06em;
+      }
+      html.lang-en .hero-gugong-art {
+        gap: clamp(0.3rem, 1vw, 0.7rem);
+      }
+      html.lang-en .hero-gugong-art span {
+        font-family: "Cinzel", "Times New Roman", Georgia, serif;
+        font-size: clamp(2.4rem, 6.2vw, 5.6rem);
+        letter-spacing: 0.08em;
+        line-height: 1;
+        opacity: 0.9;
+      }
+      html.lang-en .hero-gugong-art.hero-siheyuan-art {
+        gap: clamp(0.12rem, 0.5vw, 0.45rem);
+      }
+      html.lang-en .hero-gugong-art.hero-siheyuan-art span {
+        letter-spacing: 0.04em;
+      }
+      html.lang-en .hero-gugong-art.hero-lugou-art {
+        gap: clamp(0.14rem, 0.55vw, 0.55rem);
+      }
+      html.lang-en .hero-gugong-art.hero-lugou-art span {
+        letter-spacing: 0.05em;
+      }
     </style>
   </head>
 
@@ -2625,18 +2842,19 @@
     >
       <div class="site-nav-container container mx-auto flex flex-nowrap items-center justify-between gap-3 px-3 py-1 md:px-4 md:py-1.5">
         <div class="site-nav-brand-wrap select-none leading-tight">
-          <a href="./index.html" class="site-nav-brand">古建智寻</a>
-          <div class="site-nav-sub mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
+          <a id="detailNavBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
+          <div id="detailNavSub" class="site-nav-sub mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
       </div>
 
         <div class="flex shrink-0 items-center gap-x-4 md:gap-x-6 font-flow text-lg font-medium tracking-[0.14em] text-amber-50/95 md:text-xl md:tracking-[0.16em]">
           <a
+            id="detailNavBack"
             href="javascript:void(0)"
-            onclick="if (history.length > 1) { history.back(); } else { location.href='./list.html'; }"
             class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100"
             >返回上一页</a
           >
-          <a href="./index.html" class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
+          <a id="detailNavHome" href="./index.html" class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
+          <button id="langSwitchBtn" type="button" class="site-nav-btn lang-switch-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100" aria-label="切换为英文">EN</button>
 
         </div>
       </div>
@@ -2682,6 +2900,12 @@
         <div id="heroGugongArt" class="hero-gugong-art" hidden aria-hidden="true">
           <span>故</span><span>宫</span>
         </div>
+        <div id="heroSiheyuanArt" class="hero-gugong-art hero-siheyuan-art" hidden aria-hidden="true">
+          <span>北</span><span>京</span><span>四</span><span>合</span><span>院</span>
+        </div>
+        <div id="heroLugouArt" class="hero-gugong-art hero-lugou-art" hidden aria-hidden="true">
+          <span>卢</span><span>沟</span><span>桥</span>
+        </div>
       </div>
       <div id="heroLionDecor" class="hero-lion-decor" hidden aria-hidden="true">
         <img
@@ -2703,7 +2927,7 @@
       </div>
       <div class="hero-vignette" aria-hidden="true"></div>
 
-      <!-- 御花园：顶区两行导语靠右（背景图已含标题；仅故宫御花园；pointer-events:none 不挡热区） -->
+      <!-- 御花园：顶区两行导语靠右（大标题为左上角 #yuhuaVerticalTitle 叠加；仅故宫御花园） -->
       <div id="heroYuhuaPageHeader" class="hero-yuhua-page-header" hidden>
         <div class="hero-yuhua-page-header__intro">
           <p class="hero-yuhua-page-header__line">
@@ -2755,6 +2979,13 @@
         <span class="taihe-char">殿</span>
       </div>
 
+      <!-- 御花园：左上角竖排标题（与背景图留白对齐；仅故宫御花园） -->
+      <div id="yuhuaVerticalTitle" class="yuhua-vertical-title" aria-hidden="true">
+        <span class="yuhua-char">御</span>
+        <span class="yuhua-char">花</span>
+        <span class="yuhua-char">园</span>
+      </div>
+
       <!-- 太和殿：首屏导语（仅故宫太和殿；pointer-events:none 不挡热区） -->
       <div id="taiheHeroIntro" class="taihe-hero-intro" aria-hidden="true">
         <p class="taihe-hero-intro__text">
@@ -2772,7 +3003,7 @@
             ></h1>
             <div class="mt-7 flex items-center gap-4">
               <div class="h-px w-24 bg-gradient-to-r from-qianbai/0 via-qianbai/55 to-qianbai/0"></div>
-              <div class="text-qianbai/70 text-sm tracking-[0.22em]">北京 · 中轴</div>
+              <div id="heroMidLine" class="text-qianbai/70 text-sm tracking-[0.22em]">北京 · 中轴</div>
               <div class="h-px flex-1 bg-gradient-to-r from-qianbai/0 via-qianbai/18 to-qianbai/0"></div>
             </div>
 
@@ -2811,10 +3042,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="重檐庑殿顶"
+                data-name-en="Double-eaved hip roof"
                 data-link-group="taihe-roof"
                 data-category="屋顶形制"
+                data-category-en="Roof hierarchy"
                 data-card-placement="top"
                 data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                data-desc-en="The hip roof (wudian) meets at four slopes with one main ridge and four hip ridges. A double-eaved roof adds a second skirt of eaves for greater mass and rank. In Ming–Qing official architecture this is reserved for the highest halls; Taihe is the principal hall of the Forbidden City with imperial yellow glazed tiles."
                 d="M5.35156 274.042V265.042H8.35156L6.85156 258.042H10.3516L12.3516 264.042L16.8516 262.542L14.8516 256.542H16.8516L19.8516 262.542H24.8516L22.3516 255.542H25.8516L28.8516 261.542H33.8516L30.8516 254.042H33.8516L36.8516 259.542H41.3516L39.3516 254.042L42.8516 252.542L44.8516 259.542L50.3516 258.042L47.3516 251.042H50.3516L54.8516 258.042L57.3516 256.542L54.8516 249.042H57.3516L60.8516 254.042H65.8516L62.8516 249.042H65.8516L69.3516 254.042L73.8516 252.542L71.3516 247.042H73.8516L75.8516 252.542L81.8516 251.042L78.8516 245.042L81.8516 243.542L85.3516 251.042L93.8516 249.042V243.542L86.3516 241.042V236.042H93.8516L98.8516 229.042L102.852 241.042H112.352L165.352 223.542L270.352 181.042L355.352 132.042L412.852 84.542L416.852 56.542L423.852 52.042L426.352 37.542H434.352L431.352 49.542H439.852V37.542L447.352 32.542L455.852 42.042L447.352 56.542V69.042L455.852 76.042L545.352 69.042L781.352 49.542L869.852 46.042L874.352 38.542V25.542L869.852 12.542L867.352 4.04199L874.352 0.541992L884.352 4.04199V16.042L894.852 19.542L891.852 0.541992H899.352V12.542L903.852 16.042H912.352L914.852 25.542V57.042L962.852 105.042L1040.35 167.042L1101.85 204.042L1145.35 225.042L1183.85 243.042L1170.35 273.542L1101.85 253.042L1069.85 238.042L1061.85 213.542V231.542L1016.35 247.542L914.852 253.042L51.8516 292.042L22.3516 285.042H8.35156L1.35156 279.042H8.35156V274.042H5.35156Z"
               />
             </g>
@@ -2822,10 +3056,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="重檐庑殿顶"
+                data-name-en="Double-eaved hip roof"
                 data-link-group="taihe-roof"
                 data-category="屋顶形制"
+                data-category-en="Roof hierarchy"
                 data-card-placement="top"
                 data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                data-desc-en="The hip roof (wudian) meets at four slopes with one main ridge and four hip ridges. A double-eaved roof adds a second skirt of eaves for greater mass and rank. In Ming–Qing official architecture this is reserved for the highest halls; Taihe is the principal hall of the Forbidden City with imperial yellow glazed tiles."
                 d="M0.5 208V179.5V173L5.5 176.5H6.5L5.5 170L9 168.5L10 176.5L12 175.5V168.5H14.5L16.5 175.5L20 173L18 168.5L20 167L23 173L28.5 171.5L24.5 167V163H30.5V160V153.5H33.5V163L37.5 165.5L115 138L166.5 110L227.5 50V35V20L231.5 15.5V2H237L238.5 15.5H243.5V4.5L247.5 0.5H253.5V18L249.5 32.5L253.5 35V43L426.5 59L469.5 61V50L466.5 45.5V37.5V30L473 28L474.5 39.5L478.5 43V30H483.5V43L488 45.5V72L496 83L540 119.5L567 139L613.5 159.5V235H469.5H308H201H54H44.5V231H41V228.5L44.5 225V222H30.5V217.5H14.5V215H24.5V211H10V208H0.5Z"
               />
             </g>
@@ -2833,10 +3070,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="脊兽"
+                data-name-en="Ridge beasts"
                 data-link-group="taihe-ridge"
                 data-category="屋脊陈设"
+                data-category-en="Ridge ornaments"
                 data-card-placement="top"
                 data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                data-desc-en="Ridge beasts line the hip and corner ridges: immortal rider and mythical animals in sequence, both ornament and stabilizing weight. Qing official regulations tie beast count to building rank; Taihe ranks among the richest surviving sets, underscoring the outer court’s ceremonial peak."
                 d="M0.5 46.5V12V0.5H2L7.5 8H11L15 12L7.5 18.5L15 22.5V16H17.5V22.5L21 25.5V20H24V27.5H28.5V20H31V27.5L36 29.5V22.5H38V31H42.5V24H45.5V32.5H49.5V27.5H52.5V34.5H57.5V29.5H60V38H64.5V32.5H68.5V39.5H72V34.5H75.5V42.5H80L80.5 36.5L84 38L86 43.5H88V48H86L84 52.5V59H89.5V61.5H62.5L0.5 46.5Z"
               />
             </g>
@@ -2844,10 +3084,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="脊兽"
+                data-name-en="Ridge beasts"
                 data-link-group="taihe-ridge"
                 data-category="屋脊陈设"
+                data-category-en="Ridge ornaments"
                 data-card-placement="top"
                 data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                data-desc-en="Ridge beasts line the hip and corner ridges: immortal rider and mythical animals in sequence, both ornament and stabilizing weight. Qing official regulations tie beast count to building rank; Taihe ranks among the richest surviving sets, underscoring the outer court’s ceremonial peak."
                 d="M0.5 306.21V77.21L136.5 75.71L167.5 73.71L178 66.21L180.5 61.71L175 49.21L173 42.71V33.71L178 26.71H188L190 29.71L202.5 44.71L214 46.21L235.5 39.21L241.5 40.71L240 46.21L247.5 47.21V52.21L241.5 52.71L245 61.71L235.5 69.21L225 82.71L226.5 91.21L260.5 88.21L261 73.71L267.5 66.21L273.5 56.21V52.21L277.5 42.71L293 44.71V49.21L286 56.21V61.71L290 66.21V73.71L286 81.21L284.5 86.71H288.5H309V73.21L315.5 66.21L320.5 59.71L322.5 49.21V39.21H336L338 40.71L335.5 47.21L330.5 52.21L332 56.21L335.5 64.21V73.21L332 75.71V79.71H335.5H359.5V61.71L366.5 59.71L368.5 47.21L374.5 40.71V32.21H378.5V35.21L381.5 33.71V30.21H385V33.71L388.5 32.21V37.21L385 42.71L381.5 43.71L383 49.21L387 56.21L388.5 64.21L385 69.21L387 75.71L411 73.21V64.71L407.5 61.71V56.21H414.5V52.71L416.5 44.71L421.5 32.21V24.21H425.5V27.71H429V24.21H436L437 30.21V35.21L432.5 37.21V44.71L436 49.21L437.5 57.71L434 61.71V69.21L460 64.71L458.5 59.21L460 52.71H456.5V48.71H463.5L473 27.71L475 17.21V13.21H484L490.5 17.21L488.5 19.71L484 21.71L488.5 24.21L483 27.71L484 32.21L487 40.71L484 48.71L483 57.71L487 61.71L518 56.21V52.71L515.5 42.71L509.5 33.71V24.21L513 17.21L527 24.21L537 21.71L535.5 13.21L534 7.70996L530 3.20996V0.709961L537 3.20996H542.5V7.70996H539.5L542.5 17.21L546.5 12.21L549.5 15.71L559.5 17.21V24.21L551 21.71V27.71L557.5 33.71L555 48.71L557.5 52.71L563 59.71L565 70.21L567.5 77.21L559.5 83.21V89.71L565 99.71V111.21H561.5L559.5 114.21H557.5L563 123.21L559.5 131.71L565 135.21L572 131.71L583 133.21V140.71L580 150.71L570.5 163.71L557.5 170.71L542.5 175.71H532V179.71L530 183.21L524.5 187.71V192.71L513 200.21H508V206.71L505 211.21H499V214.21H492.5V211.21H490.5V218.21L488.5 227.21L484 231.21L482 227.21H479.5V231.21H477.5V227.21H475V238.71L473 245.21H463.5V242.71L460 242.21L462 249.71L456.5 259.21H450V255.71H448V265.71L443 271.21L437.5 269.71V275.71L432 280.21L428.5 277.21L425.5 286.21H420V292.71L415 299.21L408 295.71V306.21H0.5Z"
               />
             </g>
@@ -2855,10 +3098,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="溜金斗拱"
+                data-name-en="Gilded dougong"
                 data-link-group="taihe-eave"
                 data-category="檐下木构"
+                data-category-en="Eaves timber"
                 data-card-placement="top"
                 data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                data-desc-en="Dougong are timber brackets that cantilever in tiers between columns and beams, carrying load and eave projection. Taihe uses palace-scale sets of enormous size. High-rank eaves often combine gilded linework with imperial polychrome painting—hallmark craft of the state ceremonial hall."
                 d="M0.5 0.5H14.5L17.5 17.5H8L0.5 12.5V0.5Z"
               />
             </g>
@@ -2866,10 +3112,13 @@
               <path
                 class="map-hotspot-path"
                 data-name-zh="溜金斗拱"
+                data-name-en="Gilded dougong"
                 data-link-group="taihe-eave"
                 data-category="檐下木构"
+                data-category-en="Eaves timber"
                 data-card-placement="top"
                 data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                data-desc-en="Dougong are timber brackets that cantilever in tiers between columns and beams, carrying load and eave projection. Taihe uses palace-scale sets of enormous size. High-rank eaves often combine gilded linework with imperial polychrome painting—hallmark craft of the state ceremonial hall."
                 d="M0.5 166V0.5L614 1V53L599.5 47.5V65L595.5 70L570 65V77.5L564 84.5L543 79.5L541 93L538.5 97L519.5 93V109.5L510 113.5V118.5L512 123L516 125.5L527 130L525 135.5H531L538.5 141.5H543L541 146L536.5 150H522L513.5 156H519.5L516 158.5L508.5 166.5L496.5 170L486 168L487 175L490 181.5L505 189.5L522 197.5L519.5 201.5L510 203.5L486 199L487 203.5L493 218.5L486 223.5L487 228L485.5 235L475.5 237.5L457 233.5L438.5 221.5L434 225L438.5 229.5L445 235L452 240.5L460.5 246V250.5L452 256.5L422.5 246V250.5L415 253L428.5 260.5V266.5L415 272.5H404.5L411 275.5L418.5 285L428.5 287L432.5 292V310.5L428.5 316V332.5L422.5 342L415 351.5H272.5V280.5L295.5 282.5L293.5 275.5H289.5L285.5 270L283 264.5H269L256 258.5L241.5 246L238 240.5L236 233.5L231.5 231L228 226L224.5 218.5L211 215L201.5 221.5H194.5L182 215V211.5L201.5 201V188.5V182.5H182V179.5H174.5L167.5 170.5L35.5 150L29.5 158.5H19L10 166H0.5Z"
               />
             </g>
@@ -2888,8 +3137,10 @@
                 data-name-zh="钦安殿"
                 data-name-en="Hall of Imperial Peace (Qin'an)"
                 data-category="内廷 · 祠庙"
+                data-category-en="Inner court · Shrine"
                 data-card-placement="top"
                 data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间。"
+                data-desc-en="Qin'an Hall anchors the north end of the Imperial Garden axis with a double-eaved lu roof; it enshrines Xuantian Shangdi and is a rare Daoist ritual space inside the palace."
                 d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
               />
             </g>
@@ -2899,8 +3150,10 @@
                 data-name-zh="堆秀亭"
                 data-name-en="Duixiu Pavilion"
                 data-category="园林 · 叠山"
+                data-category-en="Garden · Rockery"
                 data-card-placement="top"
                 data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的重要节点。"
+                data-desc-en="Duixiu Pavilion crowns the artificial Duixiu Hill—a key lookout and rock-garden focal point in the Imperial Garden."
                 d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
               />
             </g>
@@ -2949,6 +3202,16 @@
                 alt="故宫图片1"
                 loading="lazy"
               />
+              <video
+                id="detailPlateVideo"
+                class="relative z-0 hidden w-full h-[min(58vw,380px)] sm:h-[400px] md:h-[440px] object-cover"
+                muted
+                playsinline
+                loop
+                controls
+                preload="metadata"
+                aria-label="北京四合院实地影像"
+              ></video>
               <img
                 id="detailPlateHighlight"
                 class="absolute inset-0 z-[1] h-full w-full object-cover"
@@ -2976,10 +3239,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="重檐庑殿顶"
+                      data-name-en="Double-eaved hip roof"
                       data-link-group="taihe-roof"
                       data-category="屋顶形制"
+                      data-category-en="Roof hierarchy"
                       data-card-placement="top"
                       data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                      data-desc-en="The hip roof (wudian) meets at four slopes with one main ridge and four hip ridges. A double-eaved roof adds a second skirt of eaves for greater mass and rank. In Ming–Qing official architecture this is reserved for the highest halls; Taihe is the principal hall of the Forbidden City with imperial yellow glazed tiles."
                       d="M5.35156 274.042V265.042H8.35156L6.85156 258.042H10.3516L12.3516 264.042L16.8516 262.542L14.8516 256.542H16.8516L19.8516 262.542H24.8516L22.3516 255.542H25.8516L28.8516 261.542H33.8516L30.8516 254.042H33.8516L36.8516 259.542H41.3516L39.3516 254.042L42.8516 252.542L44.8516 259.542L50.3516 258.042L47.3516 251.042H50.3516L54.8516 258.042L57.3516 256.542L54.8516 249.042H57.3516L60.8516 254.042H65.8516L62.8516 249.042H65.8516L69.3516 254.042L73.8516 252.542L71.3516 247.042H73.8516L75.8516 252.542L81.8516 251.042L78.8516 245.042L81.8516 243.542L85.3516 251.042L93.8516 249.042V243.542L86.3516 241.042V236.042H93.8516L98.8516 229.042L102.852 241.042H112.352L165.352 223.542L270.352 181.042L355.352 132.042L412.852 84.542L416.852 56.542L423.852 52.042L426.352 37.542H434.352L431.352 49.542H439.852V37.542L447.352 32.542L455.852 42.042L447.352 56.542V69.042L455.852 76.042L545.352 69.042L781.352 49.542L869.852 46.042L874.352 38.542V25.542L869.852 12.542L867.352 4.04199L874.352 0.541992L884.352 4.04199V16.042L894.852 19.542L891.852 0.541992H899.352V12.542L903.852 16.042H912.352L914.852 25.542V57.042L962.852 105.042L1040.35 167.042L1101.85 204.042L1145.35 225.042L1183.85 243.042L1170.35 273.542L1101.85 253.042L1069.85 238.042L1061.85 213.542V231.542L1016.35 247.542L914.852 253.042L51.8516 292.042L22.3516 285.042H8.35156L1.35156 279.042H8.35156V274.042H5.35156Z"
                     />
                   </g>
@@ -2987,10 +3253,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="重檐庑殿顶"
+                      data-name-en="Double-eaved hip roof"
                       data-link-group="taihe-roof"
                       data-category="屋顶形制"
+                      data-category-en="Roof hierarchy"
                       data-card-placement="top"
                       data-desc="庑殿顶（古称四阿顶）屋面四坡相交，正脊一道、垂脊四道。重檐即在单檐庑殿之上再加一层屋檐，体量与等级更高。明清官式中，重檐庑殿顶用于最高等级殿宇；太和殿为紫禁城主殿，覆黄琉璃瓦，与清代最高等级殿宇的形制配置一致。"
+                      data-desc-en="The hip roof (wudian) meets at four slopes with one main ridge and four hip ridges. A double-eaved roof adds a second skirt of eaves for greater mass and rank. In Ming–Qing official architecture this is reserved for the highest halls; Taihe is the principal hall of the Forbidden City with imperial yellow glazed tiles."
                       d="M0.5 208V179.5V173L5.5 176.5H6.5L5.5 170L9 168.5L10 176.5L12 175.5V168.5H14.5L16.5 175.5L20 173L18 168.5L20 167L23 173L28.5 171.5L24.5 167V163H30.5V160V153.5H33.5V163L37.5 165.5L115 138L166.5 110L227.5 50V35V20L231.5 15.5V2H237L238.5 15.5H243.5V4.5L247.5 0.5H253.5V18L249.5 32.5L253.5 35V43L426.5 59L469.5 61V50L466.5 45.5V37.5V30L473 28L474.5 39.5L478.5 43V30H483.5V43L488 45.5V72L496 83L540 119.5L567 139L613.5 159.5V235H469.5H308H201H54H44.5V231H41V228.5L44.5 225V222H30.5V217.5H14.5V215H24.5V211H10V208H0.5Z"
                     />
                   </g>
@@ -2998,10 +3267,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="脊兽"
+                      data-name-en="Ridge beasts"
                       data-link-group="taihe-ridge"
                       data-category="屋脊陈设"
+                      data-category-en="Ridge ornaments"
                       data-card-placement="top"
                       data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                      data-desc-en="Ridge beasts line the hip and corner ridges: immortal rider and mythical animals in sequence, both ornament and stabilizing weight. Qing official regulations tie beast count to building rank; Taihe ranks among the richest surviving sets, underscoring the outer court’s ceremonial peak."
                       d="M0.5 46.5V12V0.5H2L7.5 8H11L15 12L7.5 18.5L15 22.5V16H17.5V22.5L21 25.5V20H24V27.5H28.5V20H31V27.5L36 29.5V22.5H38V31H42.5V24H45.5V32.5H49.5V27.5H52.5V34.5H57.5V29.5H60V38H64.5V32.5H68.5V39.5H72V34.5H75.5V42.5H80L80.5 36.5L84 38L86 43.5H88V48H86L84 52.5V59H89.5V61.5H62.5L0.5 46.5Z"
                     />
                   </g>
@@ -3009,10 +3281,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="脊兽"
+                      data-name-en="Ridge beasts"
                       data-link-group="taihe-ridge"
                       data-category="屋脊陈设"
+                      data-category-en="Ridge ornaments"
                       data-card-placement="top"
                       data-desc="垂脊、戗脊檐角列有脊兽，由前向后依次为骑凤仙人与神兽形象，除装饰外也兼有稳脊坠饰作用。清代官式中，脊兽数量与建筑等级相应。太和殿檐角脊兽数量为全国现存古建筑中最多者之一，体现外朝正殿的礼制地位。"
+                      data-desc-en="Ridge beasts line the hip and corner ridges: immortal rider and mythical animals in sequence, both ornament and stabilizing weight. Qing official regulations tie beast count to building rank; Taihe ranks among the richest surviving sets, underscoring the outer court’s ceremonial peak."
                       d="M0.5 306.21V77.21L136.5 75.71L167.5 73.71L178 66.21L180.5 61.71L175 49.21L173 42.71V33.71L178 26.71H188L190 29.71L202.5 44.71L214 46.21L235.5 39.21L241.5 40.71L240 46.21L247.5 47.21V52.21L241.5 52.71L245 61.71L235.5 69.21L225 82.71L226.5 91.21L260.5 88.21L261 73.71L267.5 66.21L273.5 56.21V52.21L277.5 42.71L293 44.71V49.21L286 56.21V61.71L290 66.21V73.71L286 81.21L284.5 86.71H288.5H309V73.21L315.5 66.21L320.5 59.71L322.5 49.21V39.21H336L338 40.71L335.5 47.21L330.5 52.21L332 56.21L335.5 64.21V73.21L332 75.71V79.71H335.5H359.5V61.71L366.5 59.71L368.5 47.21L374.5 40.71V32.21H378.5V35.21L381.5 33.71V30.21H385V33.71L388.5 32.21V37.21L385 42.71L381.5 43.71L383 49.21L387 56.21L388.5 64.21L385 69.21L387 75.71L411 73.21V64.71L407.5 61.71V56.21H414.5V52.71L416.5 44.71L421.5 32.21V24.21H425.5V27.71H429V24.21H436L437 30.21V35.21L432.5 37.21V44.71L436 49.21L437.5 57.71L434 61.71V69.21L460 64.71L458.5 59.21L460 52.71H456.5V48.71H463.5L473 27.71L475 17.21V13.21H484L490.5 17.21L488.5 19.71L484 21.71L488.5 24.21L483 27.71L484 32.21L487 40.71L484 48.71L483 57.71L487 61.71L518 56.21V52.71L515.5 42.71L509.5 33.71V24.21L513 17.21L527 24.21L537 21.71L535.5 13.21L534 7.70996L530 3.20996V0.709961L537 3.20996H542.5V7.70996H539.5L542.5 17.21L546.5 12.21L549.5 15.71L559.5 17.21V24.21L551 21.71V27.71L557.5 33.71L555 48.71L557.5 52.71L563 59.71L565 70.21L567.5 77.21L559.5 83.21V89.71L565 99.71V111.21H561.5L559.5 114.21H557.5L563 123.21L559.5 131.71L565 135.21L572 131.71L583 133.21V140.71L580 150.71L570.5 163.71L557.5 170.71L542.5 175.71H532V179.71L530 183.21L524.5 187.71V192.71L513 200.21H508V206.71L505 211.21H499V214.21H492.5V211.21H490.5V218.21L488.5 227.21L484 231.21L482 227.21H479.5V231.21H477.5V227.21H475V238.71L473 245.21H463.5V242.71L460 242.21L462 249.71L456.5 259.21H450V255.71H448V265.71L443 271.21L437.5 269.71V275.71L432 280.21L428.5 277.21L425.5 286.21H420V292.71L415 299.21L408 295.71V306.21H0.5Z"
                     />
                   </g>
@@ -3020,10 +3295,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="溜金斗拱"
+                      data-name-en="Gilded dougong"
                       data-link-group="taihe-eave"
                       data-category="檐下木构"
+                      data-category-en="Eaves timber"
                       data-card-placement="top"
                       data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                      data-desc-en="Dougong are timber brackets that cantilever in tiers between columns and beams, carrying load and eave projection. Taihe uses palace-scale sets of enormous size. High-rank eaves often combine gilded linework with imperial polychrome painting—hallmark craft of the state ceremonial hall."
                       d="M0.5 0.5H14.5L17.5 17.5H8L0.5 12.5V0.5Z"
                     />
                   </g>
@@ -3031,10 +3309,13 @@
                     <path
                       class="map-hotspot-path"
                       data-name-zh="溜金斗拱"
+                      data-name-en="Gilded dougong"
                       data-link-group="taihe-eave"
                       data-category="檐下木构"
+                      data-category-en="Eaves timber"
                       data-card-placement="top"
                       data-desc="斗栱是柱头与梁枋之间层层出跳、传递荷载与出檐的木构节点。太和殿檐下施殿式大斗栱，体量宏巨。檐下高等级彩画与贴金做法中，常见以金色勾勒或贴金的「溜金」等处理，与和玺彩画相配，体现皇家礼仪大殿的等级与工艺。"
+                      data-desc-en="Dougong are timber brackets that cantilever in tiers between columns and beams, carrying load and eave projection. Taihe uses palace-scale sets of enormous size. High-rank eaves often combine gilded linework with imperial polychrome painting—hallmark craft of the state ceremonial hall."
                       d="M0.5 166V0.5L614 1V53L599.5 47.5V65L595.5 70L570 65V77.5L564 84.5L543 79.5L541 93L538.5 97L519.5 93V109.5L510 113.5V118.5L512 123L516 125.5L527 130L525 135.5H531L538.5 141.5H543L541 146L536.5 150H522L513.5 156H519.5L516 158.5L508.5 166.5L496.5 170L486 168L487 175L490 181.5L505 189.5L522 197.5L519.5 201.5L510 203.5L486 199L487 203.5L493 218.5L486 223.5L487 228L485.5 235L475.5 237.5L457 233.5L438.5 221.5L434 225L438.5 229.5L445 235L452 240.5L460.5 246V250.5L452 256.5L422.5 246V250.5L415 253L428.5 260.5V266.5L415 272.5H404.5L411 275.5L418.5 285L428.5 287L432.5 292V310.5L428.5 316V332.5L422.5 342L415 351.5H272.5V280.5L295.5 282.5L293.5 275.5H289.5L285.5 270L283 264.5H269L256 258.5L241.5 246L238 240.5L236 233.5L231.5 231L228 226L224.5 218.5L211 215L201.5 221.5H194.5L182 215V211.5L201.5 201V188.5V182.5H182V179.5H174.5L167.5 170.5L35.5 150L29.5 158.5H19L10 166H0.5Z"
                     />
                   </g>
@@ -3052,8 +3333,10 @@
                       data-name-zh="钦安殿"
                       data-name-en="Hall of Imperial Peace (Qin'an)"
                       data-category="内廷 · 祠庙"
+                      data-category-en="Inner court · Shrine"
                       data-card-placement="top"
                       data-desc="钦安殿居于御花园中轴北端，重檐盝顶，内奉玄天上帝，是紫禁城内少有的道教祭祀空间。"
+                      data-desc-en="Qin'an Hall anchors the north end of the Imperial Garden axis with a double-eaved lu roof; it enshrines Xuantian Shangdi and is a rare Daoist ritual space inside the palace."
                       d="M0.550354 239.96L20.5504 31.9597L34.5504 36.9597H81.5504V20.9597H106.55L127.55 9.95966L132.55 0.959656L138.55 9.95966H261.05L266.05 0.959656H274.05V9.95966L297.05 20.9597H322.05V31.9597H376.05L401.05 239.96H282.05L274.05 249.96H261.05L251.05 254.96L246.05 270.96H224.05H205.05V239.96H193.55H180.55V270.96L156.55 260.96L164.55 254.96L156.55 239.96H101.55H81.5504L74.5504 230.96H65.5504L47.5504 239.96H0.550354Z"
                     />
                   </g>
@@ -3063,8 +3346,10 @@
                       data-name-zh="堆秀亭"
                       data-name-en="Duixiu Pavilion"
                       data-category="园林 · 叠山"
+                      data-category-en="Garden · Rockery"
                       data-card-placement="top"
                       data-desc="堆秀亭立于堆秀山之上，是御花园中登高望远、叠石造景的重要节点。"
+                      data-desc-en="Duixiu Pavilion crowns the artificial Duixiu Hill—a key lookout and rock-garden focal point in the Imperial Garden."
                       d="M60.5 11.888L67.5 0.888L75.5 11.888L87.5 19.888L97.5 11.888L101.5 39.888L109.5 36.888L117.5 61.888H137.5L151.5 80.888L146.5 89.888H166.5V129.888H156.5L137.5 124.888L151.5 146.888L137.5 159.888V178.888H117.5V167.888L97.5 159.888L87.5 173.888L75.5 167.888L60.5 173.888H50.5L40.5 188.888L11.5 173.888L20.5 159.888L11.5 146.888L0.5 159.888V129.888V112.888V89.888L11.5 80.888V48.888H20.5H28.5L20.5 19.888H40.5L60.5 11.888Z"
                     />
                   </g>
@@ -3155,12 +3440,12 @@
               />
               <div
                 id="paperQuizBoard"
-                class="paper-quiz-board w-full h-[min(46vw,280px)] sm:h-[300px]"
+                class="paper-quiz-board w-full max-h-[min(72vh,420px)]"
                 hidden
                 aria-hidden="true"
               >
                 <div class="paper-quiz-board__head">
-                  <h4 class="paper-quiz-board__title">古建小测</h4>
+                  <h4 id="paperQuizTitle" class="paper-quiz-board__title">古建小测</h4>
                   <span id="paperQuizMeta" class="paper-quiz-board__meta">Q1 / 3</span>
                 </div>
                 <p id="paperQuizQuestion" class="paper-quiz-board__question"></p>
@@ -3183,11 +3468,12 @@
 
         <div class="mt-8 flex items-center justify-between border-t border-stone-200/90 pt-4">
           <a
+            id="paperBackToList"
             href="./list.html"
             class="text-xs tracking-[0.26em] text-stone-600 transition-colors hover:text-stone-900"
-            >← BACK TO LIST</a
+            >← 返回列表</a
           >
-          <span class="text-[10px] tracking-[0.22em] text-stone-400">DETAIL</span>
+          <span id="paperFooterTag" class="text-[10px] tracking-[0.22em] text-stone-400">详情</span>
         </div>
       </div>
     </section>
@@ -3196,12 +3482,722 @@
     <script src="./js/map-svg-hotspots.js?v=20260406-2"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="./js/site-lang.js"></script>
 
     <script>
       document.documentElement.style.webkitFontSmoothing = "antialiased";
       document.documentElement.style.mozOsxFontSmoothing = "grayscale";
 
       gsap.registerPlugin(ScrollTrigger);
+
+      const UI_TEXT = {
+        zh: {
+          navAria: "主导航",
+          navBrand: "古建智寻",
+          navSub: "华夏建筑选集",
+          back: "返回上一页",
+          home: "返回首页",
+          enterTour: "进入游览",
+          compareTitlePrefix: "中巴对照",
+          compareClose: "关闭",
+          similarity: "相似点：",
+          difference: "差异点：",
+          heroBgAria: "古建筑背景图",
+          carouselLabel: "影像轮播",
+          pageSuffix: "华夏建筑选集",
+          plateDefault: "PLATE 01 · 屋面与出檐的层次",
+          plateYuhuaHint: "PLATE 01 · 将鼠标移入中轴主殿（钦安殿）区域以查看高亮示意",
+          plateTaiheHint: "PLATE 01 · 悬停主图可览重檐庑殿顶、脊兽与溜金斗拱",
+          plateYuhuaHotspot: "PLATE 01 · 悬停鸟瞰热区可览钦安殿与堆秀亭",
+          detailAlt: "细节图",
+          closeLabel: "关闭对照弹层",
+          switchLabel: "切换为英文",
+          taiheHeroIntroHtml:
+            '太和殿是紫禁城内体量最大、等级最高的建筑，其建筑规制及装饰手法，堪列中国的建筑之首。如今经过大规模古建筑维修保护，太和殿内外重现清朝鼎盛时期的<span class="taihe-hero-intro__tail">样貌。</span>',
+          yuhuaHeaderHtml:
+            '<p class="hero-yuhua-page-header__line">御花园集建筑、园林、礼制与哲学于一体，是中华优秀传统建筑文明的<span class="hero-yuhua-page-header__nb">生动缩影。</span></p><p class="hero-yuhua-page-header__line">是让中华传统营建智慧与文化精神的代代相传。</p>',
+          backToList: "← 返回列表",
+          paperFooterTag: "详情",
+        },
+        en: {
+          navAria: "Main navigation",
+          navBrand: "ArchiQuest",
+          navSub: "Huaxia Architecture Collection",
+          back: "Back",
+          home: "Home",
+          enterTour: "Enter Tour",
+          compareTitlePrefix: "China-Pakistan Compare",
+          compareClose: "Close",
+          similarity: "Similarity:",
+          difference: "Difference:",
+          heroBgAria: "Ancient architecture background",
+          carouselLabel: "Image Carousel",
+          pageSuffix: "Huaxia Architecture Collection",
+          plateDefault: "PLATE 01 · Roof profile and eave hierarchy",
+          plateYuhuaHint: "PLATE 01 · Hover the central hall area (Qin'an Hall) for highlight",
+          plateTaiheHint: "PLATE 01 · Hover to inspect roof type, ridge beasts and dougong",
+          plateYuhuaHotspot: "PLATE 01 · Hover hotspots to view Qin'an Hall and Duixiu Pavilion",
+          detailAlt: "detail view",
+          closeLabel: "Close comparison popup",
+          switchLabel: "Switch to Chinese",
+          taiheHeroIntroHtml:
+            "The Hall of Supreme Harmony is the largest and highest-ranking hall in the Forbidden City. Its scale and decorative language rank among the finest in Chinese architecture. After major conservation work, the hall again reflects the appearance of the Qing golden age inside and out.",
+          yuhuaHeaderHtml:
+            '<p class="hero-yuhua-page-header__line">The Imperial Garden weaves architecture, landscape, ritual and philosophy—<span class="hero-yuhua-page-header__nb">a living miniature</span> of China&rsquo;s classical building civilization.</p><p class="hero-yuhua-page-header__line">It passes down the wisdom of traditional construction and cultural spirit from generation to generation.</p>',
+          backToList: "← Back to list",
+          paperFooterTag: "DETAIL",
+        },
+      };
+      const HOTSPOT_NAME_EN = {
+        "重檐庑殿顶": "Double-eaved hip roof",
+        脊兽: "Ridge beasts",
+        溜金斗拱: "Gilded dougong",
+        钦安殿: "Qin'an Hall",
+        堆秀亭: "Duixiu Pavilion",
+      };
+      const BUILDING_I18N = {
+        "北京故宫": {
+          name: "Forbidden City, Beijing",
+          category: "Imperial Palace",
+          province: "Beijing",
+          year: "Built in 1406 (Ming Yongle era)",
+          desc: "The imperial palace of the Ming and Qing dynasties, and the largest surviving wooden palace complex in the world.",
+        },
+        "故宫太和殿": {
+          name: "Hall of Supreme Harmony",
+          category: "Imperial Palace",
+          province: "Beijing",
+          year: "Completed in 1420",
+          desc: "The highest ceremonial hall in the Forbidden City, defined by a high marble terrace, double-eaved hip roof, and richly painted timber structure.",
+        },
+        "故宫御花园": {
+          name: "Imperial Garden, Forbidden City",
+          category: "Imperial Palace",
+          province: "Beijing",
+          year: "Completed in 1420",
+          desc: "A compact royal garden behind the inner court, where pavilions, rocks, cypresses and winding paths compose refined spatial layers.",
+        },
+        "北京四合院": {
+          name: "Beijing Siheyuan",
+          category: "Courtyard Residence",
+          province: "Beijing",
+          year: "Matured in Yuan-Ming-Qing periods",
+          desc: "A classic northern courtyard-house type with axial symmetry and inward-facing layout, carrying both ritual order and everyday neighborhood life.",
+        },
+        "卢沟桥": {
+          name: "Marco Polo Bridge",
+          category: "Bridge",
+          province: "Beijing",
+          year: "Completed in 1189 (Jin Dading era)",
+          desc: "A historic multi-arch stone bridge on the Yongding River, famed for its countless carved stone lions and layered cultural memory.",
+        },
+      };
+      const PAPER_COPY_DEFAULT_EN = {
+        h2L1: "Structure is not frozen geometry,",
+        h2L2: "but experience tuned by wind and snow.",
+        introRight:
+          "The page opens from deep shadows into warm paper tones, inviting close reading instead of quick scanning.",
+        p1:
+          "Axial balance, roof rhythm, and measured eave depths are not ornaments alone; they are construction intelligence shaped by climate, craft and ceremony.",
+        p2:
+          "Stone, timber, and glazed tiles age differently, yet together produce a quiet sense of dignity. The layout keeps enough breathing room for each layer to be seen.",
+        plate01: "PLATE 01 · Roof profile and eave hierarchy",
+        plate0203: "PLATE 02–03 · Structure and spatial rhythm",
+        plate04: "PLATE 04 · Light moving along timber frames",
+        s2h3: "Discipline of scale is the root of beauty",
+        p3:
+          "What we call classical aesthetics is often restraint: structure acts as decoration, while proportion replaces visual overload.",
+        p4:
+          "This page follows the same principle. Images and text interleave without crowding, so the viewer can navigate by rhythm rather than instruction.",
+        plate05: "PLATE 05 · Courtyard continuity",
+      };
+      const PAPER_COPY_GUGONG_EN = {
+        h2L1: "Structure is not frozen geometry,",
+        h2L2: "but experience tuned by wind and snow.",
+        introRight:
+          "The Forbidden City is best understood in motion: from distant outline to close material detail.",
+        p1:
+          "Started in 1406 and completed in 1420, the palace complex organizes ritual halls and residential courts along a strict north-south axis.",
+        p2:
+          "From afar you read terraces and rooflines; up close you read dougong, painted timber and ridge ornaments. Engineering and symbolism are fused.",
+        plate01: "PLATE 01 · Glazed roof and eave system",
+        plate0203: "PLATE 02–03 · Ridge details and courtyards",
+        plate04: "PLATE 04 · Colonnades and red-wall light",
+        s2h3: "Discipline of scale is the root of beauty",
+        p3:
+          "Classical beauty here comes from restraint: repeated bays, stairs and axis become a spatial algorithm refined over centuries.",
+        p4:
+          "The page mirrors that logic with layered images, generous margins and controlled rhythm.",
+        plate05: "PLATE 05 · A glimpse of garden courts",
+      };
+      const PAPER_COPY_SIHEYUAN_EN = {
+        h2L1: "Courtyard enclosure is the northern norm;",
+        h2L2: "brick and tile hold family and neighbors.",
+        introRight:
+          "Beijing siheyuan arranges the gatehouse, main hall and east–west wing rooms along a north–south axis. The central courtyard brings light and air, and frames ritual and daily life; the sequence from gateway inward reflects household order and neighborhood ethics.",
+        p1:
+          "Its axial symmetry clarifies hierarchy and function: reception in outer zones, daily life in inner zones, all linked by eaves, corridors and thresholds.",
+        p2:
+          "PLATE 01 is a still from the same kind of courtyard space suggested by the hero video; the two smaller plates continue with roof-to-wall junctions and timber-brick layers.",
+        plate01: "PLATE 01 · Courtyard (photo)",
+        plate0203: "PLATE 02–03 · Roof and wall details",
+        plate04: "PLATE 04 · Path and court",
+        s2h3: "Scale discipline also defines domestic beauty",
+        p3:
+          "Beyond a single compound, hutong weave courtyards into a neighborhood fabric—gateways, screen walls and eave-scale encounters repeat across the grid.",
+        p4:
+          "The second group continues the same walk: paving, wall base and the sky line along the eaves. Use the quiz at the lower left to check key ideas.",
+        plate05: "PLATE 05 · Hutong streetscape",
+      };
+
+      const PAPER_COPY_SIHEYUAN_ZH = {
+        h2L1: "围合院落，北方民居的常态。",
+        h2L2: "灰瓦青砖，安顿家与邻里。",
+        introRight:
+          "北京四合院以南北中轴组织门屋、正房与东西厢房，中央庭院采光通风，也承载礼制与交往。从宅门到正房层层递进，体现传统家庭秩序与北方的居住伦理。",
+        p1:
+          "从垂花门或墙门进入，次第展开：倒座、正房与东西厢房围合出一方庭院。抬梁式木构架承托屋面，檐下出挑、檐口起翘；院墙与抄手游廊限定边界，让私密与公共在尺度上取得平衡。",
+        p2:
+          "左侧 PLATE 01 为现场照片，对应首屏视频所呈现的同一类院落空间；旁侧两幅小图继续截取屋面与墙体交接、木装修与灰砖的层次。细读材料与比例，比记住名词更重要。",
+        plate01: "PLATE 01 · 院落空间（照片）",
+        plate0203: "PLATE 02–03 · 屋面与墙体细部",
+        plate04: "PLATE 04 · 庭院与路径",
+        s2h3: "胡同与院落，共同构成北京的邻里风景",
+        p3:
+          "走出单座院落，胡同把一座座宅门串成街区网络。宅门与影壁的仪式感、檐下与台基的小尺度交往，都在这套方格化的平面里反复出现。",
+        p4:
+          "第二组图片沿同一现场线索展开：可留意砖墙与铺地、屋檐与天空的交界，以及人在院中的穿行路径。左下角小测帮助你巩固四合院的基本概念。",
+        plate05: "PLATE 05 · 邻里与街区",
+      };
+
+      const PAPER_COPY_LUGOU_EN = {
+        h2L1: "Moonlight on stone and water,",
+        h2L2: "a bridge that carries Yanjing’s memory.",
+        introRight:
+          "Lugou Bridge spans the Yongding River: first built in the Jin era and repaired across dynasties. Its balustrade lions—each carved differently—gave rise to the saying they are “too many to count.” In the Qing, “Morning Moon over Lugou Bridge” became one of the Eight Great Sights of Yanjing; imperial steles and inscriptions joined the bridge to poetry and local gazetteers.",
+        p1:
+          "Reading Lugou means reading both structure—arches, deck slabs, posts and lions—and its place in urban memory as a crossing and a literary motif.",
+        p2:
+          "Below, the paper gallery uses a separate set of photos from the hero carousel: a long oblique view of the bridge, close-ups of lions and deck atmosphere, and a tall stele on a bixi tortoise bearing the Qianlong-era “Lugou Xiaoyue” theme—so reading here widens the scene without repeating the same five slides.",
+        plate01: "PLATE 01 · Oblique bridge and river (paper gallery)",
+        plate0203: "PLATE 02–03 · Lion post close-up and deck vista",
+        plate04: "PLATE 04 · Imperial stele on bixi, “Lugou Xiaoyue” (vertical)",
+        s2h3: "Lions and steles—two kinds of readable weight",
+        p3:
+          "The lions are not mere repetition: posture, cubs and pedestals differ, inviting slow viewing. Official plaques and protection steles add another layer of text carved in stone—history made legible at human scale.",
+        p4:
+          "The quiz at the lower left checks Yanjing’s eight sights, the lion proverb, and the bridge’s founding dynasty—pairing what you see with what you know.",
+        plate05: "PLATE 05 · Bridge precinct glimpse (corner plate)",
+      };
+
+      const PAPER_COPY_LUGOU_ZH = {
+        h2L1: "晓月临水，桥影入诗。",
+        h2L2: "一座石桥，载着燕京的风物与记忆。",
+        introRight:
+          "卢沟桥跨永定河，金代始建，历代重修；桥上望柱石狮姿态各异，民间有「卢沟桥的狮子——数不清」之谚。清代「卢沟晓月」列为燕京八景之一，御题碑刻使桥与月色、诗文与方志彼此印证。",
+        p1:
+          "读卢沟桥，既读联拱石桥、桥面石板与栏板望柱的工程与工艺，也读它在城市记忆里的位置——既是水陆要冲，也是被反复题咏的风景节点。",
+        p2:
+          "下方画册另选一组与首屏轮播不重复的素材：主图取侧向长桥与金色天光；两幅小图分别贴近望柱石狮与桥面眺望；竖幅大图为乾隆时期「卢沟晓月」御题碑立于赑屃之上——与轮播里的碑亭照片并非同一张，便于从「桥—狮—碑」三条线同时阅读。",
+        plate01: "PLATE 01 · 侧向长桥与河面（画册主图）",
+        plate0203: "PLATE 02–03 · 石狮近景与桥面眺望",
+        plate04: "PLATE 04 · 御题「卢沟晓月」碑与赑屃基座（竖幅）",
+        s2h3: "石狮与碑刻，同一种「可读的厚重」",
+        p3:
+          "石狮并非简单重复：姿态、幼狮与基座各有变化，宜慢读。御题碑刻与文保标识则在另一层面把历史刻成可驻足细读的文字。",
+        p4:
+          "左下角小测围绕卢沟桥的常识：燕京八景、石狮歇后语与始建年代，帮助把画面与史实对齐。",
+        plate05: "PLATE 05 · 桥畔环境掠影（角图）",
+      };
+
+      const PAPER_COPY_TAIHE_EN = {
+        h2L1: "Ritual rises on the terrace,",
+        h2L2: "and gathers into order beneath the roof.",
+        introRight:
+          "The Hall of Supreme Harmony is more than a single hall: it is the apex of the outer-court ceremonial axis, where rank, scale and symbol are composed as one spatial score—from marble stairs and terraces to the double-eaved hip roof.",
+        p1:
+          "Across Ming and Qing rites—enthronement, imperial wedding, grand birthdays—the hall stands as the highest expression of palace protocol. It rests on a triple white marble terrace; the double-eaved hip roof marks one of the highest roof grades in classical official architecture; painted timber, ridge beasts and stacked dougong invite reading from silhouette down to joint and ornament.",
+        p2:
+          "This page links a cinematic hero with paper sections: first grasp terrace and roof massing, then read eaves and carvings. Cross-comparison hotspots are not exotic pairing—they situate materials, craft and ceremonial space on the same scale.",
+        plate01: "PLATE 01 · Marble terrace and hall massing",
+        plate0203: "PLATE 02–03 · Eaves, paint layers and timber rhythm",
+        plate04: "PLATE 04 · Ridge beasts and roof curvature",
+        s2h3: "Hierarchy is a spatial algorithm you can walk through",
+        p3:
+          "As your gaze climbs the stairs, terrace height, bay width and eave depth choreograph the body’s experience of elevation. That experience echoes canonical ritual: ceremony is not only procedure but also height, setback and proportion written into stone and wood.",
+        p4:
+          "The layout follows the same logic: massing and relationships first, detail second; image and text leave room for each other so reading feels like walking—from afar to near, from gesture to grammar.",
+        plate05: "PLATE 05 · Court and axial continuation",
+      };
+
+      const PAPER_COPY_YUHUA_EN = {
+        h2L1: "A garden need not be vast,",
+        h2L2: "but it must hide turns within order.",
+        introRight:
+          "Behind the inner court, the Imperial Garden offers one of the few palace spaces devoted to strolling and rest. Along the axis and at its sides, pavilions, rockeries, cypresses and paths weave layers that read as “small yet deep.”",
+        p1:
+          "Qin'an Hall anchors the north end of the garden axis; Duixiu Hill, winding paths and ancient cypresses interlace to form a layered depth of hall, hill, route and grove. The scale is gentler than the outer-court halls, yet paving, balustrades and planting still speak the palace idiom.",
+        p2:
+          "A scroll-like collage presents the garden, with hotspots for close reading—how nodal buildings and rockeries converse with the palace axis. Margins between images slow the pace of viewing.",
+        plate01: "PLATE 01 · Garden axis and depth",
+        plate0203: "PLATE 02–03 · Pavilions and rockery nodes",
+        plate04: "PLATE 04 · Cypresses and path layers",
+        s2h3: "A space to breathe, still within the palace grammar",
+        p3:
+          "The garden does not escape protocol; it offers pause and circulation within a strict frame. Turns in the path do not break the axis—they let eye and body find surprise at short range.",
+        p4:
+          "Vertical collage segments act as panels you can rest on, then reconnect to axis and nodes—understanding how imperial gardens balance restraint and delight.",
+        plate05: "PLATE 05 · Garden edge and inner court",
+      };
+
+      const GUGONG_QUIZ_I18N = {
+        zh: {
+          title: "古建小测",
+          choose: "请选择一个答案",
+          next: "下一题",
+          viewResult: "查看结果",
+          doneMeta: "完成",
+          restart: "重新开始",
+          restartHint: "点击右侧按钮可重新开始。",
+          finishLine: (score, total) => `答题完成：共答对 ${score} / ${total} 题。`,
+          rightLine: (explain) => `回答正确。${explain}`,
+          wrongLine: (answer, explain) => `正确答案：${answer}。${explain}`,
+          facts: [
+            "太和殿重檐庑殿顶，代表皇家建筑最高等级之一。",
+            "紫禁城外朝三大殿：太和殿、中和殿、保和殿。",
+            "御花园北端钦安殿是宫城中重要的道教祭祀空间。",
+          ],
+          items: [
+            {
+              q: "太和殿屋顶在官式建筑中属于哪种等级形制？",
+              options: ["重檐庑殿顶", "歇山顶", "悬山顶", "硬山顶"],
+              answer: 0,
+              explain: "太和殿采用重檐庑殿顶，是最高等级形制之一。",
+            },
+            {
+              q: "御花园中轴北端、内奉玄天上帝的建筑是？",
+              options: ["中和殿", "钦安殿", "堆秀亭", "保和殿"],
+              answer: 1,
+              explain: "钦安殿是御花园轴线上重要祠庙建筑。",
+            },
+            {
+              q: "外朝礼仪核心“三大殿”不包括以下哪一座？",
+              options: ["太和殿", "中和殿", "保和殿", "坤宁宫"],
+              answer: 3,
+              explain: "外朝三大殿为太和殿、中和殿、保和殿。",
+            },
+          ],
+        },
+        en: {
+          title: "Architecture Quiz",
+          choose: "Choose one answer",
+          next: "Next",
+          viewResult: "View Result",
+          doneMeta: "Done",
+          restart: "Restart",
+          restartHint: "Use the button on the right to restart.",
+          finishLine: (score, total) => `Quiz complete: ${score} / ${total} correct.`,
+          rightLine: (explain) => `Correct. ${explain}`,
+          wrongLine: (answer, explain) => `Correct answer: ${answer}. ${explain}`,
+          facts: [
+            "The Hall of Supreme Harmony uses a double-eaved hip roof, one of the highest formal roof types.",
+            "The three ceremonial halls of the outer court are Taihe, Zhonghe and Baohe.",
+            "Qin'an Hall at the north end of the Imperial Garden is a key Daoist ritual space inside the palace.",
+          ],
+          items: [
+            {
+              q: "Which official roof hierarchy does the Hall of Supreme Harmony use?",
+              options: ["Double-eaved hip roof", "Hip-and-gable roof", "Overhanging gable roof", "Flush-gable roof"],
+              answer: 0,
+              explain: "It uses a double-eaved hip roof, among the highest-ranking formal types.",
+            },
+            {
+              q: "Which building stands at the north end of the Imperial Garden axis and enshrines Xuantian Shangdi?",
+              options: ["Hall of Central Harmony", "Qin'an Hall", "Duixiu Pavilion", "Hall of Preserving Harmony"],
+              answer: 1,
+              explain: "Qin'an Hall is the main temple-like node on the Imperial Garden axis.",
+            },
+            {
+              q: "Which one is NOT part of the three ceremonial halls of the outer court?",
+              options: ["Hall of Supreme Harmony", "Hall of Central Harmony", "Hall of Preserving Harmony", "Kunning Palace"],
+              answer: 3,
+              explain: "The outer-court trio consists of Taihe, Zhonghe and Baohe.",
+            },
+          ],
+        },
+      };
+
+      const SIHEYUAN_QUIZ_I18N = {
+        zh: {
+          title: "四合院小测",
+          choose: "请选择一个答案",
+          next: "下一题",
+          viewResult: "查看结果",
+          doneMeta: "完成",
+          restart: "重新开始",
+          restartHint: "点击右侧按钮可重新开始。",
+          finishLine: (score, total) => `答题完成：共答对 ${score} / ${total} 题。`,
+          rightLine: (explain) => `回答正确。${explain}`,
+          wrongLine: (answer, explain) => `正确答案：${answer}。${explain}`,
+          facts: [
+            "四合院一般以中轴对称组织正房、东西厢房与倒座，中央为庭院。",
+            "宅门常与影壁配合，形成内外过渡与隐私遮挡。",
+            "北京胡同与四合院肌理相连，是北方城市居住的重要样本。",
+          ],
+          items: [
+            {
+              q: "传统北京四合院庭院多在平面上呈什么布局特征？",
+              options: ["完全自由式", "以中轴对称围合", "单廊单侧", "圆形向心"],
+              answer: 1,
+              explain: "四合院典型特征是以南北中轴组织建筑并围合中央庭院。",
+            },
+            {
+              q: "下列哪一项常作为四合院入口处的空间处理，兼有遮挡视线的作用？",
+              options: ["月台", "影壁", "藻井", "须弥座"],
+              answer: 1,
+              explain: "影壁常见于宅门内侧或对面，用于遮挡视线并形成内外过渡。",
+            },
+            {
+              q: "“四合院”名称中的“四合”主要指什么？",
+              options: ["四座塔楼", "四面建筑围合庭院", "四条胡同交汇", "四种屋顶形式"],
+              answer: 1,
+              explain: "四合指东、西、南、北四面建筑围合出中央庭院的空间格局。",
+            },
+          ],
+        },
+        en: {
+          title: "Siheyuan Quiz",
+          choose: "Choose one answer",
+          next: "Next",
+          viewResult: "View Result",
+          doneMeta: "Done",
+          restart: "Restart",
+          restartHint: "Use the button on the right to restart.",
+          finishLine: (score, total) => `Quiz complete: ${score} / ${total} correct.`,
+          rightLine: (explain) => `Correct. ${explain}`,
+          wrongLine: (answer, explain) => `Correct answer: ${answer}. ${explain}`,
+          facts: [
+            "A siheyuan typically organizes main rooms, side wings and the gatehouse around a central courtyard.",
+            "Screen walls often work with the gateway to modulate privacy and circulation.",
+            "Hutong and courtyard compounds together shape Beijing’s historic residential fabric.",
+          ],
+          items: [
+            {
+              q: "What is the most typical plan characteristic of a classic Beijing siheyuan?",
+              options: ["Fully free-form", "Axially symmetrical enclosure", "Single-sided corridor", "Radial plan"],
+              answer: 1,
+              explain: "The courtyard is usually formed by buildings arranged symmetrically along a north–south axis.",
+            },
+            {
+              q: "Which element is commonly placed near the entrance to buffer views and transition space?",
+              options: ["Marble terrace", "Screen wall (yingbi)", "Caisson ceiling", "Terrace podium"],
+              answer: 1,
+              explain: "A screen wall often faces or sits beside the gate to block direct sightlines.",
+            },
+            {
+              q: "In the name “siheyuan”, what does “sihe” most directly refer to?",
+              options: ["Four towers", "Four sides of buildings enclosing a courtyard", "Four hutong crossings", "Four roof types"],
+              answer: 1,
+              explain: "It refers to buildings on four sides enclosing the central courtyard.",
+            },
+          ],
+        },
+      };
+
+      const LUGOU_QUIZ_I18N = {
+        zh: {
+          title: "卢沟桥小测",
+          choose: "请选择一个答案",
+          next: "下一题",
+          viewResult: "查看结果",
+          doneMeta: "完成",
+          restart: "重新开始",
+          restartHint: "点击右侧按钮可重新开始。",
+          finishLine: (score, total) => `答题完成：共答对 ${score} / ${total} 题。`,
+          rightLine: (explain) => `回答正确。${explain}`,
+          wrongLine: (answer, explain) => `正确答案：${answer}。${explain}`,
+          facts: [
+            "「卢沟晓月」为清代所定燕京八景之一，写永定河畔月色与桥影的意境。",
+            "卢沟桥始建于金大定二十九年（1189 年），属多孔联拱石桥。",
+            "桥上石狮数量众多、形态各异，故民间有「数不清」的歇后语流传。",
+          ],
+          items: [
+            {
+              q: "「卢沟晓月」在清代被列入哪一组著名景观？",
+              options: ["燕京八景", "西湖十景", "关中八景", "岭南八景"],
+              answer: 0,
+              explain: "清代将「卢沟晓月」定为燕京（北京）八景之一。",
+            },
+            {
+              q: "俗语「卢沟桥的狮子——」的下一句常说是什么？",
+              options: ["数不清", "跑得快", "会咬人", "会唱歌"],
+              answer: 0,
+              explain: "歇后语点出桥上石狮数量多、造型各异，难以一一数清。",
+            },
+            {
+              q: "卢沟桥始建于哪个朝代？",
+              options: ["唐代", "宋代", "金代", "明代"],
+              answer: 2,
+              explain: "卢沟桥始建于金大定二十九年（1189 年）。",
+            },
+          ],
+        },
+        en: {
+          title: "Lugou Bridge Quiz",
+          choose: "Choose one answer",
+          next: "Next",
+          viewResult: "View Result",
+          doneMeta: "Done",
+          restart: "Restart",
+          restartHint: "Use the button on the right to restart.",
+          finishLine: (score, total) => `Quiz complete: ${score} / ${total} correct.`,
+          rightLine: (explain) => `Correct. ${explain}`,
+          wrongLine: (answer, explain) => `Correct answer: ${answer}. ${explain}`,
+          facts: [
+            "“Morning Moon over Lugou Bridge” was listed among the Eight Great Sights of Yanjing in the Qing, evoking moonlight and bridge reflections on the Yongding River.",
+            "The bridge was first built in 1189 under the Jin dynasty as a multi-arch stone bridge.",
+            "Folk wordplay says the stone lions are “uncountable” because each carving differs.",
+          ],
+          items: [
+            {
+              q: "In the Qing, “Morning Moon over Lugou Bridge” belongs to which famous set of Beijing-area sights?",
+              options: ["Eight Great Sights of Yanjing", "Ten Views of West Lake", "Eight Sights of Guanzhong", "Eight Sights of Lingnan"],
+              answer: 0,
+              explain: "It is one of the Eight Great Sights of Yanjing (historic Beijing).",
+            },
+            {
+              q: "The saying “Lugou Bridge’s lions—…” often ends with which punchline?",
+              options: ["Uncountable", "Run fast", "Bite people", "Sing songs"],
+              answer: 0,
+              explain: "The punchline jokes that there are too many unique lions to count.",
+            },
+            {
+              q: "The bridge was first built under which dynasty?",
+              options: ["Tang", "Song", "Jin", "Ming"],
+              answer: 2,
+              explain: "Construction began in 1189 during the Jin dynasty.",
+            },
+          ],
+        },
+      };
+
+      const TAIHE_MOSAIC_I18N = {
+        zh: {
+          locTitle: "历史位置与文物价值",
+          locP1:
+            "太和殿，又称「金銮殿」，位于紫禁城外朝、明清北京城中轴线的核心。它与中和殿、保和殿同立于三层汉白玉石须弥座台基之上，是皇宫礼仪空间的主序列。太和殿采用重檐庑殿顶，建筑形制与用材等级在紫禁城中居于首位；历史上，登基、大婚、万寿节等重大国家典礼多在此举行。",
+          locImgAlt0: "紫禁城外朝三大殿营造关系示意（文档素材）",
+          locP2:
+            "下图沿中轴由南而北依次为太和殿、中和殿与保和殿：太和殿体量最大，为外朝正殿；中和殿为方形攒尖顶、体量最小，大典前皇帝常在此稍憩并接受侍臣行礼；保和殿为重檐歇山顶，清代曾在此举行殿试并举办筵宴。三殿与台基、御路石与石栏杆等共同体现了明清皇家建筑的营造制度与空间秩序。",
+          locImgAlt1: "紫禁城外朝太和殿、中和殿、保和殿手绘示意图",
+          locP3:
+            "1961年，「故宫」已被公布为第一批全国重点文物保护单位。1987年，「明清皇宫（紫禁城）」列入《世界遗产名录》，太和殿是紫禁城中最具标志性的木构礼仪大殿之一。今日观众所见殿宇与陈设，在修缮、监测与开放管理之下，以原状陈列为主，向公众传递明清宫廷建筑与礼制空间的历史信息。",
+          featTitle: "特色雕饰与纹样",
+          featLead:
+            "太和殿的丹陛石雕、木结构雕刻与琉璃装饰，以极致工艺彰显皇家威仪，是中国古建筑装饰艺术的巅峰之作。",
+          capStone: "石雕 · 丹陛云龙石",
+          capWood: "木雕",
+          capGlaze: "琉璃雕",
+          ridgeLabel: "屋脊兽",
+          ridgeDesc:
+            "太和殿的装饰上共有10个屋脊兽。这些小兽依次排列在高高的檐角处，象征着消灾灭祸、逢凶化吉，并含有剪除邪恶、主持公道之意。",
+          spoutLabel: "石雕龙头排水",
+          spoutDesc: "栏杆下安有排水用的石雕龙头，每逢雨季，可呈现「千龙吐水」的奇观。",
+          timelineLabel: "历史沿革",
+          timelineImgAlt: "太和殿历史沿革年表",
+          featBTitle: "特色雕饰与纹样",
+          sundialLabel: "汉白玉赤道式日晷",
+          sundialDesc: "日晷在丹陛的左侧，以汉白玉石制成晷盘圆形，中央有金属晷针。",
+          sundialImgAlt: "汉白玉赤道式日晷",
+          paintLabel: "金龙和玺彩画",
+          capDragon: "龙纹",
+          capCloud: "祥云纹",
+          valueTitle: "历史价值",
+          valueP1:
+            "太和殿是中国现存等级最高、形制最完备的皇家木结构大殿之一，集中体现明清皇家宫殿建筑的体制与工艺水平，是礼制、营造技艺、空间美学与传统哲学观念相互叠合的典型实例，对东亚地区宫殿类建筑的形制与审美具有广泛影响。",
+          valueImgAlt: "太和殿正立面与三层汉白玉台基",
+          valueP2:
+            "殿宇立于须弥座台基之上，重檐庑殿顶覆黄琉璃瓦，檐下施斗栱与和玺彩画，屋脊饰脊兽，均体现清代官式建筑的等级做法。白石栏杆、御路石雕与铜龟铜鹤等陈设，共同构成外朝大典的视觉中心。作为紫禁城开放参观的重要节点，太和殿承担着文化遗产展示与公众历史教育的现实功能。",
+          valueP3:
+            "从文物价值看，太和殿木构架、屋面瓦作、石作与油饰彩画等构件系统，是研究明清皇家工程制度、材料加工与修缮史的实物标本；其与广场、台基、丹陛的组合关系，也是理解中国传统都城轴线与宫廷礼仪空间的关键案例。",
+        },
+        en: {
+          locTitle: "Historical position and heritage value",
+          locP1:
+            'The Hall of Supreme Harmony—also called the "Golden Throne Hall"—stands at the heart of the outer court on Beijing\'s north–south axis. Together with the Halls of Central and Preserving Harmony, it rises on a triple white-marble platform, forming the main sequence of palace ritual space. Its double-eaved hip roof and material and craft grades rank first in the Forbidden City; enthronements, imperial weddings, and longevity celebrations were often held here.',
+          locImgAlt0: "Diagram: relationship of the three outer-court halls (source material)",
+          locP2:
+            "From south to north along the axis: Taihe is the largest and serves as the outer court's principal hall; Zhonghe is a square pyramidal roof and the smallest, where the emperor rested before great ceremonies and received brief homage; Baohe is a double-eaved hip-and-gable roof, used in the Qing for palace examinations and banquets. The three halls, with the platform, imperial-way stone and balustrades, embody Ming–Qing royal building regulations and spatial order.",
+          locImgAlt1: "Illustration: Taihe, Zhonghe and Baohe along the axis",
+          locP3:
+            'In 1961 the "Palace Museum" was listed among the first national priority protected sites. In 1987 the "Ming and Qing Palace (Forbidden City)" was inscribed on the World Heritage List; Taihe is one of the palace\'s most iconic timber ceremonial halls. The architecture and furnishings visitors see today are chiefly conserved in original layout, conveying Ming–Qing court architecture and ritual space to the public.',
+          featTitle: "Ornament and decorative motifs",
+          featLead:
+            "Marble ramps, timber carving and glazed fittings at Taihe express imperial dignity through extreme craft—the summit of decorative art in Chinese classical architecture.",
+          capStone: "Stone · Danbi cloud-dragon slab",
+          capWood: "Wood carving",
+          capGlaze: "Glazed tile carving",
+          ridgeLabel: "Ridge beasts",
+          ridgeDesc:
+            "Ten small figures line the roof; they climb the high eaves in sequence, symbolizing protection, good fortune, and the removal of evil in traditional interpretation.",
+          spoutLabel: "Dragon-head spouts",
+          spoutDesc:
+            "Marble dragon heads drain the balustrades; in heavy rain they create the famous “thousand dragons spouting water” effect.",
+          timelineLabel: "Timeline",
+          timelineImgAlt: "Chronology of the Hall of Supreme Harmony",
+          featBTitle: "Ornament and motifs (continued)",
+          sundialLabel: "Equatorial sundial on white marble",
+          sundialDesc: "To the left of the ramp, a circular sundial disk with a metal gnomon.",
+          sundialImgAlt: "White marble equatorial sundial",
+          paintLabel: "Golden dragon and hexi polychrome",
+          capDragon: "Dragon motif",
+          capCloud: "Auspicious clouds",
+          valueTitle: "Historical significance",
+          valueP1:
+            "Taihe is among the highest-ranking and best-preserved surviving timber ceremonial halls in China. It concentrates Ming–Qing palace typology, craft and spatial aesthetics, and has influenced palace architecture across East Asia.",
+          valueImgAlt: "Front elevation and triple marble terrace",
+          valueP2:
+            "On a sumeru base, the double-eaved hip roof with yellow glazed tiles, dougong, hexi polychrome and ridge beasts follows Qing official rank. White balustrades, imperial-way carving, bronze tortoises and cranes form the visual core of outer-court rites; as a major visitor stop, the hall carries heritage display and public education.",
+          valueP3:
+            "As a relic, its timber frame, roof tile, stone and painted finishes are primary evidence for imperial engineering, materials and conservation history; its pairing with plaza, terrace and ramp is a key case for reading Chinese capital axis and court ritual space.",
+        },
+      };
+
+      const YUHUA_MOSAIC_V4_I18N = {
+        zh: {
+          seasonTitle: "四季亭台",
+          capWan: "御花园 · 万春亭",
+          capQian: "御花园 · 千秋亭",
+          azLabel: "方位",
+          seasonLead:
+            "对应四季轮回、天地有序，代表中国古人「顺应天时、敬畏自然」的宇宙观。",
+          lineL: "东方属春、主生，所以叫「万春」；",
+          lineR: "西方属秋、主收，所以叫「千秋」。",
+          seasonFoot:
+            "二者东西对称、形制精巧、内涵深厚，与攒尖顶、方形基座相呼应，诠释了「天圆地方」与「天人合一」的传统宇宙观。",
+          zaojingTitle: "藻井",
+          zaojingIntro:
+            "藻井是中国古代建筑中的独特元素。由于古建筑多为木质结构，防火至关重要。因此，古人将「井」建在屋顶，以压制火魔，保护建筑安全。",
+          zaojingMid:
+            "中心盘龙衔珠浮雕搭配环绕的双凤与龙凤纹样，层叠井架构成天圆地方的布局，边缘饰以火焰纹，工艺精巧繁复，呈现龙凤呈祥的皇家气象，寄寓了吉祥安康、天地和谐的文化祈愿。",
+          zaojingHeroAlt: "太和殿木雕藻井（参照）",
+          landTitle: "景观",
+          landLead:
+            "园内散布各类奇石，与建筑、植物相互映衬，营造「虽由人作，宛自天开」的意境。",
+          duixiuP:
+            "堆秀山用太湖石叠筑，山势险峻，磴道陡峭，叠石手法新颖，山上御景亭是帝后重阳节登高之处。",
+          duixiuAlt: "堆秀山与御景亭",
+          nestStoneZh: "奇石",
+          nestStoneEn: "Exotic stones",
+          nestStoneDesc:
+            "拜斗石、海参石、木化石等名石点缀园中，与路径、植栽形成对景与框景，是皇家园林叠山理石传统的缩影。",
+          stoneCaps: ["拜斗石", "海参石", "木化石"],
+          nestTreeZh: "古树",
+          nestTreeEn: "Old trees",
+          nestTreeDesc: "蟠龙槐、连理柏、人字柏等古木与御花园共生，冠盖参天，见证宫苑岁月。",
+          treeCaps: ["蟠龙槐", "连理柏", "人字柏"],
+          flowersTitle: "花卉",
+          flowerNames: [
+            "玉兰",
+            "榆叶梅",
+            "梨花",
+            "丁香",
+            "紫玉兰",
+            "海棠",
+            "桃花",
+            "楸树",
+            "芍药",
+          ],
+          flowerCopy:
+            "玉兰、榆叶梅、梨花、丁香与海棠、芍药等次第开放，与亭台楼阁相映成趣，寄托吉祥与生机，亦承载宫廷岁时游赏与审美传统。",
+          timelineSection: "御花园历史精华时轴",
+          timelineLabel: "沿革",
+          timelineImgAlt: "御花园历史沿革",
+        },
+        en: {
+          seasonTitle: "Four Seasons Pavilion",
+          capWan: "Imperial Garden · Wanchun Pavilion",
+          capQian: "Imperial Garden · Qianqiu Pavilion",
+          azLabel: "Orientation",
+          seasonLead:
+            "The pair echoes the cycle of seasons and an ordered cosmos—expressing the traditional view of aligning with heaven and revering nature.",
+          lineL: "The east belongs to spring and growth—hence “Wanchun” (myriad springs).",
+          lineR: "The west belongs to autumn and harvest—hence “Qianqiu” (a thousand autumns).",
+          seasonFoot:
+            "They face each other east–west with refined form and meaning; together with pyramidal roofs and square bases, they illustrate “round heaven, square earth” and harmony between human and cosmos.",
+          zaojingTitle: "Caisson ceiling (zaojing)",
+          zaojingIntro:
+            "Zaojing is a distinctive ceiling element. Timber buildings needed fire protection, so builders placed a symbolic “well” overhead to suppress fire and protect the hall.",
+          zaojingMid:
+            "A coiled dragon disk with pearl, paired phoenix and dragon motifs, layered frames in a round-heaven / square-earth layout, flame patterns at the edge—dense craft and royal auspice.",
+          zaojingHeroAlt: "Taihe Hall timber caisson (reference)",
+          landTitle: "Landscape",
+          landLead:
+            "Strange rocks, architecture and planting interplay to create the feeling of nature—even though every step is designed.",
+          duixiuP:
+            "Duixiu Hill is built of Taihu Lake stone; steep paths and novel stacking lead to Yujing Pavilion, where emperors and consorts climbed at the Double Ninth Festival.",
+          duixiuAlt: "Duixiu Hill and Yujing Pavilion",
+          nestStoneZh: "Exotic stones",
+          nestStoneEn: "Exotic stones",
+          nestStoneDesc:
+            "Named stones such as the star-worship, sea-cucumber and petrified-wood specimens punctuate paths and plantings—classic garden framing in miniature.",
+          stoneCaps: ["Star-worship stone", "Sea-cucumber rock", "Petrified wood"],
+          nestTreeZh: "Ancient trees",
+          nestTreeEn: "Ancient trees",
+          nestTreeDesc: "Coiled-dragon locust, conjoined cypress and “person” cypress share the garden with the palace, their crowns marking time.",
+          treeCaps: ["Coiled-dragon locust", "Conjoined cypress", "“Person” cypress"],
+          flowersTitle: "Flowers",
+          flowerNames: [
+            "Yulan magnolia",
+            "Flowering plum",
+            "Pear blossom",
+            "Lilac",
+            "Purple magnolia",
+            "Crabapple",
+            "Peach blossom",
+            "Catalpa",
+            "Peony",
+          ],
+          flowerCopy:
+            "Magnolia, plum, pear, lilac, crabapple and peony bloom in turn beside pavilions—auspicious symbols and seasonal court tastes.",
+          timelineSection: "Imperial Garden timeline",
+          timelineLabel: "Timeline",
+          timelineImgAlt: "Imperial Garden chronology",
+        },
+      };
+
+      let currentLang =
+        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
+      const isEn = () => currentLang === "en";
+      const t = (key) => (UI_TEXT[currentLang] && UI_TEXT[currentLang][key]) || UI_TEXT.zh[key] || "";
+      const stripComparePrefix = (text) =>
+        (text || "").replace(/^(相似点|差异点|Similarity|Difference)\s*[：:]\s*/i, "");
+      const localizeCompareCaption = (caption) => {
+        if (!isEn()) return caption;
+        return (caption || "")
+          .replace(/^中国\s*[·•]\s*/, "China · ")
+          .replace(/^巴基斯坦\s*[·•]\s*/, "Pakistan · ");
+      };
+      const localizeHotspotName = (name) => (isEn() ? HOTSPOT_NAME_EN[name] || name : name);
+      const getLocalizedBuildingMeta = (buildingName, building) => {
+        if (!isEn()) {
+          return {
+            name: building.name,
+            category: building.category,
+            province: building.province,
+            year: building.year,
+            desc: building.desc,
+          };
+        }
+        const mapped = BUILDING_I18N[buildingName] || {};
+        return {
+          name: mapped.name || building.name,
+          category: mapped.category || building.category,
+          province: mapped.province || building.province,
+          year: mapped.year || building.year,
+          desc: mapped.desc || building.desc,
+        };
+      };
 
       // 建筑数据库
       const BUILDINGS_DB = {
@@ -3246,12 +4242,12 @@
           year: "明永乐十八年（1420年）",
           desc: "御花园位于乾清宫后方，是明清宫廷休憩赏景之所。园内以亭、石、柏与曲径组织空间，在中轴秩序中形成精巧而层次丰富的园林节点。",
           pageBg: "#F9F0E3",
-          heroImage: "./assets/yuhuayuan-plate-base.png",
+          heroImage: "./assets/yuhuayuan-hero-isometric.jpg?v=20260419c",
           heroHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
-          detailImage: "./assets/yuhuayuan-plate-base.png",
+          detailImage: "./assets/yuhuayuan-hero-isometric.jpg?v=20260419c",
           detailHighlightImage: "./assets/yuhuayuan-plate-highlight.png",
           subImages: [
-            "./assets/yuhuayuan-plate-base.png",
+            "./assets/yuhuayuan-hero-isometric.jpg?v=20260419c",
             "./assets/yuhuayuan-plate-highlight.png"
           ]
         },
@@ -3261,12 +4257,18 @@
           province: "北京",
           year: "元代定型，明清成熟",
           desc: "典型北方民居，中轴对称、院落围合，承载传统礼制与市井生活文化。",
-          heroImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600",
-          detailImage: "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1600",
-          subImages: [
-            "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200",
-            "https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"
-          ]
+          heroCarousel: [
+            { src: "./assets/siheyuan-carousel-1.png", alt: "北京四合院 · 临水院落鸟瞰" },
+            { src: "./assets/siheyuan-carousel-2.png", alt: "北京四合院 · 庭院内景与正房" },
+            { src: "./assets/siheyuan-carousel-3.png", alt: "北京四合院 · 中轴庭院与灰瓦屋面" },
+            { src: "./assets/siheyuan-carousel-4.png", alt: "北京四合院 · 庭院中轴望正房与东西厢房" },
+            { src: "./assets/siheyuan-carousel-5.png", alt: "北京四合院 · 暮色中的内院" },
+          ],
+          heroImage: "./assets/siheyuan-carousel-1.png",
+          detailImage: "./assets/siheyuan-1.jpg",
+          paperLargeImage: "./assets/siheyuan-4.jpg",
+          paperCornerImage: "./assets/siheyuan-1.jpg",
+          subImages: ["./assets/siheyuan-2.jpg", "./assets/siheyuan-3.jpg"],
         },
         "卢沟桥": {
           name: "卢沟桥",
@@ -3274,12 +4276,18 @@
           province: "北京",
           year: "金大定二十九年（1189年）",
           desc: "华北地区现存最古老的石拱桥，桥身雕刻精美，见证多段历史。",
-          heroImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/2560px-Marco_Polo_Bridge_1.jpg",
-          detailImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Marco_Polo_Bridge_lions.jpg/1600px-Marco_Polo_Bridge_lions.jpg",
-          subImages: [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/1200px-Marco_Polo_Bridge_1.jpg",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Marco_Polo_Bridge_lions.jpg/1200px-Marco_Polo_Bridge_lions.jpg"
-          ]
+          heroCarousel: [
+            { src: "./assets/lugou-carousel-1.png", alt: "卢沟桥 · 夜色与拱门灯光" },
+            { src: "./assets/lugou-carousel-2.png", alt: "卢沟桥 · 多孔石桥与石狮望柱" },
+            { src: "./assets/lugou-carousel-3.png", alt: "卢沟桥 · 桥面遗存与说明碑刻" },
+            { src: "./assets/lugou-carousel-4.png", alt: "卢沟桥 · 暮色中望城楼" },
+            { src: "./assets/lugou-carousel-5.png", alt: "卢沟桥 · 「卢沟晓月」碑亭与御题四字" },
+          ],
+          heroImage: "./assets/lugou-carousel-1.png",
+          detailImage: "./assets/lugou-paper-detail.png",
+          paperLargeImage: "./assets/lugou-paper-large.png",
+          paperCornerImage: "./assets/lugou-paper-corner.png",
+          subImages: ["./assets/lugou-paper-sub1.png", "./assets/lugou-paper-sub2.png"],
         },
         "颐和园": {
           name: "颐和园",
@@ -3593,6 +4601,46 @@
         plate05: "PLATE 05 · 园林与庭院一瞥",
       };
 
+      const PAPER_COPY_TAIHE = {
+        h2L1: "礼制在台基之上抬升，",
+        h2L2: "在屋面之下收束为秩序。",
+        introRight:
+          "太和殿并非「一座殿」那么简单：它是外朝礼仪轴线上的顶点，也是等级、尺度与象征在空间里的一次合奏。从丹陛、须弥座到重檐庑殿顶，每一层都在重复同一句营造语法——庄严来自分寸。",
+        p1:
+          "明清两代，太和殿承担登基、大婚、万寿等国家大典，是紫禁城礼制空间的最高表达。殿宇立于三层汉白玉须弥座之上，重檐庑殿顶为传统官式建筑屋顶等级中的顶端形制之一；檐下和玺彩画、脊兽序列与斗栱层叠，共同构成「远看有势、近看有法」的阅读路径。",
+        p2:
+          "本页以巨幅首屏与画册段落相接：你可以先感受台基与屋面的体量关系，再在檐下细读木作与装饰。热区对照并非猎奇并置，而是帮助把材料、工艺与仪式空间放在同一尺度上理解。",
+        plate01: "PLATE 01 · 须弥座与殿身体量",
+        plate0203: "PLATE 02–03 · 檐部木作与彩画层次",
+        plate04: "PLATE 04 · 檐角脊兽与屋面曲线",
+        s2h3: "等级不是标签，而是一套可体验的空间算法",
+        p3:
+          "当视线沿丹陛向上移动，台基的高度、开间的宽度与出檐的深度会共同塑造「仰望」的身体经验。这种经验与典制文献相互印证：礼仪不只是程序，也被写进高度、进退与比例之中。",
+        p4:
+          "页面排版亦遵循同一逻辑：先给体量与关系，再给细部；让图像与文字彼此留白，使阅读顺序接近真实行走——由远及近，由势入法。",
+        plate05: "PLATE 05 · 殿庭与轴线延续",
+      };
+
+      const PAPER_COPY_YUHUA = {
+        h2L1: "园林不必宏大，",
+        h2L2: "却要在秩序里藏曲折。",
+        introRight:
+          "御花园位于内廷乾清宫北侧，是宫廷生活中少数以游赏与休憩为主的空间。它在中轴礼制之外，用亭、石、柏与路径组织出层次丰富的「小中见大」。",
+        p1:
+          "园中建筑与构筑物沿轴线与两侧展开：钦安殿踞于中轴北端，与堆秀山、曲径、古柏相映，形成「殿—山—路—林」的层叠景深。空间尺度相对内廷殿堂更亲切，却在铺地、栏杆与植物配置上仍保持宫廷品格。",
+        p2:
+          "本页以拼贴长卷呈现御花园意象，并保留热区细读：你可对照钦安殿与堆秀山等节点，观察园林要素如何与宫廷轴线对话。图像之间的留白，意在让「游观」的节奏放慢。",
+        plate01: "PLATE 01 · 园中轴线与景深",
+        plate0203: "PLATE 02–03 · 亭台与叠山节点",
+        plate04: "PLATE 04 · 古柏与路径层次",
+        s2h3: "游赏的空间，也是礼制之外的呼吸",
+        p3:
+          "御花园并非逃离秩序，而是在严谨格局中提供可驻足、可回环的体验。曲折并非破坏中轴，而是让视线与身体在短距离内获得转折与惊喜。",
+        p4:
+          "因此页面以纵向分段拼贴组织信息：每一段既是一张「可停留的画面」，也邀请你回到轴线与节点关系之中，重新理解皇家园林的节制与精巧。",
+        plate05: "PLATE 05 · 园景与内廷衔接",
+      };
+
       const HERO_CROSS_COMPARE_DATA = {
         "故宫太和殿": {
           "重檐庑殿顶": {
@@ -3638,6 +4686,53 @@
             pakistanCaption: "巴基斯坦 · 巴德夏希清真寺入口层级",
             similarity: "相似点：都通过路径与节点的递进，塑造进入核心空间的节奏。",
             difference: "差异点：御花园是曲折园路与叠景，巴德夏希是开阔轴线与大尺度前场。",
+          },
+        },
+      };
+
+      const HERO_CROSS_COMPARE_DATA_EN = {
+        "故宫太和殿": {
+          重檐庑殿顶: {
+            chinaCaption: "China · Taihe Hall roof tiers",
+            pakistanCaption: "Pakistan · Badshahi Mosque main facade",
+            similarity:
+              "Similarity: Both use the height of the main volume and axial symmetry to establish a ceremonial center.",
+            difference:
+              "Difference: Taihe expresses ritual rank through timber roof hierarchy; Badshahi amplifies solemnity through stone mass and courtyard scale.",
+          },
+          脊兽: {
+            chinaCaption: "China · Taihe Hall ridge beasts",
+            pakistanCaption: "Pakistan · Badshahi Mosque ornamental detail",
+            similarity:
+              "Similarity: Both use elevated ornamental detail to strengthen identity and symbolic presence.",
+            difference:
+              "Difference: Chinese halls emphasize mythical beasts and ritual symbols; the mosque emphasizes geometry, floral motifs and calligraphic tradition.",
+          },
+          溜金斗拱: {
+            chinaCaption: "China · Taihe eaves timber and painted ornament",
+            pakistanCaption: "Pakistan · Badshahi red sandstone and marble",
+            similarity:
+              "Similarity: Both invest refined craft in the most visible joints of structure and facade.",
+            difference:
+              "Difference: China foregrounds timber bracket sets and polychrome painting; Pakistan foregrounds stone coursing and inlay.",
+          },
+        },
+        "故宫御花园": {
+          钦安殿: {
+            chinaCaption: "China · Qin'an Hall on the Imperial Garden axis",
+            pakistanCaption: "Pakistan · Badshahi Mosque courtyard and main hall",
+            similarity:
+              "Similarity: Both organize space as courtyard-first, then hall, along a clear hierarchy.",
+            difference:
+              "Difference: The Imperial Garden stresses intimate strolling and inner-court scale; Badshahi foregrounds prayer and public gathering.",
+          },
+          堆秀亭: {
+            chinaCaption: "China · Duixiu Pavilion and rockery",
+            pakistanCaption: "Pakistan · Badshahi entrance sequence",
+            similarity:
+              "Similarity: Both choreograph approach through path and threshold to heighten arrival at the core.",
+            difference:
+              "Difference: The garden route is winding and pictorial; Badshahi opens along a broad axis with a large forecourt.",
           },
         },
       };
@@ -3691,27 +4786,34 @@
         }
 
         const buildingData = HERO_CROSS_COMPARE_DATA[buildingName];
+        const buildingDataEn = HERO_CROSS_COMPARE_DATA_EN[buildingName];
         const hidePopup = () => {
           popup.hidden = true;
           popup.setAttribute("aria-hidden", "true");
         };
         const showPopupByName = (hotspotName) => {
           if (!buildingData) return;
-          const item = buildingData[hotspotName];
-          if (!item) {
+          const itemZh = buildingData[hotspotName];
+          if (!itemZh) {
             hidePopup();
             return;
           }
-          titleEl.textContent = `中巴对照 · ${hotspotName}`;
+          const itemEn = buildingDataEn && buildingDataEn[hotspotName];
+          const useEn = isEn() && itemEn;
+          const capChina = useEn ? itemEn.chinaCaption : itemZh.chinaCaption;
+          const capPk = useEn ? itemEn.pakistanCaption : itemZh.pakistanCaption;
+          titleEl.textContent = `${t("compareTitlePrefix")} · ${localizeHotspotName(hotspotName)}`;
           metaEl.textContent = "";
-          chinaImgEl.src = item.chinaImage;
-          chinaImgEl.alt = item.chinaCaption;
-          pakistanImgEl.src = item.pakistanImage;
-          pakistanImgEl.alt = item.pakistanCaption;
-          chinaCapEl.textContent = item.chinaCaption;
-          pakistanCapEl.textContent = item.pakistanCaption;
-          similarityEl.innerHTML = `<strong>相似点：</strong>${item.similarity.replace(/^相似点：/, "")}`;
-          differenceEl.innerHTML = `<strong>差异点：</strong>${item.difference.replace(/^差异点：/, "")}`;
+          chinaImgEl.src = itemZh.chinaImage;
+          chinaImgEl.alt = useEn ? capChina : localizeCompareCaption(itemZh.chinaCaption);
+          pakistanImgEl.src = itemZh.pakistanImage;
+          pakistanImgEl.alt = useEn ? capPk : localizeCompareCaption(itemZh.pakistanCaption);
+          chinaCapEl.textContent = useEn ? capChina : localizeCompareCaption(itemZh.chinaCaption);
+          pakistanCapEl.textContent = useEn ? capPk : localizeCompareCaption(itemZh.pakistanCaption);
+          const sim = useEn ? itemEn.similarity : itemZh.similarity;
+          const diff = useEn ? itemEn.difference : itemZh.difference;
+          similarityEl.innerHTML = `<strong>${t("similarity")}</strong>${stripComparePrefix(sim)}`;
+          differenceEl.innerHTML = `<strong>${t("difference")}</strong>${stripComparePrefix(diff)}`;
           popup.hidden = false;
           popup.setAttribute("aria-hidden", "false");
         };
@@ -3773,6 +4875,7 @@
 
       /** 太和殿拼贴：图文自 Word「太和殿1.5」导出，图见 assets/taihe-doc-* */
       const renderTaiheEditorialMosaic = (grid) => {
+        const M = TAIHE_MOSAIC_I18N[isEn() ? "en" : "zh"];
         const img = (src, alt, cls) => {
           const el = document.createElement("img");
           el.src = src;
@@ -3788,35 +4891,26 @@
         in1.className = "taihe-card__inner";
         const t1 = document.createElement("h3");
         t1.className = "taihe-card__title";
-        t1.textContent = "历史位置与文物价值";
+        t1.textContent = M.locTitle;
         const d1 = document.createElement("p");
         d1.className = "taihe-card__desc";
-        d1.textContent =
-          "太和殿，又称「金銮殿」，位于紫禁城外朝、明清北京城中轴线的核心。它与中和殿、保和殿同立于三层汉白玉石须弥座台基之上，是皇宫礼仪空间的主序列。太和殿采用重檐庑殿顶，建筑形制与用材等级在紫禁城中居于首位；历史上，登基、大婚、万寿节等重大国家典礼多在此举行。";
+        d1.textContent = M.locP1;
         const f0 = document.createElement("figure");
         f0.className = "taihe-card__figure taihe-figure-red-block";
-        f0.appendChild(
-          img("./assets/taihe-doc-halls.jpeg", "紫禁城外朝三大殿营造关系示意（文档素材）", "taihe-card__img")
-        );
+        f0.appendChild(img("./assets/taihe-doc-halls.jpeg", M.locImgAlt0, "taihe-card__img"));
         const d1b = document.createElement("p");
         d1b.className = "taihe-card__desc";
         d1b.style.marginTop = "0.35rem";
-        d1b.textContent =
-          "下图沿中轴由南而北依次为太和殿、中和殿与保和殿：太和殿体量最大，为外朝正殿；中和殿为方形攒尖顶、体量最小，大典前皇帝常在此稍憩并接受侍臣行礼；保和殿为重檐歇山顶，清代曾在此举行殿试并举办筵宴。三殿与台基、御路石与石栏杆等共同体现了明清皇家建筑的营造制度与空间秩序。";
+        d1b.textContent = M.locP2;
         const f1 = document.createElement("figure");
         f1.className = "taihe-card__figure taihe-figure-red-block";
         f1.appendChild(
-          img(
-            "./assets/taihe-three-halls-illustration.png",
-            "紫禁城外朝太和殿、中和殿、保和殿手绘示意图",
-            "taihe-card__img"
-          )
+          img("./assets/taihe-three-halls-illustration.png", M.locImgAlt1, "taihe-card__img")
         );
         const d1c = document.createElement("p");
         d1c.className = "taihe-card__desc";
         d1c.style.marginTop = "0.35rem";
-        d1c.textContent =
-          "1961年，「故宫」已被公布为第一批全国重点文物保护单位。1987年，「明清皇宫（紫禁城）」列入《世界遗产名录》，太和殿是紫禁城中最具标志性的木构礼仪大殿之一。今日观众所见殿宇与陈设，在修缮、监测与开放管理之下，以原状陈列为主，向公众传递明清宫廷建筑与礼制空间的历史信息。";
+        d1c.textContent = M.locP3;
         in1.append(t1, d1, f0, d1b, f1, d1c);
         c1.appendChild(in1);
 
@@ -3826,27 +4920,26 @@
         in2.className = "taihe-card__inner";
         const t2 = document.createElement("h3");
         t2.className = "taihe-card__title";
-        t2.textContent = "特色雕饰与纹样";
+        t2.textContent = M.featTitle;
         const d2a = document.createElement("p");
         d2a.className = "taihe-card__desc";
-        d2a.textContent =
-          "太和殿的丹陛石雕、木结构雕刻与琉璃装饰，以极致工艺彰显皇家威仪，是中国古建筑装饰艺术的巅峰之作。";
+        d2a.textContent = M.featLead;
         const triple = document.createElement("div");
         triple.className = "taihe-triple";
         const figStone = document.createElement("figure");
-        figStone.appendChild(img("./assets/taihe-doc-stone.jpeg", "丹陛云龙石石雕"));
+        figStone.appendChild(img("./assets/taihe-doc-stone.jpeg", M.capStone));
         const cs = document.createElement("figcaption");
-        cs.textContent = "石雕 · 丹陛云龙石";
+        cs.textContent = M.capStone;
         figStone.appendChild(cs);
         const figWood = document.createElement("figure");
-        figWood.appendChild(img("./assets/taihe-doc-wood.jpeg", "太和殿木雕藻井"));
+        figWood.appendChild(img("./assets/taihe-doc-wood.jpeg", M.capWood));
         const cw = document.createElement("figcaption");
-        cw.textContent = "木雕";
+        cw.textContent = M.capWood;
         figWood.appendChild(cw);
         const figGlaze = document.createElement("figure");
-        figGlaze.appendChild(img("./assets/taihe-doc-glaze.jpeg", "琉璃雕饰"));
+        figGlaze.appendChild(img("./assets/taihe-doc-glaze.jpeg", M.capGlaze));
         const cg = document.createElement("figcaption");
-        cg.textContent = "琉璃雕";
+        cg.textContent = M.capGlaze;
         figGlaze.appendChild(cg);
         triple.append(figStone, figWood, figGlaze);
         const twinRow = document.createElement("div");
@@ -3855,28 +4948,25 @@
         colBeast.className = "taihe-twin-col";
         const fb = document.createElement("figure");
         fb.className = "taihe-card__figure taihe-twin-figure";
-        fb.appendChild(img("./assets/taihe-doc-ridge-beasts.jpeg", "太和殿屋脊兽", "taihe-card__img"));
+        fb.appendChild(img("./assets/taihe-doc-ridge-beasts.jpeg", M.ridgeLabel, "taihe-card__img"));
         const lb = document.createElement("div");
         lb.className = "taihe-section-label";
-        lb.textContent = "屋脊兽";
+        lb.textContent = M.ridgeLabel;
         const db = document.createElement("p");
         db.className = "taihe-card__desc";
-        db.textContent =
-          "太和殿的装饰上共有10个屋脊兽。这些小兽依次排列在高高的檐角处，象征着消灾灭祸、逢凶化吉，并含有剪除邪恶、主持公道之意。";
+        db.textContent = M.ridgeDesc;
         colBeast.append(fb, lb, db);
         const colSpout = document.createElement("div");
         colSpout.className = "taihe-twin-col";
         const fsp = document.createElement("figure");
         fsp.className = "taihe-card__figure taihe-twin-figure";
-        fsp.appendChild(
-          img("./assets/taihe-doc-dragon-spouts.png", "太和殿丹陛石阶与汉白玉栏杆（石雕龙头排水）", "taihe-card__img")
-        );
+        fsp.appendChild(img("./assets/taihe-doc-dragon-spouts.png", M.spoutLabel, "taihe-card__img"));
         const lsp = document.createElement("div");
         lsp.className = "taihe-section-label";
-        lsp.textContent = "石雕龙头排水";
+        lsp.textContent = M.spoutLabel;
         const dsp = document.createElement("p");
         dsp.className = "taihe-card__desc";
-        dsp.textContent = "栏杆下安有排水用的石雕龙头，每逢雨季，可呈现「千龙吐水」的奇观。";
+        dsp.textContent = M.spoutDesc;
         colSpout.append(fsp, lsp, dsp);
         twinRow.append(colBeast, colSpout);
         in2.append(t2, d2a, triple, twinRow);
@@ -3890,11 +4980,11 @@
         row4.className = "taihe-timeline-row";
         const vl = document.createElement("span");
         vl.className = "taihe-vertical-label";
-        vl.textContent = "历史沿革";
+        vl.textContent = M.timelineLabel;
         row4.appendChild(vl);
         const twrap = document.createElement("div");
         twrap.className = "taihe-timeline-img-wrap";
-        twrap.appendChild(img("./assets/taihe-doc-timeline.png", "太和殿历史沿革年表"));
+        twrap.appendChild(img("./assets/taihe-doc-timeline.png", M.timelineImgAlt));
         row4.appendChild(twrap);
         in4.appendChild(row4);
         c4.appendChild(in4);
@@ -3905,32 +4995,32 @@
         in3.className = "taihe-card__inner";
         const t3 = document.createElement("h3");
         t3.className = "taihe-card__title";
-        t3.textContent = "特色雕饰与纹样";
+        t3.textContent = M.featBTitle;
         const l3a = document.createElement("div");
         l3a.className = "taihe-section-label";
-        l3a.textContent = "汉白玉赤道式日晷";
+        l3a.textContent = M.sundialLabel;
         const d3a = document.createElement("p");
         d3a.className = "taihe-card__desc";
         d3a.style.fontSize = "0.84rem";
-        d3a.textContent = "日晷在丹陛的左侧，以汉白玉石制成晷盘圆形，中央有金属晷针。";
+        d3a.textContent = M.sundialDesc;
         const f3a = document.createElement("figure");
         f3a.className = "taihe-card__figure";
         f3a.style.minHeight = "160px";
-        f3a.appendChild(img("./assets/taihe-doc-sundial.jpeg", "汉白玉赤道式日晷", "taihe-card__img"));
+        f3a.appendChild(img("./assets/taihe-doc-sundial.jpeg", M.sundialImgAlt, "taihe-card__img"));
         const l3b = document.createElement("div");
         l3b.className = "taihe-section-label taihe-section-label--sm";
-        l3b.textContent = "金龙和玺彩画";
+        l3b.textContent = M.paintLabel;
         const pair = document.createElement("div");
         pair.className = "taihe-paint-pair";
         const fg = document.createElement("figure");
-        fg.appendChild(img("./assets/taihe-doc-dragon-pattern.jpeg", "龙纹"));
+        fg.appendChild(img("./assets/taihe-doc-dragon-pattern.jpeg", M.capDragon));
         const fgc = document.createElement("figcaption");
-        fgc.textContent = "龙纹";
+        fgc.textContent = M.capDragon;
         fg.appendChild(fgc);
         const fc = document.createElement("figure");
-        fc.appendChild(img("./assets/taihe-doc-cloud-pattern.jpeg", "祥云纹"));
+        fc.appendChild(img("./assets/taihe-doc-cloud-pattern.jpeg", M.capCloud));
         const fcc = document.createElement("figcaption");
-        fcc.textContent = "祥云纹";
+        fcc.textContent = M.capCloud;
         fc.appendChild(fcc);
         pair.append(fg, fc);
         in3.append(t3, l3a, d3a, f3a, l3b, pair);
@@ -3942,26 +5032,21 @@
         in5.className = "taihe-card__inner";
         const t5 = document.createElement("h3");
         t5.className = "taihe-card__title";
-        t5.textContent = "历史价值";
+        t5.textContent = M.valueTitle;
         const d5 = document.createElement("p");
         d5.className = "taihe-card__desc";
-        d5.textContent =
-          "太和殿是中国现存等级最高、形制最完备的皇家木结构大殿之一，集中体现明清皇家宫殿建筑的体制与工艺水平，是礼制、营造技艺、空间美学与传统哲学观念相互叠合的典型实例，对东亚地区宫殿类建筑的形制与审美具有广泛影响。";
+        d5.textContent = M.valueP1;
         const fv = document.createElement("figure");
         fv.className = "taihe-value-figure";
-        fv.appendChild(
-          img("./assets/taihe-value-facade.png", "太和殿正立面与三层汉白玉台基", "taihe-card__img")
-        );
+        fv.appendChild(img("./assets/taihe-value-facade.png", M.valueImgAlt, "taihe-card__img"));
         const d5b = document.createElement("p");
         d5b.className = "taihe-card__desc";
         d5b.style.marginTop = "0.35rem";
-        d5b.textContent =
-          "殿宇立于须弥座台基之上，重檐庑殿顶覆黄琉璃瓦，檐下施斗栱与和玺彩画，屋脊饰脊兽，均体现清代官式建筑的等级做法。白石栏杆、御路石雕与铜龟铜鹤等陈设，共同构成外朝大典的视觉中心。作为紫禁城开放参观的重要节点，太和殿承担着文化遗产展示与公众历史教育的现实功能。";
+        d5b.textContent = M.valueP2;
         const d5c = document.createElement("p");
         d5c.className = "taihe-card__desc";
         d5c.style.marginTop = "0.3rem";
-        d5c.textContent =
-          "从文物价值看，太和殿木构架、屋面瓦作、石作与油饰彩画等构件系统，是研究明清皇家工程制度、材料加工与修缮史的实物标本；其与广场、台基、丹陛的组合关系，也是理解中国传统都城轴线与宫廷礼仪空间的关键案例。";
+        d5c.textContent = M.valueP3;
         in5.append(t5, d5, fv, d5b, d5c);
         c5.appendChild(in5);
 
@@ -3978,6 +5063,7 @@
           return;
         }
         if (variant === "yuhua-v4") {
+          const Y = YUHUA_MOSAIC_V4_I18N[isEn() ? "en" : "zh"];
           const mkImg = (src, alt, cls) => {
             const el = document.createElement("img");
             el.src = src;
@@ -4000,12 +5086,6 @@
             art.appendChild(inner);
             return { art, inner };
           };
-          const mkDesc = (text) => {
-            const p = document.createElement("p");
-            p.className = "taihe-card__desc";
-            p.textContent = text;
-            return p;
-          };
           const mkSub = (text) => {
             const el = document.createElement("div");
             el.className = "taihe-section-label";
@@ -4024,12 +5104,8 @@
           seasonHead.className = "yuhua-v4-season-card-head";
           const hSeason = document.createElement("h3");
           hSeason.className = "taihe-card__title";
-          hSeason.textContent = "四季亭台";
-          const enSeason = document.createElement("span");
-          enSeason.className = "yuhua-v4-season-card-head__en";
-          enSeason.lang = "en";
-          enSeason.textContent = "Four Seasons Pavilion Terrace";
-          seasonHead.append(hSeason, enSeason);
+          hSeason.textContent = Y.seasonTitle;
+          seasonHead.appendChild(hSeason);
           i1.appendChild(seasonHead);
 
           const row1 = document.createElement("div");
@@ -4037,42 +5113,34 @@
           const figs = document.createElement("div");
           figs.className = "yuhua-v4-season-figs";
           const wf = document.createElement("figure");
-          wf.appendChild(mkImg(`${B}/image1.png`, "御花园 · 万春亭"));
+          wf.appendChild(mkImg(`${B}/image1.png`, Y.capWan));
           const wcap = document.createElement("figcaption");
-          wcap.textContent = "御花园 · 万春亭";
+          wcap.textContent = Y.capWan;
           wf.appendChild(wcap);
           const qf = document.createElement("figure");
-          qf.appendChild(mkImg(`${B}/image2.png`, "御花园 · 千秋亭"));
+          qf.appendChild(mkImg(`${B}/image2.png`, Y.capQian));
           const qcap = document.createElement("figcaption");
-          qcap.textContent = "御花园 · 千秋亭";
+          qcap.textContent = Y.capQian;
           qf.appendChild(qcap);
           figs.append(wf, qf);
           const copy1 = document.createElement("div");
           copy1.className = "yuhua-v4-season-copy";
-          copy1.appendChild(mkSub("方位"));
+          copy1.appendChild(mkSub(Y.azLabel));
           const lead = document.createElement("p");
           lead.className = "yuhua-v4-season-lead";
-          lead.textContent =
-            "对应四季轮回、天地有序，代表中国古人「顺应天时、敬畏自然」的宇宙观。";
+          lead.textContent = Y.seasonLead;
           copy1.appendChild(lead);
-          const enLead = document.createElement("p");
-          enLead.className = "yuhua-v4-season-en";
-          enLead.lang = "en";
-          enLead.textContent =
-            "It corresponds to the cycles of the four seasons and an ordered cosmos—reflecting the traditional view of aligning with nature and revering the natural order.";
-          copy1.appendChild(enLead);
           const pairLines = document.createElement("div");
           pairLines.className = "yuhua-v4-season-pair-lines";
           const lineL = document.createElement("p");
-          lineL.textContent = "东方属春、主生，所以叫「万春」；";
+          lineL.textContent = Y.lineL;
           const lineR = document.createElement("p");
-          lineR.textContent = "西方属秋、主收，所以叫「千秋」。";
+          lineR.textContent = Y.lineR;
           pairLines.append(lineL, lineR);
           copy1.appendChild(pairLines);
           const foot = document.createElement("p");
           foot.className = "yuhua-v4-season-foot";
-          foot.textContent =
-            "二者东西对称、形制精巧、内涵深厚，与攒尖顶、方形基座相呼应，诠释了「天圆地方」与「天人合一」的传统宇宙观。";
+          foot.textContent = Y.seasonFoot;
           copy1.appendChild(foot);
           row1.append(figs, copy1);
           i1.appendChild(row1);
@@ -4083,12 +5151,8 @@
           zHead.className = "yuhua-v4-zaojing-head";
           const hZ = document.createElement("h3");
           hZ.className = "taihe-card__title";
-          hZ.textContent = "藻井";
-          const enZ = document.createElement("span");
-          enZ.className = "yuhua-v4-zaojing-head__en";
-          enZ.lang = "en";
-          enZ.textContent = "Sunk panel";
-          zHead.append(hZ, enZ);
+          hZ.textContent = Y.zaojingTitle;
+          zHead.appendChild(hZ);
           i2.appendChild(zHead);
 
           const gZ = document.createElement("div");
@@ -4097,22 +5161,21 @@
           zL.className = "yuhua-v4-zaojing-col-left";
           const zIntro = document.createElement("p");
           zIntro.className = "yuhua-v4-zaojing-intro";
-          zIntro.textContent =
-            "藻井是中国古代建筑中的独特元素。由于古建筑多为木质结构，防火至关重要。因此，古人将「井」建在屋顶，以压制火魔，保护建筑安全。";
+          zIntro.textContent = Y.zaojingIntro;
           zL.appendChild(zIntro);
           const pairWrap = document.createElement("div");
           pairWrap.className = "yuhua-v4-zaojing-col-left__pair";
           const pairZ = document.createElement("div");
           pairZ.className = "yuhua-v4-zaojing-pair";
           const fz1 = document.createElement("figure");
-          fz1.appendChild(mkImg(`${B}/image3.jpeg`, "御花园 · 万春亭藻井"));
+          fz1.appendChild(mkImg(`${B}/image3.jpeg`, `${Y.capWan} · zaojing`));
           const cz1 = document.createElement("figcaption");
-          cz1.textContent = "御花园 · 万春亭";
+          cz1.textContent = Y.capWan;
           fz1.appendChild(cz1);
           const fz2 = document.createElement("figure");
-          fz2.appendChild(mkImg(`${B}/image4.jpeg`, "御花园 · 千秋亭藻井"));
+          fz2.appendChild(mkImg(`${B}/image4.jpeg`, `${Y.capQian} · zaojing`));
           const cz2 = document.createElement("figcaption");
-          cz2.textContent = "御花园 · 千秋亭";
+          cz2.textContent = Y.capQian;
           fz2.appendChild(cz2);
           pairZ.append(fz1, fz2);
           pairWrap.appendChild(pairZ);
@@ -4122,17 +5185,14 @@
           zM.className = "yuhua-v4-zaojing-col-mid";
           const zMidP = document.createElement("p");
           zMidP.className = "yuhua-v4-zaojing-mid-text";
-          zMidP.textContent =
-            "中心盘龙衔珠浮雕搭配环绕的双凤与龙凤纹样，层叠井架构成天圆地方的布局，边缘饰以火焰纹，工艺精巧繁复，呈现龙凤呈祥的皇家气象，寄寓了吉祥安康、天地和谐的文化祈愿。";
+          zMidP.textContent = Y.zaojingMid;
           zM.appendChild(zMidP);
 
           const zR = document.createElement("div");
           zR.className = "yuhua-v4-zaojing-col-right";
           const fc = document.createElement("figure");
           fc.className = "yuhua-v4-zaojing-hero";
-          fc.appendChild(
-            mkImg("./assets/taihe-doc-wood.jpeg", "太和殿木雕藻井")
-          );
+          fc.appendChild(mkImg("./assets/taihe-doc-wood.jpeg", Y.zaojingHeroAlt));
           zR.appendChild(fc);
 
           gZ.append(zL, zM, zR);
@@ -4146,37 +5206,29 @@
           landBrand.className = "yuhua-v4-land-head__brand";
           const hLand = document.createElement("h3");
           hLand.className = "taihe-card__title";
-          hLand.textContent = "景观";
-          const enLand = document.createElement("span");
-          enLand.className = "yuhua-v4-land-head__en";
-          enLand.lang = "en";
-          enLand.textContent = "Landscape";
-          landBrand.append(hLand, enLand);
+          hLand.textContent = Y.landTitle;
+          landBrand.appendChild(hLand);
           const landLead = document.createElement("p");
           landLead.className = "yuhua-v4-land-head__lead";
-          landLead.textContent =
-            "园内散布各类奇石，与建筑、植物相互映衬，营造「虽由人作，宛自天开」的意境。";
+          landLead.textContent = Y.landLead;
           landHead.append(landBrand, landLead);
           i3.appendChild(landHead);
 
-          const mkLandNest = (kind, zh, en, desc, items) => {
+          const mkLandNest = (kind, title, desc, caps, files) => {
             const nest = document.createElement("div");
             nest.className = `yuhua-v4-land-nest yuhua-v4-land-nest--${kind}`;
             const titles = document.createElement("div");
             titles.className = "yuhua-v4-land-nest__titles";
-            const szh = document.createElement("span");
-            szh.className = "yuhua-v4-land-nest__zh";
-            szh.textContent = zh;
-            const sen = document.createElement("span");
-            sen.className = "yuhua-v4-land-nest__en";
-            sen.lang = "en";
-            sen.textContent = en;
-            titles.append(szh, sen);
+            const tEl = document.createElement("span");
+            tEl.className = isEn() ? "yuhua-v4-land-nest__en" : "yuhua-v4-land-nest__zh";
+            tEl.textContent = title;
+            titles.appendChild(tEl);
             const main = document.createElement("div");
             main.className = "yuhua-v4-land-nest__main";
             const gallery = document.createElement("div");
             gallery.className = "yuhua-v4-land-nest__gallery";
-            items.forEach(([cap, file]) => {
+            caps.forEach((cap, idx) => {
+              const file = files[idx];
               const fig = document.createElement("figure");
               fig.appendChild(mkImg(`${B}/${file}`, cap));
               const capEl = document.createElement("div");
@@ -4199,36 +5251,27 @@
           landColLeft.className = "yuhua-v4-land-col-left";
           const duixiuP = document.createElement("p");
           duixiuP.className = "yuhua-v4-land-duixiu";
-          duixiuP.textContent =
-            "堆秀山用太湖石叠筑，山势险峻，磴道陡峭，叠石手法新颖，山上御景亭是帝后重阳节登高之处。";
+          duixiuP.textContent = Y.duixiuP;
           const figLand = document.createElement("figure");
           figLand.className = "yuhua-v4-land-hero";
-          figLand.appendChild(mkImg(`${B}/image5.png`, "堆秀山与御景亭"));
+          figLand.appendChild(mkImg(`${B}/image5.png`, Y.duixiuAlt));
           landColLeft.append(duixiuP, figLand);
           const landStack = document.createElement("div");
           landStack.className = "yuhua-v4-land-stack";
           landStack.append(
             mkLandNest(
               "stone",
-              "奇石",
-              "Exotic stones",
-              "拜斗石、海参石、木化石等名石点缀园中，与路径、植栽形成对景与框景，是皇家园林叠山理石传统的缩影。",
-              [
-                ["拜斗石", "image7.png"],
-                ["海参石", "image8.jpeg"],
-                ["木化石", "image9.png"],
-              ]
+              isEn() ? Y.nestStoneEn : Y.nestStoneZh,
+              Y.nestStoneDesc,
+              Y.stoneCaps,
+              ["image7.png", "image8.jpeg", "image9.png"]
             ),
             mkLandNest(
               "tree",
-              "古树",
-              "Old trees",
-              "蟠龙槐、连理柏、人字柏等古木与御花园共生，冠盖参天，见证宫苑岁月。",
-              [
-                ["蟠龙槐", "image10.jpeg"],
-                ["连理柏", "image11.png"],
-                ["人字柏", "image12.jpeg"],
-              ]
+              isEn() ? Y.nestTreeEn : Y.nestTreeZh,
+              Y.nestTreeDesc,
+              Y.treeCaps,
+              ["image10.jpeg", "image11.png", "image12.jpeg"]
             )
           );
           landBody.append(landColLeft, landStack);
@@ -4240,12 +5283,8 @@
           flowerHead.className = "yuhua-v4-flowers-head";
           const hFlower = document.createElement("h3");
           hFlower.className = "taihe-card__title";
-          hFlower.textContent = "花卉";
-          const enFlower = document.createElement("span");
-          enFlower.className = "yuhua-v4-flowers-head__en";
-          enFlower.lang = "en";
-          enFlower.textContent = "Flowers";
-          flowerHead.append(hFlower, enFlower);
+          hFlower.textContent = Y.flowersTitle;
+          flowerHead.appendChild(hFlower);
           i4.appendChild(flowerHead);
 
           const mkFlowerFig = (name, file) => {
@@ -4262,40 +5301,40 @@
           flowerGrid.className = "yuhua-v4-flower-grid";
           const rowTop = document.createElement("div");
           rowTop.className = "yuhua-v4-flower-grid__row yuhua-v4-flower-grid__row--4";
+          const fn = Y.flowerNames;
           [
-            ["玉兰", "image13.jpeg"],
-            ["榆叶梅", "image14.jpeg"],
-            ["梨花", "image15.jpeg"],
-            ["丁香", "image16.jpeg"],
+            [fn[0], "image13.jpeg"],
+            [fn[1], "image14.jpeg"],
+            [fn[2], "image15.jpeg"],
+            [fn[3], "image16.jpeg"],
           ].forEach(([name, file]) => rowTop.appendChild(mkFlowerFig(name, file)));
           const rowBot = document.createElement("div");
           rowBot.className = "yuhua-v4-flower-grid__row yuhua-v4-flower-grid__row--5";
           [
-            ["紫玉兰", "image17.jpeg"],
-            ["海棠", "image18.jpeg"],
-            ["桃花", "image19.jpeg"],
-            ["楸树", "image20.jpeg"],
-            ["芍药", "image21.jpeg"],
+            [fn[4], "image17.jpeg"],
+            [fn[5], "image18.jpeg"],
+            [fn[6], "image19.jpeg"],
+            [fn[7], "image20.jpeg"],
+            [fn[8], "image21.jpeg"],
           ].forEach(([name, file]) => rowBot.appendChild(mkFlowerFig(name, file)));
           flowerGrid.append(rowTop, rowBot);
           const fText = document.createElement("div");
           fText.className = "yuhua-v4-flower-copy";
           const pFlower = document.createElement("p");
           pFlower.className = "taihe-card__desc";
-          pFlower.textContent =
-            "玉兰、榆叶梅、梨花、丁香与海棠、芍药等次第开放，与亭台楼阁相映成趣，寄托吉祥与生机，亦承载宫廷岁时游赏与审美传统。";
+          pFlower.textContent = Y.flowerCopy;
           fText.appendChild(pFlower);
           rowF.append(flowerGrid, fText);
           i4.appendChild(rowF);
-          i4.appendChild(mkSub("御花园历史精华时轴"));
+          i4.appendChild(mkSub(Y.timelineSection));
           const tlRow = document.createElement("div");
           tlRow.className = "yuhua-v4-timeline-row taihe-timeline-row";
           const vl = document.createElement("span");
           vl.className = "taihe-vertical-label";
-          vl.textContent = "沿革";
+          vl.textContent = Y.timelineLabel;
           const twrap = document.createElement("div");
           twrap.className = "taihe-timeline-img-wrap";
-          twrap.appendChild(mkImg(`${B}/image22.png`, "御花园历史沿革"));
+          twrap.appendChild(mkImg(`${B}/image22.png`, Y.timelineImgAlt));
           tlRow.append(vl, twrap);
           i4.appendChild(tlRow);
 
@@ -4361,13 +5400,16 @@
         carousel?.setAttribute("aria-hidden", "true");
       };
 
-      const setupHeroCarousel = (items) => {
+      const setupHeroCarousel = (items, fallbackAltName) => {
         const carousel = document.getElementById("heroCarousel");
         const slidesEl = document.getElementById("heroCarouselSlides");
         const dotsEl = document.getElementById("heroCarouselDots");
         const prevBtn = document.getElementById("heroCarouselPrev");
         const nextBtn = document.getElementById("heroCarouselNext");
         if (!carousel || !slidesEl || !dotsEl || !items?.length || !prevBtn || !nextBtn) return;
+        prevBtn.setAttribute("aria-label", isEn() ? "Previous image" : "上一张");
+        nextBtn.setAttribute("aria-label", isEn() ? "Next image" : "下一张");
+        dotsEl.setAttribute("aria-label", isEn() ? "Carousel pagination" : "轮播页码");
 
         clearHeroCarouselTimer();
         slidesEl.innerHTML = "";
@@ -4377,7 +5419,7 @@
           const img = document.createElement("img");
           img.className = "hero-carousel__slide" + (i === 0 ? " is-active" : "");
           img.src = item.src;
-          img.alt = item.alt || "故宫";
+          img.alt = item.alt || fallbackAltName || "";
           img.decoding = "async";
           img.loading = i < 2 ? "eager" : "lazy";
           img.sizes = "100vw";
@@ -4403,7 +5445,7 @@
           dot.type = "button";
           dot.className = "hero-carousel__dot" + (i === 0 ? " is-active" : "");
           dot.setAttribute("role", "tab");
-          dot.setAttribute("aria-label", `第 ${i + 1} 张`);
+          dot.setAttribute("aria-label", isEn() ? `Slide ${i + 1}` : `第 ${i + 1} 张`);
           dot.setAttribute("aria-selected", i === 0 ? "true" : "false");
           dot.addEventListener("click", () => go(i));
           dotsEl.appendChild(dot);
@@ -4521,35 +5563,15 @@
         });
       }
 
-      const GUGONG_QUIZ_ITEMS = [
-        {
-          q: "太和殿屋顶在官式建筑中属于哪种等级形制？",
-          options: ["重檐庑殿顶", "歇山顶", "悬山顶", "硬山顶"],
-          answer: 0,
-          explain: "太和殿采用重檐庑殿顶，是最高等级形制之一。",
-        },
-        {
-          q: "御花园中轴北端、内奉玄天上帝的建筑是？",
-          options: ["中和殿", "钦安殿", "堆秀亭", "保和殿"],
-          answer: 1,
-          explain: "钦安殿是御花园轴线上重要祠庙建筑。",
-        },
-        {
-          q: "外朝礼仪核心“三大殿”不包括以下哪一座？",
-          options: ["太和殿", "中和殿", "保和殿", "坤宁宫"],
-          answer: 3,
-          explain: "外朝三大殿为太和殿、中和殿、保和殿。",
-        },
-      ];
-
-      function setupGugongPaperQuiz(active) {
+      function setupGugongPaperQuiz(active, quizMode) {
         const quizBoard = document.getElementById("paperQuizBoard");
+        const quizTitle = document.getElementById("paperQuizTitle");
         const quizMeta = document.getElementById("paperQuizMeta");
         const quizQuestion = document.getElementById("paperQuizQuestion");
         const quizOptions = document.getElementById("paperQuizOptions");
         const quizFeedback = document.getElementById("paperQuizFeedback");
         const quizNextBtn = document.getElementById("paperQuizNext");
-        if (!quizBoard || !quizMeta || !quizQuestion || !quizOptions || !quizFeedback || !quizNextBtn) return;
+        if (!quizBoard || !quizMeta || !quizQuestion || !quizOptions || !quizFeedback || !quizNextBtn || !quizTitle) return;
 
         if (!active) {
           quizBoard.hidden = true;
@@ -4560,14 +5582,32 @@
         quizBoard.hidden = false;
         quizBoard.setAttribute("aria-hidden", "false");
 
-        if (quizBoard.dataset.bound === "1") return;
-        quizBoard.dataset.bound = "1";
-
-        const state = { index: 0, score: 0, picked: false };
+        const mode =
+          quizMode === "siheyuan" ? "siheyuan" : quizMode === "lugou" ? "lugou" : "gugong";
+        if (quizBoard.dataset.quizMode !== mode) {
+          quizBoard.dataset.quizMode = mode;
+          quizBoard.__quizState = { index: 0, score: 0, picked: false };
+        }
+        if (!quizBoard.__quizState) {
+          quizBoard.__quizState = { index: 0, score: 0, picked: false };
+        }
+        const state = quizBoard.__quizState;
+        const quizPack = () => {
+          const m = quizBoard.dataset.quizMode || "gugong";
+          const base =
+            m === "siheyuan"
+              ? SIHEYUAN_QUIZ_I18N
+              : m === "lugou"
+                ? LUGOU_QUIZ_I18N
+                : GUGONG_QUIZ_I18N;
+          return isEn() ? base.en : base.zh;
+        };
 
         const render = () => {
-          const item = GUGONG_QUIZ_ITEMS[state.index];
-          quizMeta.textContent = `Q${state.index + 1} / ${GUGONG_QUIZ_ITEMS.length}`;
+          const pack = quizPack();
+          const item = pack.items[state.index];
+          quizTitle.textContent = pack.title;
+          quizMeta.textContent = `Q${state.index + 1} / ${pack.items.length}`;
           quizQuestion.textContent = item.q;
           quizOptions.innerHTML = item.options
             .map(
@@ -4575,58 +5615,66 @@
                 `<button type="button" class="paper-quiz-option" data-idx="${idx}">${String.fromCharCode(65 + idx)}. ${option}</button>`
             )
             .join("");
-          quizFeedback.textContent = "请选择一个答案";
-          quizNextBtn.textContent = state.index === GUGONG_QUIZ_ITEMS.length - 1 ? "查看结果" : "下一题";
+          quizFeedback.textContent = pack.choose;
+          quizNextBtn.textContent = state.index === pack.items.length - 1 ? pack.viewResult : pack.next;
           quizNextBtn.disabled = true;
           state.picked = false;
+          quizNextBtn.onclick = null;
         };
 
-        quizOptions.addEventListener("click", (event) => {
-          const btn = event.target.closest(".paper-quiz-option");
-          if (!btn || state.picked) return;
+        if (quizBoard.dataset.bound !== "1") {
+          quizBoard.dataset.bound = "1";
+          quizOptions.addEventListener("click", (event) => {
+            const btn = event.target.closest(".paper-quiz-option");
+            if (!btn || state.picked) return;
 
-          const picked = Number(btn.getAttribute("data-idx"));
-          const item = GUGONG_QUIZ_ITEMS[state.index];
-          state.picked = true;
+            const picked = Number(btn.getAttribute("data-idx"));
+            const pack = quizPack();
+            const item = pack.items[state.index];
+            state.picked = true;
 
-          quizOptions.querySelectorAll(".paper-quiz-option").forEach((el) => {
-            const idx = Number(el.getAttribute("data-idx"));
-            if (idx === item.answer) el.classList.add("is-right");
-            if (idx === picked && idx !== item.answer) el.classList.add("is-wrong");
-            el.disabled = true;
+            quizOptions.querySelectorAll(".paper-quiz-option").forEach((el) => {
+              const idx = Number(el.getAttribute("data-idx"));
+              if (idx === item.answer) el.classList.add("is-right");
+              if (idx === picked && idx !== item.answer) el.classList.add("is-wrong");
+              el.disabled = true;
+            });
+
+            if (picked === item.answer) {
+              state.score += 1;
+              quizFeedback.textContent = pack.rightLine(item.explain);
+            } else {
+              quizFeedback.textContent = pack.wrongLine(item.options[item.answer], item.explain);
+            }
+            quizNextBtn.disabled = false;
           });
 
-          if (picked === item.answer) {
-            state.score += 1;
-            quizFeedback.textContent = `回答正确。${item.explain}`;
-          } else {
-            quizFeedback.textContent = `正确答案：${item.options[item.answer]}。${item.explain}`;
-          }
-          quizNextBtn.disabled = false;
-        });
-
-        quizNextBtn.addEventListener("click", () => {
-          if (!state.picked) return;
-          if (state.index < GUGONG_QUIZ_ITEMS.length - 1) {
-            state.index += 1;
-            render();
-            return;
-          }
-          quizQuestion.textContent = `答题完成：共答对 ${state.score} / ${GUGONG_QUIZ_ITEMS.length} 题。`;
-          quizOptions.innerHTML =
-            '<div class="paper-quiz-board__facts"><p>• 太和殿重檐庑殿顶，代表皇家建筑最高等级之一。</p><p>• 紫禁城外朝三大殿：太和殿、中和殿、保和殿。</p><p>• 御花园北端钦安殿是宫城中重要的道教祭祀空间。</p></div>';
-          quizFeedback.textContent = "点击右侧按钮可重新开始。";
-          quizMeta.textContent = "完成";
-          quizNextBtn.textContent = "重新开始";
-          quizNextBtn.disabled = false;
-          state.index = 0;
-          state.score = 0;
-          state.picked = false;
-          quizNextBtn.onclick = () => {
-            quizNextBtn.onclick = null;
-            render();
-          };
-        });
+          quizNextBtn.addEventListener("click", () => {
+            if (!state.picked) return;
+            const pack = quizPack();
+            if (state.index < pack.items.length - 1) {
+              state.index += 1;
+              render();
+              return;
+            }
+            quizQuestion.textContent = pack.finishLine(state.score, pack.items.length);
+            quizOptions.innerHTML = `<div class="paper-quiz-board__facts">${pack.facts
+              .map((line) => `<p>• ${line}</p>`)
+              .join("")}</div>`;
+            quizFeedback.textContent = pack.restartHint;
+            quizMeta.textContent = pack.doneMeta;
+            quizTitle.textContent = pack.title;
+            quizNextBtn.textContent = pack.restart;
+            quizNextBtn.disabled = false;
+            state.index = 0;
+            state.score = 0;
+            state.picked = false;
+            quizNextBtn.onclick = () => {
+              quizNextBtn.onclick = null;
+              render();
+            };
+          });
+        }
 
         render();
       }
@@ -4635,10 +5683,61 @@
       const updatePageContent = () => {
         const buildingName = getBuildingFromUrl();
         const building = BUILDINGS_DB[buildingName] || BUILDINGS_DB["故宫太和殿"];
+        const localized = getLocalizedBuildingMeta(buildingName, building);
+        const isEnglish = isEn();
+        document.documentElement.lang = isEnglish ? "en" : "zh-CN";
+        document.documentElement.classList.toggle("lang-en", isEnglish);
 
         // 调试标记：便于确认当前到底渲染了哪个建筑分支
         document.body.setAttribute("data-active-building", building.name);
         console.log("[detail] active building:", building.name, "query:", window.location.search);
+
+        const navEl = document.getElementById("detailTopNav");
+        if (navEl) navEl.setAttribute("aria-label", t("navAria"));
+        const navBrandEl = document.getElementById("detailNavBrand");
+        if (navBrandEl) navBrandEl.textContent = t("navBrand");
+        const navSubEl = document.getElementById("detailNavSub");
+        if (navSubEl) navSubEl.textContent = t("navSub");
+        const navBackEl = document.getElementById("detailNavBack");
+        const navHomeEl = document.getElementById("detailNavHome");
+        if (navHomeEl) {
+          navHomeEl.textContent = t("home");
+          navHomeEl.setAttribute("href", `./index.html?lang=${encodeURIComponent(currentLang)}`);
+        }
+        if (navBrandEl) {
+          navBrandEl.setAttribute("href", `./index.html?lang=${encodeURIComponent(currentLang)}`);
+        }
+        if (navBackEl) {
+          navBackEl.textContent = t("back");
+          navBackEl.setAttribute("href", "javascript:void(0)");
+          navBackEl.onclick = function () {
+            if (history.length > 1) {
+              history.back();
+            } else {
+              window.location.href = "./list.html?lang=" + encodeURIComponent(currentLang);
+            }
+          };
+        }
+        const langSwitchBtn = document.getElementById("langSwitchBtn");
+        if (langSwitchBtn) {
+          langSwitchBtn.textContent = isEnglish ? "中" : "EN";
+          langSwitchBtn.setAttribute("aria-label", t("switchLabel"));
+        }
+        const heroBgEl = document.getElementById("heroBg");
+        if (heroBgEl) heroBgEl.setAttribute("aria-label", t("heroBgAria"));
+        const compareCloseBtn = document.getElementById("heroCompareClose");
+        if (compareCloseBtn) {
+          compareCloseBtn.textContent = t("compareClose");
+          compareCloseBtn.setAttribute("aria-label", t("closeLabel"));
+        }
+
+        const paperBackToListEl = document.getElementById("paperBackToList");
+        if (paperBackToListEl) {
+          paperBackToListEl.textContent = t("backToList");
+          paperBackToListEl.setAttribute("href", `./list.html?lang=${encodeURIComponent(currentLang)}`);
+        }
+        const paperFooterTagEl = document.getElementById("paperFooterTag");
+        if (paperFooterTagEl) paperFooterTagEl.textContent = t("paperFooterTag");
 
         document.body.classList.toggle("page-taihe-hotspots", building.name === "故宫太和殿");
         document.body.classList.toggle("page-yuhua-hotspots", building.name === "故宫御花园");
@@ -4646,32 +5745,77 @@
         const heroYuhuaPageHeader = document.getElementById("heroYuhuaPageHeader");
         if (heroYuhuaPageHeader) {
           heroYuhuaPageHeader.hidden = building.name !== "故宫御花园";
+          if (building.name === "故宫御花园") {
+            heroYuhuaPageHeader.innerHTML =
+              '<div class="hero-yuhua-page-header__intro">' + t("yuhuaHeaderHtml") + "</div>";
+          }
         }
 
         const showTaiheSideTitle = building.name === "故宫太和殿";
         const taiheVerticalTitleEl = document.getElementById("taiheVerticalTitle");
         if (taiheVerticalTitleEl) {
           taiheVerticalTitleEl.setAttribute("aria-hidden", showTaiheSideTitle ? "false" : "true");
+          if (showTaiheSideTitle) {
+            if (isEnglish) {
+              taiheVerticalTitleEl.classList.add("taihe-vertical-title--en");
+              taiheVerticalTitleEl.innerHTML =
+                '<span class="taihe-title-en-wrap"><span class="taihe-title-en">Hall of Supreme Harmony</span></span>';
+            } else {
+              taiheVerticalTitleEl.classList.remove("taihe-vertical-title--en");
+              taiheVerticalTitleEl.innerHTML =
+                '<span class="taihe-char">太</span><span class="taihe-char">和</span><span class="taihe-char">殿</span>';
+            }
+          }
         }
+
+        const showYuhuaSideTitle = building.name === "故宫御花园";
+        const yuhuaVerticalTitleEl = document.getElementById("yuhuaVerticalTitle");
+        if (yuhuaVerticalTitleEl) {
+          if (showYuhuaSideTitle) {
+            yuhuaVerticalTitleEl.setAttribute("aria-hidden", "false");
+            if (isEnglish) {
+              yuhuaVerticalTitleEl.classList.add("yuhua-vertical-title--en");
+              yuhuaVerticalTitleEl.innerHTML = '<span class="yuhua-title-en">Imperial Garden</span>';
+            } else {
+              yuhuaVerticalTitleEl.classList.remove("yuhua-vertical-title--en");
+              yuhuaVerticalTitleEl.innerHTML =
+                '<span class="yuhua-char">御</span><span class="yuhua-char">花</span><span class="yuhua-char">园</span>';
+            }
+          } else {
+            yuhuaVerticalTitleEl.setAttribute("aria-hidden", "true");
+            yuhuaVerticalTitleEl.classList.remove("yuhua-vertical-title--en");
+            yuhuaVerticalTitleEl.innerHTML =
+              '<span class="yuhua-char">御</span><span class="yuhua-char">花</span><span class="yuhua-char">园</span>';
+          }
+        }
+
         const taiheHeroIntroEl = document.getElementById("taiheHeroIntro");
         if (taiheHeroIntroEl) {
           taiheHeroIntroEl.setAttribute("aria-hidden", showTaiheSideTitle ? "false" : "true");
+          if (showTaiheSideTitle) {
+            taiheHeroIntroEl.innerHTML =
+              '<p class="taihe-hero-intro__text">' + t("taiheHeroIntroHtml") + "</p>";
+          }
         }
 
         // 更新标题
-        document.title = `${building.name} · 华夏建筑选集`;
-        document.getElementById('heroTitle').textContent = building.name;
+        document.title = `${localized.name} · ${t("pageSuffix")}`;
+        document.getElementById('heroTitle').textContent = localized.name;
         
         const isMosaicDetail = building.name === "故宫太和殿" || building.name === "故宫御花园";
 
         const enterTourEl = document.getElementById("detailNavEnterTour");
         if (enterTourEl) {
           const showEnterTour = building.name === "北京故宫";
+          enterTourEl.textContent = t("enterTour");
           enterTourEl.classList.toggle("hidden", !showEnterTour);
           enterTourEl.setAttribute("aria-hidden", showEnterTour ? "false" : "true");
+          const enterHref = new URL("./gugong-palace-map.html", window.location.href);
+          enterHref.searchParams.set("lang", currentLang);
+          enterTourEl.setAttribute("href", `${enterHref.pathname}${enterHref.search}`);
         }
 
-        // 更新 Hero：北京故宫用 assets 内六图轮播；其余建筑有 heroVideo 仍可走视频；太和殿/御花园等走背景图
+        // 更新 Hero：北京故宫 / 北京四合院 / 卢沟桥用 assets 内轮播；其余建筑有 heroVideo 仍可走视频；太和殿/御花园等走背景图
         const heroBg = document.getElementById("heroBg");
         const heroVideo = document.getElementById("heroVideo");
         const heroHoverHighlight = document.getElementById("heroHoverHighlight");
@@ -4682,50 +5826,110 @@
           Array.isArray(carouselItems) &&
           carouselItems.length > 0 &&
           !isMosaicDetail &&
-          building.name === "北京故宫";
+          (building.name === "北京故宫" || building.name === "北京四合院" || building.name === "卢沟桥");
+        const useGugongCarousel = useCarousel && building.name === "北京故宫";
         const heroGugongArtEl = document.getElementById("heroGugongArt");
         if (heroGugongArtEl) {
-          heroGugongArtEl.hidden = !useCarousel;
-          heroGugongArtEl.setAttribute("aria-hidden", useCarousel ? "false" : "true");
+          heroGugongArtEl.innerHTML = isEnglish
+            ? "<span>FORBIDDEN</span><span>CITY</span>"
+            : "<span>故</span><span>宫</span>";
+          heroGugongArtEl.hidden = !useGugongCarousel;
+          heroGugongArtEl.setAttribute("aria-hidden", useGugongCarousel ? "false" : "true");
         }
-        setupGugongHeroLions(!!useCarousel);
+        setupGugongHeroLions(useGugongCarousel);
         const videoSrc = building.heroVideo;
+        const heroSiheyuanArtEl = document.getElementById("heroSiheyuanArt");
+        const heroLugouArtEl = document.getElementById("heroLugouArt");
+        const isSiheyuanPage = building.name === "北京四合院";
+        const isLugouPage = building.name === "卢沟桥";
 
         if (useCarousel) {
+          if (heroSiheyuanArtEl) {
+            if (isSiheyuanPage) {
+              heroSiheyuanArtEl.hidden = false;
+              heroSiheyuanArtEl.setAttribute("aria-hidden", "false");
+              heroSiheyuanArtEl.innerHTML = isEnglish
+                ? "<span>BEIJING</span><span>SIHEYUAN</span>"
+                : "<span>北</span><span>京</span><span>四</span><span>合</span><span>院</span>";
+            } else {
+              heroSiheyuanArtEl.hidden = true;
+              heroSiheyuanArtEl.setAttribute("aria-hidden", "true");
+            }
+          }
+          if (heroLugouArtEl) {
+            if (isLugouPage) {
+              heroLugouArtEl.hidden = false;
+              heroLugouArtEl.setAttribute("aria-hidden", "false");
+              heroLugouArtEl.innerHTML = isEnglish
+                ? "<span>MARCO</span><span>POLO</span><span>BRIDGE</span>"
+                : "<span>卢</span><span>沟</span><span>桥</span>";
+            } else {
+              heroLugouArtEl.hidden = true;
+              heroLugouArtEl.setAttribute("aria-hidden", "true");
+            }
+          }
           if (heroVideo) {
-            heroVideo.classList.remove("is-active");
+            heroVideo.classList.remove("is-active", "hero-video--siheyuan");
             heroVideo.pause();
             heroVideo.removeAttribute("src");
             heroVideo.load();
           }
+          heroSection?.classList.toggle("hero--siheyuan-hero", isSiheyuanPage);
+          heroSection?.classList.toggle("hero--lugou-hero", isLugouPage);
           heroBg.style.backgroundImage = "none";
           heroBg.style.backgroundColor = "#0a0a0a";
           heroSection?.classList.add("hero--cinematic");
           document.body.classList.add("body--cinematic-hero");
-          setupHeroCarousel(carouselItems);
+          setupHeroCarousel(carouselItems, localized.name);
+          const heroCarouselEl = document.getElementById("heroCarousel");
+          if (heroCarouselEl) heroCarouselEl.setAttribute("aria-label", `${localized.name} · ${t("carouselLabel")}`);
         } else {
           hideHeroCarousel();
-          if (videoSrc && heroVideo && !isMosaicDetail) {
-          heroVideo.classList.add("is-active");
-          if (heroVideo.getAttribute("src") !== videoSrc) {
-            heroVideo.src = videoSrc;
+          if (heroLugouArtEl) {
+            heroLugouArtEl.hidden = true;
+            heroLugouArtEl.setAttribute("aria-hidden", "true");
           }
-          heroVideo.play().catch(() => {});
-          heroBg.style.backgroundImage = "none";
-          heroBg.style.backgroundColor = "#000";
-          heroSection?.classList.add("hero--cinematic");
-          document.body.classList.add("body--cinematic-hero");
-        } else {
-            if (heroVideo) {
-          heroVideo.classList.remove("is-active");
-          heroVideo.pause();
-          heroVideo.removeAttribute("src");
-          heroVideo.load();
+          heroSection?.classList.remove("hero--lugou-hero");
+          if (videoSrc && heroVideo && !isMosaicDetail) {
+            if (heroSiheyuanArtEl) {
+              if (isSiheyuanPage) {
+                heroSiheyuanArtEl.hidden = false;
+                heroSiheyuanArtEl.setAttribute("aria-hidden", "false");
+                heroSiheyuanArtEl.innerHTML = isEnglish
+                  ? "<span>BEIJING</span><span>SIHEYUAN</span>"
+                  : "<span>北</span><span>京</span><span>四</span><span>合</span><span>院</span>";
+              } else {
+                heroSiheyuanArtEl.hidden = true;
+                heroSiheyuanArtEl.setAttribute("aria-hidden", "true");
+              }
             }
-          heroBg.style.backgroundColor = "";
-          heroBg.style.backgroundImage = `url('${building.heroImage}')`;
-          heroSection?.classList.remove("hero--cinematic");
-          document.body.classList.remove("body--cinematic-hero");
+            heroVideo.classList.add("is-active");
+            heroVideo.classList.toggle("hero-video--siheyuan", isSiheyuanPage);
+            if (heroVideo.getAttribute("src") !== videoSrc) {
+              heroVideo.src = videoSrc;
+            }
+            heroVideo.play().catch(() => {});
+            heroBg.style.backgroundImage = "none";
+            heroBg.style.backgroundColor = "#000";
+            heroSection?.classList.add("hero--cinematic");
+            heroSection?.classList.toggle("hero--siheyuan-hero", isSiheyuanPage);
+            document.body.classList.add("body--cinematic-hero");
+          } else {
+            if (heroSiheyuanArtEl) {
+              heroSiheyuanArtEl.hidden = true;
+              heroSiheyuanArtEl.setAttribute("aria-hidden", "true");
+            }
+            if (heroVideo) {
+              heroVideo.classList.remove("is-active", "hero-video--siheyuan");
+              heroVideo.pause();
+              heroVideo.removeAttribute("src");
+              heroVideo.load();
+            }
+            heroSection?.classList.remove("hero--siheyuan-hero");
+            heroBg.style.backgroundColor = "";
+            heroBg.style.backgroundImage = `url('${building.heroImage}')`;
+            heroSection?.classList.remove("hero--cinematic");
+            document.body.classList.remove("body--cinematic-hero");
           }
         }
 
@@ -4838,21 +6042,21 @@
         }
         
         // 更新副标题
-        const subtitleEl = document.querySelector('.hero .text-qianbai\\/70.text-sm');
+        const subtitleEl = document.getElementById("heroMidLine");
         if (subtitleEl) {
-          subtitleEl.textContent = `${building.province} · ${building.category}`;
+          subtitleEl.textContent = `${localized.province} · ${localized.category}`;
         }
 
         // 更新顶部标签
-        const tagEl = document.querySelector('.hero .text-qianbai\\/70.text-xs');
+        const tagEl = document.getElementById("heroTagLine");
         if (tagEl) {
-          tagEl.textContent = `${building.category.toUpperCase()} · ${building.province.toUpperCase()} · ${building.year}`;
+          tagEl.textContent = `${localized.category.toUpperCase()} · ${localized.province.toUpperCase()} · ${localized.year}`;
         }
 
         // 更新介绍文字
-        const introEl = document.querySelector('.hero .text-qianbai\\/70.text-sm.leading-relaxed');
+        const introEl = document.getElementById("heroIntroBlurb");
         if (introEl) {
-          introEl.textContent = building.desc;
+          introEl.textContent = localized.desc;
         }
 
         // 更新详情主图（御花园：底层 + SVG 路径热区）
@@ -4864,10 +6068,19 @@
         const detailPlateSvgAnchor = document.getElementById("detailPlateSvgAnchor");
         const detailPlateTaiheSvg = document.getElementById("detailPlateTaiheSvg");
         const detailPlateYuhuaSvg = document.getElementById("detailPlateYuhuaSvg");
+        const detailPlateVideo = document.getElementById("detailPlateVideo");
+
+        if (detailPlateVideo) {
+          detailPlateVideo.pause();
+          detailPlateVideo.removeAttribute("src");
+          detailPlateVideo.load();
+          detailPlateVideo.classList.add("hidden");
+        }
+        if (detailPlateBase) detailPlateBase.hidden = false;
 
         if (detailPlateBase) {
           detailPlateBase.src = building.detailImage;
-          detailPlateBase.alt = `${building.name}细节图`;
+          detailPlateBase.alt = `${localized.name} ${t("detailAlt")}`;
         }
 
         if (detailPlateHighlight && detailPlateHotspot) {
@@ -4888,8 +6101,7 @@
             detailPlateHotspot.ontouchstart = () => lit();
             detailPlateHotspot.ontouchend = () => unlit();
             if (detailPlateCaption) {
-              detailPlateCaption.textContent =
-                "PLATE 01 · 将鼠标移入中轴主殿（钦安殿）区域以查看高亮示意";
+              detailPlateCaption.textContent = t("plateYuhuaHint");
             }
           } else {
             unlit();
@@ -4900,8 +6112,8 @@
             detailPlateHotspot.onmouseleave = null;
             detailPlateHotspot.ontouchstart = null;
             detailPlateHotspot.ontouchend = null;
-            if (detailPlateCaption && building.name !== "北京故宫") {
-              detailPlateCaption.textContent = "PLATE 01 · 屋面与出檐的层次";
+            if (detailPlateCaption && building.name !== "北京故宫" && building.name !== "北京四合院") {
+              detailPlateCaption.textContent = t("plateDefault");
             }
           }
         }
@@ -4919,7 +6131,7 @@
           detailPlateTaiheSvg.hidden = false;
           detailPlateYuhuaSvg.hidden = true;
           if (detailPlateCaption) {
-            detailPlateCaption.textContent = "PLATE 01 · 悬停主图可览重檐庑殿顶、脊兽与溜金斗拱";
+            detailPlateCaption.textContent = t("plateTaiheHint");
           }
           window.initMapSvgHotspots({
             root: detailPlateWrap,
@@ -4941,7 +6153,7 @@
           detailPlateTaiheSvg.hidden = true;
           detailPlateYuhuaSvg.hidden = false;
           if (detailPlateCaption) {
-            detailPlateCaption.textContent = "PLATE 01 · 悬停鸟瞰热区可览钦安殿与堆秀亭";
+            detailPlateCaption.textContent = t("plateYuhuaHotspot");
           }
           window.initMapSvgHotspots({
             root: detailPlateWrap,
@@ -4958,13 +6170,23 @@
 
         const paperFrame = document.getElementById("paperFrame");
         if (building.name === "北京故宫") {
-          applyPaperCopy(PAPER_COPY_GUGONG);
+          applyPaperCopy(isEnglish ? PAPER_COPY_GUGONG_EN : PAPER_COPY_GUGONG);
           paperFrame?.classList.add("paper-frame--wide");
+        } else if (building.name === "北京四合院") {
+          applyPaperCopy(isEnglish ? PAPER_COPY_SIHEYUAN_EN : PAPER_COPY_SIHEYUAN_ZH);
+          paperFrame?.classList.add("paper-frame--wide");
+        } else if (building.name === "卢沟桥") {
+          applyPaperCopy(isEnglish ? PAPER_COPY_LUGOU_EN : PAPER_COPY_LUGOU_ZH);
+          paperFrame?.classList.add("paper-frame--wide");
+        } else if (building.name === "故宫太和殿") {
+          paperFrame?.classList.remove("paper-frame--wide");
+          applyPaperCopy(isEnglish ? PAPER_COPY_TAIHE_EN : PAPER_COPY_TAIHE);
+        } else if (building.name === "故宫御花园") {
+          paperFrame?.classList.remove("paper-frame--wide");
+          applyPaperCopy(isEnglish ? PAPER_COPY_YUHUA_EN : PAPER_COPY_YUHUA);
         } else {
           paperFrame?.classList.remove("paper-frame--wide");
-          if (building.name !== "故宫御花园") {
-            applyPaperCopy(PAPER_COPY_DEFAULT);
-          }
+          applyPaperCopy(isEnglish ? PAPER_COPY_DEFAULT_EN : PAPER_COPY_DEFAULT);
         }
         setupHeroCrossComparePopup(building.name, heroSvgTaihe, heroSvgYuhua);
 
@@ -4972,25 +6194,32 @@
         const paperSub2 = document.getElementById("paperSubImg2");
         if (paperSub1 && paperSub2 && building.subImages?.length >= 2) {
           paperSub1.src = building.subImages[0];
-          paperSub1.alt = `${building.name}细部图`;
+          paperSub1.alt = `${localized.name} ${isEnglish ? "close-up" : "细部图"}`;
           paperSub2.src = building.subImages[1];
-          paperSub2.alt = `${building.name}全景图`;
+          paperSub2.alt = `${localized.name} ${isEnglish ? "overview" : "全景图"}`;
         }
 
         const paperPlateLarge = document.getElementById("paperPlateLarge");
         if (paperPlateLarge) {
           paperPlateLarge.src = building.paperLargeImage || building.detailImage;
-          paperPlateLarge.alt = `${building.name} · 廊庑与光影`;
+          paperPlateLarge.alt = `${localized.name} · ${isEnglish ? "corridor and light" : "廊庑与光影"}`;
         }
 
         const paperPlateCorner = document.getElementById("paperPlateCorner");
         if (paperPlateCorner) {
           paperPlateCorner.src =
             building.paperCornerImage || building.subImages?.[0] || building.detailImage;
-          paperPlateCorner.alt = `${building.name} · 局部景观`;
+          paperPlateCorner.alt = `${localized.name} · ${isEnglish ? "architectural detail" : "局部景观"}`;
         }
 
-        const showPaperQuiz = building.name === "北京故宫";
+        const showPaperQuiz =
+          building.name === "北京故宫" || building.name === "北京四合院" || building.name === "卢沟桥";
+        const paperQuizMode =
+          building.name === "北京四合院"
+            ? "siheyuan"
+            : building.name === "卢沟桥"
+              ? "lugou"
+              : "gugong";
         const paperQuizBoard = document.getElementById("paperQuizBoard");
         const paperPlateCornerCap = document.getElementById("paperPlateCornerCap");
         if (paperQuizBoard && paperPlateCorner) {
@@ -4999,13 +6228,31 @@
           paperPlateCorner.hidden = showPaperQuiz;
         }
         if (paperPlateCornerCap && showPaperQuiz) {
-          paperPlateCornerCap.textContent = "INTERACTIVE QUIZ · 故宫建筑问答";
+          paperPlateCornerCap.textContent = isEnglish
+            ? paperQuizMode === "siheyuan"
+              ? "INTERACTIVE QUIZ · Beijing Siheyuan"
+              : paperQuizMode === "lugou"
+                ? "INTERACTIVE QUIZ · Marco Polo Bridge"
+                : "INTERACTIVE QUIZ · Forbidden City Architecture"
+            : paperQuizMode === "siheyuan"
+              ? "INTERACTIVE QUIZ · 四合院建筑问答"
+              : paperQuizMode === "lugou"
+                ? "INTERACTIVE QUIZ · 卢沟桥小测"
+                : "INTERACTIVE QUIZ · 故宫建筑问答";
         }
-        setupGugongPaperQuiz(showPaperQuiz);
+        setupGugongPaperQuiz(showPaperQuiz, paperQuizMode);
       };
 
       // 初始化页面；下一帧再解除隐藏，避免与首帧合成之间夹一帧占位内容
       updatePageContent();
+      const langSwitchBtn = document.getElementById("langSwitchBtn");
+      if (langSwitchBtn) {
+        langSwitchBtn.addEventListener("click", () => {
+          currentLang = currentLang === "zh" ? "en" : "zh";
+          if (typeof persistSiteLang === "function") persistSiteLang(currentLang);
+          updatePageContent();
+        });
+      }
       requestAnimationFrame(function () {
         document.documentElement.classList.add("detail-hydrated");
         // 首屏曾 visibility:hidden，热区锚点需在可见后重算，否则命中区为 0 / 错位

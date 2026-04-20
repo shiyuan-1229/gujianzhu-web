@@ -59,7 +59,7 @@ def get_file(file_path: str):
     return FileResponse(path=target)
 
 
-static_dir = PROJECT_DIR / "古建筑 2"
+static_dir = PROJECT_DIR
 if static_dir.exists():
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="site")
 

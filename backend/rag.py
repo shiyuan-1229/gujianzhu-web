@@ -191,9 +191,11 @@ def build_prompt(query: str, refs: List[Dict], lang: str) -> List[Dict]:
     target_lang = _lang_label(lang)
     system = (
         f"你是古建智寻平台的AI导览员。请使用{target_lang}回答。"
-        "优先依据提供的参考文献作答，表达准确、简洁。"
+        "优先依据提供的参考文献作答，表达准确、学术、详细。"
+        "请提供深入的学术分析，包括相关历史背景、建筑特点和文化内涵。"
+        "回答长度应适中，至少包含3-5个完整句子，确保信息丰富且有深度。"
         "若回答使用了文献信息，请在句末标注引用编号，如[1][2]。"
-        "若资料不足，请明确说明“知识库中暂无足够证据”。"
+        "若资料不足，请明确说明‘知识库中暂无足够证据’。"
     )
     user = f"用户问题：{query}\n\n参考资料：\n{ref_text}"
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]

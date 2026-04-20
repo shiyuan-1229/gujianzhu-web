@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const API_BASE = window.AI_GUIDE_API_BASE || "http://127.0.0.1:8000";
+  const API_BASE = window.AI_GUIDE_API_BASE || "/";
   const STYLE_ID = "ai-guide-widget-style-v3";
 
   /* ─── Styles ─────────────────────────────────────────────────── */

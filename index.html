@@ -1141,12 +1141,11 @@
 
       const BUILDING_IMAGE_MAP = {
         "北京故宫": [
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg/1200px-Hall_of_Supreme_Harmony_%28Taihe_Dian%29_Forbidden_City_Beijing.jpg",
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Forbidden_City_Beijing_Shenwumen.jpg/1200px-Forbidden_City_Beijing_Shenwumen.jpg",
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Palace_Museum%2C_Beijing.jpg/1200px-Palace_Museum%2C_Beijing.jpg"
+          "./assets/gugong-hero-1.png",
+          "./assets/gugong-hero-5.png"
         ],
         "北京四合院": ["https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"],
-        "卢沟桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Marco_Polo_Bridge_1.jpg/1200px-Marco_Polo_Bridge_1.jpg"],
+        "卢沟桥": ["./assets/lugou-carousel-1.png"],
         "颐和园": ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Summer_Palace_Beijing_2019.jpg/1200px-Summer_Palace_Beijing_2019.jpg"],
         "乔家大院": [
           "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1200px-Qiao_Family_Compound_2013.jpg",
@@ -1192,25 +1191,80 @@
       // 约定：如“第134张”按 [1,3,4] 处理；如你想改为 [134]，只改这里即可
       const LOCAL_IMAGE_RULES = {
         "陈家祠": {
-          baseDir: "古建筑/计算机大赛-景点图片/广东省/陈家祠",
-          picks: [1, 3, 4]
+          baseDir: "assets/chen",
+          picks: [1, 2, 3]
         },
         "乔家大院": {
-          baseDir: "古建筑/计算机大赛-景点图片/山西省/乔家大院",
-          picks: [1, 2, 7]
+          baseDir: "assets/qiao",
+          picks: [1, 2, 3]
         },
         "阆中古城民居": {
-          baseDir: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居",
-          picks: [1, 2, 4]
-        },
-        "北京故宫": {
-          baseDir: "古建筑/计算机大赛-景点图片/北京市/北京故宫",
-          picks: [2, 5, 8]
+          baseDir: "assets/langzhong",
+          picks: [1, 2, 3]
         },
         "淮安府衙": {
-          baseDir: "古建筑/计算机设计网页供图",
-          picks: [1, 2, 4]
+          baseDir: "assets/huaian",
+          picks: [1, 2, 3]
         }
+      };
+
+      // 省份弹卡代表建筑的本地图片兜底（避免外链失效导致黑屏）
+      const SPOTLIGHT_LOCAL_IMAGE_MAP = {
+        "北京故宫": "./assets/gugong-hero-1.png",
+        "乔家大院": "./assets/qiao-hero.png",
+        "淮安府衙": "./assets/huaian-hero.png",
+        "阆中古城民居": "./assets/langzhong-hero.png",
+        "陈家祠": "./assets/chen-hero.png",
+        "燕赵古建": "./assets/gugong-hero-5.png",
+        "玉皇阁": "./assets/hebei-yuhuangge.png",
+        "河西陇原": "./assets/luding-hero.png",
+        "嘉峪关": "./assets/gansu-jiayuguan.png",
+        "河海津门": "./assets/baodai-hero.png",
+        "辽东古建": "./assets/pingyao-hero.png",
+        "关东聚落": "./assets/zhouzhuang-hero.png",
+        "伪满皇宫": "./assets/jilin-weiman-huanggong.png",
+        "寒地建筑": "./assets/langzhong-hero.png",
+        "五教道德院": "./assets/heilongjiang-wujiao-daodeyuan.png",
+        "草原营造": "./assets/longnao-hero.png",
+        "喀喇沁亲王府": "./assets/neimenggu-kalaqin-qinwangfu.png",
+        "齐鲁古建": "./assets/huozhou-hero.png",
+        "青州古城": "./assets/shandong-qingzhou-gucheng.png",
+        "中原古建": "./assets/qiao-hero.png",
+        "应天门": "./assets/henan-yingtianmen.png",
+        "关中古建": "./assets/yuzao-hero.png",
+        "秦王宫": "./assets/shaanxi-qinwanggong.png",
+        "塞上营造": "./assets/luding-hero.png",
+        "玉皇阁": "./assets/ningxia-yuhuangge.png",
+        "高原建筑": "./assets/longnao-hero.png",
+        "丹噶尔古城": "./assets/qinghai-dangaer-gucheng.png",
+        "西域古建": "./assets/xinjiang-mosque-card.png",
+        "约特干故城": "./assets/xinjiang-yuetegan-gucheng.png",
+        "雪域寺院": "./assets/xizang-xueyu-siyuan.png",
+        "徽派古建": "./assets/zhouzhuang-hero.png",
+        "江南宅院": "./assets/zhouzhuang-hero.png",
+        "花戏楼": "./assets/anhui-huaxilou.png",
+        "东阳卢宅": "./assets/zhejiang-dongyang-luzhai.png",
+        "海派里弄": "./assets/chen-hero.png",
+        "赣派聚落": "./assets/kaiping-hero.png",
+        "滕王阁": "./assets/jiangxi-tengwangge.png",
+        "荆楚古建": "./assets/huaian-hero.png",
+        "黄鹤楼": "./assets/hubei-huanghelou.png",
+        "湖湘建筑": "./assets/qiao-hero.png",
+        "凤凰古城": "./assets/hunan-fenghuang-gucheng.png",
+        "闽地土楼": "./assets/kaiping-hero.png",
+        "福建土楼": "./assets/fujian-tulou.png",
+        "巴渝吊脚楼": "./assets/langzhong-hero.png",
+        "石宝寨": "./assets/chongqing-shibaozhai.png",
+        "滇地古建": "./assets/chen-hero.png",
+        "双龙桥": "./assets/yunnan-shuanglongqiao.png",
+        "山地聚落": "./assets/yuzao-hero.png",
+        "沱江吊脚楼": "./assets/guizhou-tuojiang-diaojiaolou.png",
+        "风雨桥楼": "./assets/guangji-hero.png",
+        "风雨桥": "./assets/guangxi-fengyuqiao.png",
+        "海岛民居": "./assets/zhouzhuang-hero.png",
+        "罗驿古村": "./assets/hainan-luoyi-gucun.png",
+        "闽南街屋": "./assets/chen-hero.png",
+        "竹堑城": "./assets/taiwan-zhuqiancheng.png",
       };
 
       const LOCAL_IMAGE_EXTS = ["jpg", "jpeg", "png", "webp", "JPG", "JPEG", "PNG", "WEBP"];
@@ -1230,30 +1284,25 @@
         
         // 实际的图片文件路径映射
         const actualImagePaths = {
-          "古建筑/计算机大赛-景点图片/广东省/陈家祠": {
-            1: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fabr9A.jpeg",
-            3: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fT1Iov.jpeg",
-            4: "古建筑/计算机大赛-景点图片/广东省/陈家祠/fO7fvmuIe.jpeg"
+          "assets/chen": {
+            1: "./assets/chen-hero.png",
+            2: "./assets/chen-paper-1.png",
+            3: "./assets/chen-paper-2.png"
           },
-          "古建筑/计算机大赛-景点图片/山西省/乔家大院": {
-            1: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528720101.jpg",
-            2: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528723168.jpg",
-            7: "古建筑/计算机大赛-景点图片/山西省/乔家大院/image_1774528739670.jpg"
+          "assets/qiao": {
+            1: "./assets/qiao-hero.png",
+            2: "./assets/qiao-paper-1.png",
+            3: "./assets/qiao-paper-2.png"
           },
-          "古建筑/计算机大赛-景点图片/四川省/阆中古城民居": {
-            1: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/837b22cd5023687d788ce02d57d2303a.jpeg",
-            2: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/c1532e7d64b2f9c12aaed222d98119cb.jpeg",
-            4: "古建筑/计算机大赛-景点图片/四川省/阆中古城民居/fO7X94Sai.jpeg"
+          "assets/langzhong": {
+            1: "./assets/langzhong-hero.png",
+            2: "./assets/langzhong-paper-1.png",
+            3: "./assets/langzhong-paper-2.png"
           },
-          "古建筑/计算机大赛-景点图片/北京市/北京故宫": {
-            2: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528643317.jpg",
-            5: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528653390.jpg",
-            8: "古建筑/计算机大赛-景点图片/北京市/北京故宫/image_1774528677873.jpg"
-          },
-          "古建筑/计算机设计网页供图": {
-            1: "古建筑/计算机设计网页供图/淮安府1.jpg",
-            2: "古建筑/计算机设计网页供图/淮安府2.jpg",
-            4: "古建筑/计算机设计网页供图/淮安府4.jpg"
+          "assets/huaian": {
+            1: "./assets/huaian-hero.png",
+            2: "./assets/huaian-paper-1.png",
+            3: "./assets/huaian-paper-2.png"
           }
         };
         
@@ -1272,6 +1321,12 @@
 
       const getBuildingImages = async (buildingName) => {
         if (localImageCache.has(buildingName)) return localImageCache.get(buildingName);
+        const spotlightLocal = SPOTLIGHT_LOCAL_IMAGE_MAP[buildingName];
+        if (spotlightLocal) {
+          const local = [spotlightLocal];
+          localImageCache.set(buildingName, local);
+          return local;
+        }
         const rule = LOCAL_IMAGE_RULES[buildingName];
         const localImgs = await resolveLocalImagesByRule(rule);
         const imgs = localImgs.length ? localImgs : (BUILDING_IMAGE_MAP[buildingName] || []);
@@ -1316,33 +1371,33 @@
       };
 
       const HOTSPOT_PROVINCE_META = {
-        "河北省": { name: "河北", building: "燕赵古建", desc: "河北环拱京畿，长城关隘、皇家陵寝与古城村镇类型齐全，体现北方防御体系与礼制空间的双重传统。" },
-        "甘肃省": { name: "甘肃", building: "陇原古建", desc: "甘肃地跨陇中与河西走廊，关隘城堡、石窟寺院与夯土聚落沿丝路展开，建筑风貌兼具交通要冲与多元文化交汇特征。" },
+        "河北省": { name: "河北", building: "玉皇阁", desc: "河北环拱京畿，长城关隘、皇家陵寝与古城村镇类型齐全，体现北方防御体系与礼制空间的双重传统。" },
+        "甘肃省": { name: "甘肃", building: "嘉峪关", desc: "甘肃地跨陇中与河西走廊，关隘城堡、石窟寺院与夯土聚落沿丝路展开，建筑风貌兼具交通要冲与多元文化交汇特征。" },
         "天津市": { name: "天津", building: "河海津门", desc: "天津因漕运而兴，府城、会馆与近代街区并存，建筑体现运河节点城市与近现代工商业口岸的叠加特征。" },
         "辽宁省": { name: "辽宁", building: "辽东古建", desc: "辽宁连接关内外，清代宫苑、城垣与东北民居类型并存，建筑形态兼具北方秩序与边疆开拓特征。" },
-        "吉林省": { name: "吉林", building: "关东聚落", desc: "吉林地跨山地与平原，长白山周边聚落、关东民居与近代城市遗存并存，建筑风貌质朴而适应寒冷环境。" },
-        "黑龙江省": { name: "黑龙江", building: "寒地建筑", desc: "黑龙江地处中国最北，寒地聚落、边境城镇与近现代工业遗存并见，建筑重视保温、防雪与边疆交通联系。" },
-        "内蒙古自治区": { name: "内蒙古自治区", building: "草原营造", desc: "内蒙古横跨北疆，草原聚落、召庙与边塞城镇并存，建筑在广袤气候条件下形成开阔、厚实的地域特征。" },
-        "山东省": { name: "山东", building: "齐鲁古建", desc: "山东兼具齐鲁礼乐传统与海岱山川格局，府城、祠庙、书院与海防建筑丰富，承载深厚的儒家文化空间。" },
-        "河南省": { name: "河南", building: "中原古建", desc: "河南位居中原腹地，宫殿、寺观、石窟与古城遗存丰厚，是中华礼制建筑与都城文明的重要承载地。" },
-        "陕西省": { name: "陕西", building: "关中古建", desc: "陕西关中平原与陕北高原并存，帝都遗址、塔寺与窑洞民居交织，是中国古代都城与陵寝建筑的重要区域。" },
-        "宁夏回族自治区": { name: "宁夏回族自治区", building: "塞上营造", desc: "宁夏地处黄河上游，清真寺、夯土聚落与灌溉绿洲共生，建筑兼具西北防护需求与回族文化特色。" },
-        "青海省": { name: "青海", building: "高原建筑", desc: "青海高原辽阔，寺院、城堡式聚落与高原民居顺应气候与地形，展现出厚重、朴实而富宗教气息的空间特征。" },
-        "新疆维吾尔自治区": { name: "新疆维吾尔自治区", building: "西域古建", desc: "新疆地域辽阔，绿洲城镇、清真寺与夯土街巷深受丝路文明影响，建筑风貌兼具防风避暑与商旅交流特征。" },
+        "吉林省": { name: "吉林", building: "伪满皇宫", desc: "吉林地跨山地与平原，长白山周边聚落、关东民居与近代城市遗存并存，建筑风貌质朴而适应寒冷环境。" },
+        "黑龙江省": { name: "黑龙江", building: "五教道德院", desc: "黑龙江地处中国最北，寒地聚落、边境城镇与近现代工业遗存并见，建筑重视保温、防雪与边疆交通联系。" },
+        "内蒙古自治区": { name: "内蒙古自治区", building: "喀喇沁亲王府", desc: "内蒙古横跨北疆，草原聚落、召庙与边塞城镇并存，建筑在广袤气候条件下形成开阔、厚实的地域特征。" },
+        "山东省": { name: "山东", building: "青州古城", desc: "山东兼具齐鲁礼乐传统与海岱山川格局，府城、祠庙、书院与海防建筑丰富，承载深厚的儒家文化空间。" },
+        "河南省": { name: "河南", building: "应天门", desc: "河南位居中原腹地，宫殿、寺观、石窟与古城遗存丰厚，是中华礼制建筑与都城文明的重要承载地。" },
+        "陕西省": { name: "陕西", building: "秦王宫", desc: "陕西关中平原与陕北高原并存，帝都遗址、塔寺与窑洞民居交织，是中国古代都城与陵寝建筑的重要区域。" },
+        "宁夏回族自治区": { name: "宁夏回族自治区", building: "玉皇阁", desc: "宁夏地处黄河上游，清真寺、夯土聚落与灌溉绿洲共生，建筑兼具西北防护需求与回族文化特色。" },
+        "青海省": { name: "青海", building: "丹噶尔古城", desc: "青海高原辽阔，寺院、城堡式聚落与高原民居顺应气候与地形，展现出厚重、朴实而富宗教气息的空间特征。" },
+        "新疆维吾尔自治区": { name: "新疆维吾尔自治区", building: "约特干故城", desc: "新疆地域辽阔，绿洲城镇、清真寺与夯土街巷深受丝路文明影响，建筑风貌兼具防风避暑与商旅交流特征。" },
         "西藏自治区": { name: "西藏自治区", building: "雪域寺院", desc: "西藏高寒高海拔，宫殿、寺院与碉房依山就势，厚墙小窗与鲜明色彩共同回应高原环境与宗教生活。" },
-        "安徽省": { name: "安徽", building: "徽派古建", desc: "安徽南北风貌差异鲜明，徽派民居以白墙黛瓦、马头墙和精细木石砖雕著称，是中国传统民居的重要代表。" },
-        "浙江省": { name: "浙江", building: "江南宅院", desc: "浙江河港密布、商贸兴盛，古城街巷、廊桥与江南宅院共同塑造精巧细腻的空间气质，兼具山地与水乡特色。" },
+        "安徽省": { name: "安徽", building: "花戏楼", desc: "安徽南北风貌差异鲜明，徽派民居以白墙黛瓦、马头墙和精细木石砖雕著称，是中国传统民居的重要代表。" },
+        "浙江省": { name: "浙江", building: "东阳卢宅", desc: "浙江河港密布、商贸兴盛，古城街巷、廊桥与江南宅院共同塑造精巧细腻的空间气质，兼具山地与水乡特色。" },
         "上海市": { name: "上海", building: "海派里弄", desc: "上海地处江海交汇，近代里弄、石库门与开埠建筑并存，展现传统民居向近现代都市建筑转型的独特面貌。" },
-        "江西省": { name: "江西", building: "赣派聚落", desc: "江西山水与书院文化深厚，白墙黛瓦、祠堂书院与古村落相互映照，赣派建筑在礼制与生活之间取得平衡。" },
-        "湖北省": { name: "湖北", building: "荆楚古建", desc: "湖北位居长江中游，古城、书院与桥梁建筑类型丰富，荆楚地区建筑兼具水网环境适应与礼制空间传统。" },
-        "湖南省": { name: "湖南", building: "湖湘建筑", desc: "湖南依山带水，书院、祠堂与民居兼具湖湘文脉与山地适应性，木构穿斗、封火墙与院落组合富有地域辨识度。" },
-        "福建省": { name: "福建", building: "闽地土楼", desc: "福建山海相依，土楼、宗祠与滨海聚落并存，夯土围合与木构穿斗体现了闽地建筑在防御、聚族与适应气候上的智慧。" },
-        "重庆市": { name: "重庆", building: "巴渝吊脚楼", desc: "重庆山城临江而建，吊脚楼、码头街巷与崖壁聚落共同塑造立体城市肌理，巴渝民居因地制宜，空间层次鲜明。" },
-        "云南省": { name: "云南", building: "滇地古建", desc: "云南山川纵横、民族聚居，民居与寺庙建筑常结合高原气候与地方工艺，形成院落、木构与彩饰并重的多样风貌。" },
-        "贵州省": { name: "贵州", building: "山地聚落", desc: "贵州多山湿润，吊脚楼、石板寨与鼓楼风雨桥共同构成多民族聚落景观，建筑强调地形适应与木石工艺结合。" },
-        "广西壮族自治区": { name: "广西壮族自治区", building: "风雨桥楼", desc: "广西喀斯特山水与多民族聚落相映，干栏式建筑、风雨桥与鼓楼体现了南方木构传统与山地生活智慧。" },
-        "海南省": { name: "海南", building: "海岛民居", desc: "海南四面环海，聚落与民居常结合热带气候、骑楼街区与侨乡文化，空间通风开敞、遮阳避雨特征鲜明。" },
-        "台湾省": { name: "台湾", building: "闽南街屋", desc: "台湾传统聚落融合闽南、客家与海洋文化，红砖民居、街屋与宗祠建筑在防台风与适应湿热气候中形成鲜明特色。" },
+        "江西省": { name: "江西", building: "滕王阁", desc: "江西山水与书院文化深厚，白墙黛瓦、祠堂书院与古村落相互映照，赣派建筑在礼制与生活之间取得平衡。" },
+        "湖北省": { name: "湖北", building: "黄鹤楼", desc: "湖北位居长江中游，古城、书院与桥梁建筑类型丰富，荆楚地区建筑兼具水网环境适应与礼制空间传统。" },
+        "湖南省": { name: "湖南", building: "凤凰古城", desc: "湖南依山带水，书院、祠堂与民居兼具湖湘文脉与山地适应性，木构穿斗、封火墙与院落组合富有地域辨识度。" },
+        "福建省": { name: "福建", building: "福建土楼", desc: "福建山海相依，土楼、宗祠与滨海聚落并存，夯土围合与木构穿斗体现了闽地建筑在防御、聚族与适应气候上的智慧。" },
+        "重庆市": { name: "重庆", building: "石宝寨", desc: "重庆山城临江而建，吊脚楼、码头街巷与崖壁聚落共同塑造立体城市肌理，巴渝民居因地制宜，空间层次鲜明。" },
+        "云南省": { name: "云南", building: "双龙桥", desc: "云南山川纵横、民族聚居，民居与寺庙建筑常结合高原气候与地方工艺，形成院落、木构与彩饰并重的多样风貌。" },
+        "贵州省": { name: "贵州", building: "沱江吊脚楼", desc: "贵州多山湿润，吊脚楼、石板寨与鼓楼风雨桥共同构成多民族聚落景观，建筑强调地形适应与木石工艺结合。" },
+        "广西壮族自治区": { name: "广西壮族自治区", building: "风雨桥", desc: "广西喀斯特山水与多民族聚落相映，干栏式建筑、风雨桥与鼓楼体现了南方木构传统与山地生活智慧。" },
+        "海南省": { name: "海南", building: "罗驿古村", desc: "海南四面环海，聚落与民居常结合热带气候、骑楼街区与侨乡文化，空间通风开敞、遮阳避雨特征鲜明。" },
+        "台湾省": { name: "台湾", building: "竹堑城", desc: "台湾传统聚落融合闽南、客家与海洋文化，红砖民居、街屋与宗祠建筑在防台风与适应湿热气候中形成鲜明特色。" },
       };
 
       // 根据省份获取建筑列表
@@ -1403,7 +1458,8 @@
         const spotlight = PROVINCE_SPOTLIGHT[mappedProvince];
         const it = list.find((b) => b.name === spotlight) || list[0];
         const fallbackImages = ["./assets/index-bg.png"];
-        const imgList = spotlight ? await getBuildingImages(it.name) : fallbackImages;
+        const resolvedImages = await getBuildingImages(it.name);
+        const imgList = resolvedImages.length ? resolvedImages : fallbackImages;
         if (renderToken !== detailRenderToken) return; // 防止异步加载后覆盖新 hover 的内容
 
         provinceNameEl.textContent = localProvinceName(mappedProvince);

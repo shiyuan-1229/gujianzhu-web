@@ -265,7 +265,7 @@
         width: 100%;
         height: 100%;
         border-radius: 0;
-        overflow: hidden;
+        overflow: visible;
         outline: none;
         box-shadow: none;
         background: transparent;
@@ -285,24 +285,48 @@
         transform: translateZ(0);
       }
 
-      /* 地图与省份高亮、图标热区同层平移，避免只挪地图导致错位 */
+      /* 地图与省份高亮、图标热区同层，完整展示含南海十段线的全国范围 */
       .map-china-layer {
         position: absolute;
         inset: 0;
-        transform: translateY(-1.2vh);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
       }
 
+      .map-china-map-media {
+        position: relative;
+        flex: 0 0 auto;
+        line-height: 0;
+        overflow: hidden;
+      }
+
       #mapChinaMap {
+        position: absolute;
+        display: block !important;
+        max-width: none !important;
+        object-fit: fill !important;
+        object-position: left top !important;
         mix-blend-mode: normal;
         filter: brightness(1.04) saturate(1.02) contrast(1.02)
           drop-shadow(0 12px 40px rgba(20, 35, 25, 0.35));
-        object-fit: cover;
-        object-position: center 44%;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform: translateZ(0);
+      }
+
+      /* 南海十字线岛礁附图外框：与底图同坐标系，仅突出右下角下方岛礁附图 */
+      .map-china-nanhai-frame {
+        position: absolute;
+        pointer-events: none;
+        z-index: 2;
+        box-sizing: border-box;
+        border: 1.5px solid rgba(255, 236, 195, 0.48);
+        border-radius: 3px;
+        background: rgba(255, 248, 230, 0.06);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
       }
 
       /* 左下角：浑天仪/罗盘线稿水印 */
@@ -502,10 +526,13 @@
                   onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png'"
                 />
               <div class="map-china-layer">
-                <div class="map-china-map-media absolute inset-0 z-[1]">
+                <div
+                  id="mapChinaMapMedia"
+                  class="map-china-map-media z-[1]"
+                >
                   <img
                     id="mapChinaMap"
-                    class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
+                    class="pointer-events-none z-0 select-none"
                     src="./assets/index-map-china.png"
                     alt=""
                     decoding="async"
@@ -513,6 +540,7 @@
                     referrerpolicy="no-referrer"
                     onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png'"
                   />
+                  <div id="mapChinaNanhaiFrameLower" class="map-china-nanhai-frame" aria-hidden="true"></div>
                   <div id="chinaMapSvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
                     <svg
                       id="chinaMapHotspotSvg"
@@ -670,10 +698,10 @@
                         <path class="map-hotspot-path" data-href="./list.html?province=台湾省" data-name-zh="台湾省" data-name-en="Taiwan" data-category="省份 · 海岛东南" data-desc="台湾传统聚落融合闽南、客家与海洋文化，红砖民居、街屋与宗祠建筑在防台风与适应湿热气候中形成鲜明特色。" d="M0.605225 125.108L5.10522 90.1083L0.605225 80.1083L11.1052 70.6083V61.6083L5.10522 48.6083L24.6052 40.1083L19.6052 27.6083L38.1052 17.6083L46.6052 0.608276L65.1052 6.60828V17.6083L84.6052 27.6083L75.1052 40.1083L94.1052 48.6083L84.6052 56.6083V70.6083L94.1052 90.1083L70.1052 99.6083L65.1052 109.108L38.1052 157.108L19.6052 163.108L0.605225 125.108Z" />
                       </g>
                     </svg>
+                    <!-- 省份交互热区容器（含四川补充热区），与底图锚点同坐标系 -->
+                    <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
                   </div>
                 </div>
-                <!-- 省份交互热区容器（含四川补充热区），悬停预览 / 点击跳转 -->
-                <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
               </div>
               <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center text-white/75 opacity-0">
                   <div>加载地图中</div>
@@ -732,6 +760,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
     <script src="./js/site-lang.js"></script>
     <script src="./js/map-svg-hotspots.js"></script>
+    <script src="./js/index-china-map-fit.js?v=20260621c"></script>
 
     <script>
       // 全局：确保字体渲染更细腻
@@ -1827,7 +1856,14 @@
         const anchor = document.getElementById("chinaMapSvgAnchor");
         const svg = document.getElementById("chinaMapHotspotSvg");
         if (root && img && anchor && svg && typeof window.initMapSvgHotspots === "function") {
-          window.initMapSvgHotspots({ root, img, anchor, svg });
+          const api = window.initMapSvgHotspots({ root, img, anchor, svg });
+          if (api && typeof api.layout === "function") {
+            window.__chinaMapHotspotLayout = api.layout;
+            if (typeof window.__registerChinaMapHotspotLayout === "function") {
+              window.__registerChinaMapHotspotLayout(api.layout);
+            }
+          }
+          if (typeof window.__fitChinaMapFull === "function") window.__fitChinaMapFull();
         }
       })();
 
@@ -1861,5 +1897,23 @@
         );
       })();
     </script>
+    <style id="china-map-full-override">
+      .map-china-layer {
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: center !important;
+        transform: none !important;
+        overflow: visible !important;
+      }
+      .map-china-map-media {
+        overflow: hidden !important;
+      }
+      #mapChinaMap {
+        position: absolute !important;
+        max-width: none !important;
+        object-fit: fill !important;
+        object-position: left top !important;
+      }
+    </style>
   </body>
 </html>

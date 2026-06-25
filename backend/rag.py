@@ -201,8 +201,79 @@ def build_prompt(query: str, refs: List[Dict], lang: str) -> List[Dict]:
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
-def stream_answer(query: str, lang: str, history: Optional[List[Dict]] = None) -> Generator[str, None, None]:
-    refs = retrieve(query=query, top_k=RETRIEVAL_TOP_K)
+def _stringify_page_context(page_context: Optional[Dict]) -> str:
+    if not page_context:
+        return ""
+    parts = []
+    field_order = [
+        ("page_title", "页面标题"),
+        ("building_name", "建筑名称"),
+        ("section_titles", "关键小节"),
+        ("highlights", "页面内容摘要"),
+        ("hotspots", "页面热点要点"),
+        ("path", "页面路径"),
+    ]
+    for key, label in field_order:
+        value = str((page_context or {}).get(key, "") or "").strip()
+        if value:
+            parts.append(f"{label}: {value}")
+    return "\n".join(parts)
+
+
+def build_page_narration_prompt(query: str, refs: List[Dict], lang: str, page_context: Optional[Dict]) -> List[Dict]:
+    ref_lines = []
+    for item in refs:
+        ref_lines.append(f"- {item['building']} | {item['source']}\n{item['content'][:240]}")
+    ref_text = "\n\n".join(ref_lines) if ref_lines else "暂无可用参考资料。"
+    page_text = _stringify_page_context(page_context) or "暂无可用页面信息。"
+    target_lang = _lang_label(lang)
+    system = (
+        f"你是古建智寻平台的AI导览员。请使用{target_lang}输出一段适合朗读的口语化导览稿。"
+        "请优先根据当前页面内容讲解，再结合参考文献补充必要的历史、建筑或文化信息。"
+        "输出要像导览员在对游客讲解，自然、连贯、有节奏，控制在6到10句。"
+        "不要使用 markdown、条目、编号或[1]这类引用标记，也不要写“好的”“下面我来”等客套开场。"
+        "如果页面信息不够，就基于现有页面内容做稳妥延展，不要编造细节。"
+    )
+    user = (
+        f"目标：{query}\n\n"
+        f"当前页面信息：\n{page_text}\n\n"
+        f"参考文献摘要：\n{ref_text}"
+    )
+    return [{"role": "system", "content": system}, {"role": "user", "content": user}]
+
+
+def _build_messages(
+    query: str,
+    refs: List[Dict],
+    lang: str,
+    mode: str = "chat",
+    page_context: Optional[Dict] = None,
+) -> List[Dict]:
+    if mode == "page_narration":
+        return build_page_narration_prompt(query=query, refs=refs, lang=lang, page_context=page_context)
+    return build_prompt(query=query, refs=refs, lang=lang)
+
+
+def stream_answer(
+    query: str,
+    lang: str,
+    history: Optional[List[Dict]] = None,
+    mode: str = "chat",
+    page_context: Optional[Dict] = None,
+) -> Generator[str, None, None]:
+    retrieve_query = query
+    if mode == "page_narration" and page_context:
+        retrieve_query = " ".join(
+            part
+            for part in [
+                query,
+                str((page_context or {}).get("building_name", "") or "").strip(),
+                str((page_context or {}).get("page_title", "") or "").strip(),
+            ]
+            if part
+        )
+
+    refs = retrieve(query=retrieve_query, top_k=RETRIEVAL_TOP_K)
     safe_refs = []
     for ref in refs:
         item = {k: v for k, v in ref.items() if k != "content"}
@@ -221,7 +292,7 @@ def stream_answer(query: str, lang: str, history: Optional[List[Dict]] = None) -
         yield json.dumps({"type": "done"}, ensure_ascii=False)
         return
 
-    messages = build_prompt(query=query, refs=refs, lang=lang)
+    messages = _build_messages(query=query, refs=refs, lang=lang, mode=mode, page_context=page_context)
     response = requests.post(
         DEEPSEEK_BASE_URL.rstrip("/") + "/chat/completions",
         headers={"Authorization": "Bearer " + DEEPSEEK_API_KEY, "Content-Type": "application/json"},

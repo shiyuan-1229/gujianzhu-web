@@ -1,7 +1,11 @@
 (function () {
   "use strict";
 
-  const API_BASE = window.AI_GUIDE_API_BASE || "/";
+  const API_BASE = (function getAPIBase() {
+    if (window.AI_GUIDE_API_BASE) return window.AI_GUIDE_API_BASE;
+    if (window.location.protocol === "file:") return "http://127.0.0.1:8000";
+    return "/";
+  })();
   const STYLE_ID = "ai-guide-widget-style-v3";
 
   /* ─── Styles ─────────────────────────────────────────────────── */
@@ -369,6 +373,86 @@
       .aig-send-btn:hover { opacity:.88; transform:scale(1.06); }
       .aig-send-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
       .aig-send-btn svg { width:16px; height:16px; fill:#1b1300; }
+      /* ── Narration float button ────────────────────────────── */
+      .aig-narrate-float {
+        position: fixed; left: 120px; bottom: 28px;
+        z-index: 9998;
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(8,6,18,.82);
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(212,175,55,.28);
+        border-radius: 22px;
+        padding: 6px 14px 6px 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,.45);
+        cursor: pointer; user-select: none;
+        transition: transform .22s, opacity .22s, border-color .22s;
+        opacity: 0; transform: translateY(8px); pointer-events: none;
+      }
+      .aig-narrate-float.visible {
+        opacity: 1; transform: translateY(0); pointer-events: auto;
+      }
+      .aig-narrate-float:hover {
+        border-color: rgba(212,175,55,.5);
+        transform: translateY(-1px);
+      }
+      .aig-narrate-float-icon {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: rgba(212,175,55,.15);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; flex-shrink: 0;
+      }
+      .aig-narrate-float-label {
+        font-size: 11.5px; color: #d4af37; font-weight: 600;
+        letter-spacing: .04em;
+      }
+      .aig-narrate-float-tog {
+        font-size: 11px; color: rgba(255,255,255,.6);
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.06);
+        border-radius: 10px; padding: 2px 7px;
+        cursor: pointer; transition: background .18s;
+        margin-left: 4px;
+      }
+      .aig-narrate-float-tog:hover { background: rgba(255,255,255,.14); }
+      .aig-narrate-float.playing { border-color: rgba(212,175,55,.55); }
+      .aig-narrate-float.playing .aig-narrate-float-icon {
+        background: rgba(212,175,55,.28);
+        animation: aig-narr-pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes aig-narr-pulse {
+        0%,100%{box-shadow:0 0 6px rgba(212,175,55,.3)}
+        50%{box-shadow:0 0 18px rgba(212,175,55,.6)}
+      }
+      /* ── Narration segments inside chat messages ──────────────── */
+      .aig-narr-msg .aig-msg-content {
+        line-height: 2.1; font-size: 13.5px;
+      }
+      .aig-narr-seg {
+        display: inline; padding: 1px 3px; margin: 0 1px;
+        border-radius: 3px; color: #b8b6c4;
+        transition: color .3s, font-weight .3s, background .3s;
+      }
+      .aig-narr-seg.aig-narr-passed { color: #e5e5f0; font-weight: 400; background: transparent; }
+      .aig-narr-seg.aig-narr-current {
+        color: #f5e8b5; font-weight: 700;
+        background: rgba(212,175,55,.22);
+        box-shadow: 0 0 8px rgba(212,175,55,.18);
+      }
+
+      /* ── Read‑aloud button on AI messages ─────────────────────── */
+      .aig-msg-play {
+        display: inline-flex; align-items: center; gap: 3px;
+        margin-top: 4px; padding: 3px 10px;
+        border: 1px solid rgba(212,175,55,.22);
+        border-radius: 8px; background: rgba(212,175,55,.08);
+        color: rgba(212,175,55,.7); font-size: 11px;
+        cursor: pointer; user-select: none;
+        transition: background .18s, color .18s;
+        opacity: .75;
+      }
+      .aig-msg-play:hover { background: rgba(212,175,55,.18); color: #f5e8b5; opacity: 1; }
+      .aig-msg-play.playing { background: rgba(212,175,55,.25); color: #f5e8b5; opacity: 1; }
     `;
     document.head.appendChild(style);
   }
@@ -379,8 +463,18 @@
   let sending = false;
 
   function detectLang() {
-    const s = localStorage.getItem("aig_lang") || document.documentElement.getAttribute("lang") || "zh";
-    return s.toLowerCase().startsWith("en") ? "en" : "zh";
+    // 优先读取站点统一语言偏好（与 site-lang.js 的 gujianzhu_site_lang 一致）
+    const store = localStorage.getItem("gujianzhu_site_lang");
+    if (store === "zh" || store === "en") return store;
+    // DOM 检测：<html lang> 属性 及 lang-en class
+    const htmlLang = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    if (htmlLang.startsWith("en")) return "en";
+    if (document.documentElement.classList.contains("lang-en")) return "en";
+    return "zh";
+  }
+
+  function refreshLang() {
+    currentLang = detectLang();
   }
 
   /* ─── Markdown + citation renderer ───────────────────────────── */
@@ -406,6 +500,286 @@
     const html = out.join("\n").replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
     return `<span class="aig-msg-content"><p>${html}</p></span>`;
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TTSPlayer — 全局语音播放单例
+
+     双语双引擎：
+     ・中文（zh）→ Edge TTS 音频流（微软在线语音）
+     ・英文（en）→ Chrome SpeechSynthesis
+
+     generation 计数器：每次 play / stop 递增，旧的异步 callback
+     看到 gen 不对就直接放弃，杜绝切换语言时的幽灵播放。
+     ═══════════════════════════════════════════════════════════════ */
+  const TTSPlayer = (function () {
+    const synth = window.speechSynthesis;
+    let playing = false, paused = false;
+    let sentences = [], sentenceIdx = 0;
+    let onEndCb = null;
+    let bgmDucked = false;
+    let playGen = 0;  // generation 计数器
+
+    // ── 常量 ──────────────────────────────────────────────────────
+    const BGM_DUCK_VOLUME = 0.12;
+    const CANCEL_POLL_MS  = 30;
+    const CANCEL_MAX_TRIES = 100;  // ~3s 超时，防止死循环
+
+    // ── Edge TTS 音频引擎（中文）────────────────────────────────
+    let audioEl = null;
+    let audioUrl = null;
+    let sentProps = [];  // [{start, end}] 每句在全文中的字符占比
+
+    // ── Web Speech 引擎（英文）──────────────────────────────────
+    let wsVoice = null;
+
+    /* ── 工具函数 ───────────────────────────────────────────────── */
+
+    function splitSentences(text) {
+      const raw = String(text || "").replace(/\s+/g, " ").trim();
+      if (!raw) return [];
+      const parts = raw.split(/(?<=[。！？；\n.!?])\s*/g);
+      return parts.map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function duckBGM(duck) {
+      const audios = document.querySelectorAll("audio:not([data-aig-tts])");
+      if (!bgmDucked && duck) {
+        audios.forEach(a => { if (a.volume > BGM_DUCK_VOLUME) { a.dataset.aigPrevVol = a.volume; a.volume = BGM_DUCK_VOLUME; } });
+        bgmDucked = true;
+      } else if (bgmDucked && !duck) {
+        audios.forEach(a => { if (a.dataset.aigPrevVol) { a.volume = parseFloat(a.dataset.aigPrevVol); delete a.dataset.aigPrevVol; } });
+        bgmDucked = false;
+      }
+    }
+
+    function finish() {
+      playing = false;
+      duckBGM(false);
+      if (onEndCb) { const cb = onEndCb; onEndCb = null; cb(); }
+    }
+
+    /* ── Web Speech 引擎 ────────────────────────────────────────── */
+
+    function getWSVoice() {
+      if (!synth) return null;
+      const voices = synth.getVoices();
+      if (!voices.length) return null;
+      const pref = ["Google US English", "Microsoft David", "Microsoft Mark", "Samantha", "Karen", "Zira"];
+      for (const n of pref) {
+        const v = voices.find(vo => vo.name.toLowerCase().includes(n.toLowerCase()));
+        if (v) return v;
+      }
+      return voices.find(v => v.lang.startsWith("en")) || null;
+    }
+
+    function playNextWS() {
+      if (!playing || paused) return;
+      if (sentenceIdx >= sentences.length) { finish(); return; }
+      const u = new SpeechSynthesisUtterance(sentences[sentenceIdx]);
+      u.lang = "en-US";
+      u.rate = 0.92;  u.pitch = 1.0;
+      if (wsVoice) u.voice = wsVoice;
+
+      u.onend   = () => { sentenceIdx++; playNextWS(); };
+      u.onerror = () => { sentenceIdx++; playNextWS(); };
+      try { synth.speak(u); } catch(e) { sentenceIdx++; playNextWS(); }
+    }
+
+    function doStartWS(text, gen) {
+      if (gen !== playGen) return;
+      sentences = splitSentences(text);
+      if (!sentences.length) { playing = false; duckBGM(false); return; }
+      sentenceIdx = 0;
+      playing = true; paused = false;
+      duckBGM(true);
+
+      const kick = () => {
+        if (gen !== playGen) return;
+        wsVoice = getWSVoice();
+        playNextWS();
+      };
+      if (!synth.getVoices().length) {
+        let resolved = false;
+        const onVoices = () => { if (!resolved) { resolved = true; kick(); } };
+        synth.addEventListener("voiceschanged", onVoices, { once: true });
+        setTimeout(() => { if (!resolved) { resolved = true; synth.removeEventListener("voiceschanged", onVoices); kick(); } }, 500);
+      } else { kick(); }
+    }
+
+    // 轮询等待 synth.speaking 变 false，带超时上限
+    function waitAndStartWS(text, gen, attempt) {
+      if (gen !== playGen) return;
+      if (synth && synth.speaking) {
+        if (attempt >= CANCEL_MAX_TRIES) {
+          // 超时，强行开始
+          console.warn("[TTS] cancel poll timeout, starting anyway");
+          doStartWS(text, gen);
+          return;
+        }
+        try { synth.cancel(); } catch(e) {}
+        setTimeout(() => waitAndStartWS(text, gen, attempt + 1), CANCEL_POLL_MS);
+        return;
+      }
+      doStartWS(text, gen);
+    }
+
+    /* ── Edge TTS 引擎 ──────────────────────────────────────────── */
+
+    function cleanupAudio(el, url) {
+      const a = el || audioEl;
+      const u = url || audioUrl;
+      if (a) { try { a.pause(); } catch(e) {} a.src = ""; a.load(); if (a === audioEl) audioEl = null; }
+      if (u) { URL.revokeObjectURL(u); if (u === audioUrl) audioUrl = null; }
+    }
+
+    async function startEdgeTTS(text, onEnd, gen) {
+      sentences = splitSentences(text);
+      if (!sentences.length) return;
+      const fullText = sentences.join("");
+      sentProps = [];
+      let pos = 0;
+      for (const s of sentences) {
+        sentProps.push({ start: pos / fullText.length, end: (pos + s.length) / fullText.length });
+        pos += s.length;
+      }
+      sentenceIdx = 0;
+      onEndCb = onEnd || null;
+      playing = true; paused = false;
+      duckBGM(true);
+
+      // ★ 关键修复：在 await 之前同步创建 Audio 元素，让它继承
+      //    用户点击的 "用户手势" 上下文，从而绕过 Chrome 自动播放策略。
+      //    new Audio() 不播放任何内容，只是注册了播放许可。
+      const audio = new Audio();
+      audio.setAttribute("data-aig-tts", "1");
+      audio.preload = "auto";
+
+      let localUrl = null;
+
+      try {
+        console.log("[TTS] 请求 Edge TTS 语音合成…");
+        const resp = await fetch(API_BASE + "/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: fullText }),
+        });
+        if (gen !== playGen) { URL.revokeObjectURL(audio.src || ""); return; }
+        if (!resp.ok) throw new Error("TTS API HTTP " + resp.status + " — 请确认后端已启动");
+
+        const blob = await resp.blob();
+        if (gen !== playGen) { URL.revokeObjectURL(audio.src || ""); return; }
+        console.log("[TTS] Edge TTS 音频已就绪，大小", (blob.size / 1024).toFixed(0), "KB");
+
+        localUrl = URL.createObjectURL(blob);
+
+        // timeupdate 根据播放进度更新句子高亮索引
+        audio.addEventListener("timeupdate", () => {
+          if (!audio.duration || !isFinite(audio.duration)) return;
+          const p = audio.currentTime / audio.duration;
+          for (let i = sentProps.length - 1; i >= 0; i--) {
+            if (p >= sentProps[i].start) { sentenceIdx = i; break; }
+          }
+        });
+
+        audio.addEventListener("ended", () => {
+          console.log("[TTS] Edge TTS 播放完成");
+          finish(); cleanupAudio(audio, localUrl);
+        });
+        audio.addEventListener("error", (e) => {
+          console.warn("[TTS] Audio 播放出错", e);
+          finish(); cleanupAudio(audio, localUrl);
+        });
+        audio.addEventListener("pause", () => {
+          if (!playing) { cleanupAudio(audio, localUrl); }
+        });
+
+        if (gen !== playGen) { URL.revokeObjectURL(localUrl); return; }
+        audioUrl = localUrl;
+        audioEl = audio;
+        audio.src = localUrl;
+
+        // play() 返回 promise；若被浏览器阻止会在 catch 里处理
+        console.log("[TTS] 开始播放 Edge TTS 音频…");
+        await audio.play();
+        console.log("[TTS] 播放中…");
+      } catch (e) {
+        if (gen !== playGen) return;
+        console.warn("[TTS] Edge TTS 失败:", e.message || e);
+        cleanupAudio(audio, localUrl);
+        // 中文降级：用 Web Speech 读（通常仍无声，但至少不报错）
+        fallbackToWS(text, gen);
+      }
+    }
+
+    // 中文播放失败时的降级路径
+    function fallbackToWS(text, gen) {
+      if (gen !== playGen) return;
+      sentences = splitSentences(text);
+      if (!sentences.length) { playing = false; duckBGM(false); return; }
+      sentenceIdx = 0;
+      playing = true; paused = false;
+      duckBGM(true);
+      doStartWS(text, gen);
+    }
+
+    /* ── Public API ─────────────────────────────────────────────── */
+
+    return {
+      isPlaying: () => playing,
+      isPaused: () => paused,
+      getCurrentIndex: () => sentenceIdx,
+      getSentenceCount: () => sentences.length,
+      splitSentences,
+
+      play(text, lang, onEnd) {
+        // 递增 generation 让所有旧的异步操作自行放弃
+        playGen++;
+        const gen = playGen;
+
+        // 状态清零
+        playing = false; paused = false; onEndCb = null;
+        cleanupAudio();
+        try { if (synth) synth.cancel(); } catch(e) {}
+
+        const isZh = !String(lang || "").toLowerCase().startsWith("en");
+
+        if (isZh) {
+          startEdgeTTS(text, onEnd, gen);
+        } else {
+          onEndCb = onEnd || null;
+          waitAndStartWS(text, gen, 0);
+        }
+      },
+
+      pause() {
+        if (!playing || paused) return;
+        paused = true;
+        if (audioEl) { audioEl.pause(); }
+        else { try { if (synth) synth.pause(); } catch(e) {} }
+      },
+
+      resume() {
+        if (!paused) return;
+        paused = false;
+        if (audioEl) { audioEl.play(); }
+        else { try { if (synth) synth.resume(); } catch(e) {} }
+      },
+
+      togglePause() {
+        if (paused) this.resume(); else this.pause();
+      },
+
+      stop() {
+        playing = false; paused = false;
+        sentenceIdx = 0; sentProps = [];
+        onEndCb = null;
+        playGen++;  // 让所有在飞的异步操作放弃
+        duckBGM(false);
+        cleanupAudio();
+        try { if (synth) synth.cancel(); } catch(e) {}
+      }
+    };
+  })();
 
   /* ─── Build widget ───────────────────────────────────────────── */
   function createWidget() {
@@ -467,10 +841,43 @@
     const closeBtn= panel.querySelector(".aig-icon-btn.close");
     const resizeH = panel.querySelector(".aig-resize-handle");
 
-    /* ─── Open / close ─────────────────────────────────────────── */
+    /* ── Page detection ──────────────────────────────────────────── */
+    let pageId = "";
+    let isNarrationPage = false;
+    (function detectPage() {
+      const params = new URLSearchParams(window.location.search);
+      const building = decodeURIComponent((params.get("building") || "").trim());
+      if (building.includes("太和殿")) { pageId = "taihe"; isNarrationPage = true; }
+      else if (building.includes("御花园") || building.includes("钦安殿") || building.includes("堆秀亭")) { pageId = "yuhuayuan"; isNarrationPage = true; }
+    })();
+
+    /* ── Global narration active flag (for TTS conflict handling) ── */
+    let narrationActive = false;
+    let stopHighlightTimer = function () {}; // 兜底 no‑op
+
+    /* ── Narration float button (only on taihe / yuhuayuan pages) ── */
+    let narrateFloat = null;
+    if (isNarrationPage) {
+      narrateFloat = document.createElement("div");
+      narrateFloat.className = "aig-narrate-float";
+      narrateFloat.innerHTML = `
+        <span class="aig-narrate-float-icon">🎙</span>
+        <span class="aig-narrate-float-label">语音导览</span>
+        <button class="aig-narrate-float-tog" data-action="toggle" title="暂停/继续">⏸</button>
+      `;
+      document.body.appendChild(narrateFloat);
+    }
+
+    /* ── Open / close ─────────────────────────────────────────── */
     function setOpen(val) {
       panelOpen = !!val;
       panel.classList.toggle("aig-open", panelOpen);
+      if (!panelOpen) {
+        // 语音导览播放中 → 不停止语音，只停高亮
+        if (!narrationActive) TTSPlayer.stop();
+        stopHighlightTimer();
+        if (narrateFloat) narrateFloat.classList.remove("playing");
+      }
       if (panelOpen) setTimeout(() => input.focus(), 60);
     }
     trigger.addEventListener("click", () => setOpen(!panelOpen));
@@ -503,14 +910,32 @@
     });
 
     /* ─── Append bubble ────────────────────────────────────────── */
-    function appendMsg(role, text, extra) {
+    function appendMsg(role, text, extra, rawHtml, rawText) {
       const div = document.createElement("div");
       div.className = "aig-msg " + role + (extra ? " " + extra : "");
       if (role === "user") div.textContent = text;
+      else if (rawHtml) div.innerHTML = text || "";
       else div.innerHTML = text ? renderMarkdown(text, []) : "";
+      // 保存原始文本供朗读按钮使用
+      if (rawText !== undefined) div.dataset.aigRaw = rawText;
+      else if (role === "assistant" && !rawHtml) div.dataset.aigRaw = text;
       msgBox.appendChild(div);
       msgBox.scrollTop = msgBox.scrollHeight;
       return div;
+    }
+
+    /* ─── Add speak button to assistant message ────────────────── */
+    function addSpeakButton(msgEl) {
+      if (!msgEl || msgEl.classList.contains("user")) return;
+      // 避免重复添加
+      if (msgEl.querySelector(".aig-msg-play")) return;
+      const raw = msgEl.dataset.aigRaw;
+      if (!raw || raw.trim().length < 2) return; // 太短不朗读
+      const btn = document.createElement("button");
+      btn.className = "aig-msg-play";
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>朗读`;
+      btn.title = "朗读此回答";
+      msgEl.appendChild(btn);
     }
 
     /* ─── Bind citation hover cards ────────────────────────────── */
@@ -588,16 +1013,22 @@
       input.value = ""; input.style.height = "auto";
       sending = true; sendBtn.disabled = true;
 
+      refreshLang(); // 实时跟随站点语言切换
+
       appendMsg("user", q);
       const answerEl = appendMsg("assistant", "思考中…", "thinking aig-cursor");
       let refs = [], answerText = "", firstToken = true;
 
       try {
-        const resp = await fetch(API_BASE + "/api/chat", {
+        const url = API_BASE + "/api/chat";
+        console.log("[AI向导] 发送请求:", url, q);
+        const resp = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: q, lang: currentLang, history: [] }),
         });
+        console.log("[AI向导] 响应状态:", resp.status, resp.ok);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
         if (!resp.body) throw new Error("no stream");
 
         const reader = resp.body.getReader();
@@ -633,24 +1064,30 @@
           }
         }
 
-        answerEl.classList.remove("aig-cursor");
+        answerEl.classList.remove("aig-cursor", "thinking");
         if (firstToken) {
-          answerEl.textContent = "暂无回答，请确认后端服务已启动。";
-          answerEl.classList.remove("thinking");
+          answerEl.innerHTML = "暂无回答，请确认后端服务已启动。";
+          answerEl.dataset.aigRaw = "暂无回答，请确认后端服务已启动。";
         } else {
           // Final render: markdown + citation badges
           answerEl.innerHTML = renderMarkdown(answerText, refs);
           bindCites(answerEl, refs);
+          answerEl.dataset.aigRaw = answerText;
         }
+        // 所有 AI 回答都添加朗读按钮
+        addSpeakButton(answerEl);
         // Append reference list as sibling after the answer bubble
         const refsEl = renderRefs(refs);
         if (refsEl) {
           msgBox.appendChild(refsEl);
           msgBox.scrollTop = msgBox.scrollHeight;
         }
-      } catch {
-        answerEl.textContent = "连接失败，请确认后端已在 http://127.0.0.1:8000 启动。";
+      } catch (err) {
+        console.error("[AI向导] 请求失败:", err);
+        answerEl.innerHTML = "连接失败，请确认后端已在 http://127.0.0.1:8000 启动。";
         answerEl.classList.remove("thinking", "aig-cursor");
+        answerEl.dataset.aigRaw = "连接失败，请确认后端服务已启动";
+        addSpeakButton(answerEl);
       } finally {
         sending = false; sendBtn.disabled = false; input.focus();
       }
@@ -659,6 +1096,182 @@
     sendBtn.addEventListener("click", ask);
     input.addEventListener("keydown", e => {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); }
+    });
+
+    /* ─── Speak button: event delegation ────────────────────────── */
+    msgBox.addEventListener("click", e => {
+      const btn = e.target.closest(".aig-msg-play");
+      if (!btn) return;
+      const msgEl = btn.closest(".aig-msg.assistant");
+      if (!msgEl) return;
+      const raw = msgEl.dataset.aigRaw || msgEl.textContent || "";
+      if (!raw.trim()) return;
+
+      // 如果正在朗读同一条消息 → 停止
+      if (btn.classList.contains("playing")) {
+        TTSPlayer.stop();
+        btn.classList.remove("playing");
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>朗读`;
+        return;
+      }
+
+      // 如果有语音导览在播放 → 先停止
+      if (narrationActive) stopNarrationUI();
+
+      // 清除其他消息的播放状态
+      msgBox.querySelectorAll(".aig-msg-play.playing").forEach(b => {
+        b.classList.remove("playing");
+        b.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>朗读`;
+      });
+
+      // 标记播放中
+      btn.classList.add("playing");
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>播放中`;
+
+      refreshLang(); // 跟随站点语言切换
+      const lang = currentLang === "en" ? "en-US" : "zh-CN";
+      TTSPlayer.play(raw, lang, () => {
+        btn.classList.remove("playing");
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>朗读`;
+      });
+    });
+
+    /* ═══════════════════════════════════════════════════════════════
+       Narration (旁白语音导览) — 只在太和殿 / 御花园生效
+       ═══════════════════════════════════════════════════════════════ */
+    if (!isNarrationPage) return; // 其他页面无语音导览
+
+    /* ── Highlight polling timer ────────────────────────────────── */
+    let narrHighlightTimer = null;
+    let narrMsgEl = null; // 当前叙事 AI 消息 DOM
+
+    function pollNarrHighlight() {
+      if (!TTSPlayer.isPlaying()) { stopHighlightTimer(); return; }
+      if (!narrMsgEl || !document.body.contains(narrMsgEl)) { stopHighlightTimer(); return; }
+      const sIdx = TTSPlayer.getCurrentIndex();
+      const allSegs = narrMsgEl.querySelectorAll(".aig-narr-seg");
+      if (!allSegs.length) return;
+      let curChanged = false;
+      allSegs.forEach((el, i) => {
+        const wasCur = el.classList.contains("aig-narr-current");
+        const wasPassed = el.classList.contains("aig-narr-passed");
+        el.classList.remove("aig-narr-current", "aig-narr-passed");
+        if (i < sIdx) { el.classList.add("aig-narr-passed"); if (!wasPassed) curChanged = true; }
+        if (i === sIdx) { el.classList.add("aig-narr-current"); if (!wasCur) curChanged = true; }
+      });
+      // 自动滚动当前句到消息可见区域
+      if (curChanged && allSegs[sIdx] && msgBox) {
+        const seg = allSegs[sIdx];
+        const segRect = seg.getBoundingClientRect();
+        const boxRect = msgBox.getBoundingClientRect();
+        if (segRect.bottom > boxRect.bottom - 20 || segRect.top < boxRect.top + 30) {
+          seg.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }
+
+    function startHighlightTimer() {
+      stopHighlightTimer();
+      narrHighlightTimer = setInterval(() => pollNarrHighlight(), 150);
+    }
+
+    stopHighlightTimer = function () {
+      if (narrHighlightTimer) { clearInterval(narrHighlightTimer); narrHighlightTimer = null; }
+    };
+
+    /* ── Stop narration UI (voice ended or stopped) ─────────────── */
+    function stopNarrationUI() {
+      narrationActive = false;
+      stopHighlightTimer();
+      // 清除当前叙事消息中的高亮
+      if (narrMsgEl) {
+        narrMsgEl.querySelectorAll(".aig-narr-seg").forEach(el => {
+          el.classList.remove("aig-narr-current", "aig-narr-passed");
+        });
+        narrMsgEl = null;
+      }
+      if (narrateFloat) {
+        narrateFloat.classList.remove("playing");
+        narrateFloat.querySelector(".aig-narrate-float-icon").textContent = "🎙";
+        const tog = narrateFloat.querySelector('[data-action="toggle"]');
+        if (tog) { tog.textContent = "⏸"; tog.title = "暂停"; }
+      }
+    }
+
+    /* ── Start narration ────────────────────────────────────────── */
+    async function startNarration() {
+      // 确保对话面板打开，用户能看到字幕
+      if (!panelOpen) setOpen(true);
+      refreshLang(); // 跟随站点语言切换
+      try {
+        const resp = await fetch(API_BASE + "/api/narration", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lang: currentLang, page_id: pageId }),
+        });
+        if (!resp.ok) throw new Error("narration API failed");
+        const data = await resp.json();
+        const script = data.text || data.script || "";
+        // API 返回 "zh"/"en"，统一转为合法 BCP 47 标签（Chrome 只认 zh-CN，不认 zh）
+        const rawLang = data.lang || currentLang;
+        const lang = String(rawLang).toLowerCase().startsWith("en") ? "en-US" : "zh-CN";
+
+        if (!script.trim()) {
+          appendMsg("assistant", "暂无语音导览内容。");
+          return;
+        }
+
+        // 分句并构建 HTML（与 TTSPlayer 共用同一分句逻辑，确保字幕与音频句数对齐）
+        const sentences = TTSPlayer.splitSentences(script);
+        const segsHtml = sentences.map((s, i) =>
+          `<span class="aig-narr-seg" data-idx="${i}">${s}</span>`
+        ).join("");
+
+        // 作为 AI 消息发送到对话面板（raw HTML 不经过 markdown 转义）
+        const msgDiv = appendMsg("assistant",
+          `<span class="aig-msg-content"><p class="aig-narr-body">${segsHtml}</p></span>`,
+          "aig-narr-msg",
+          true
+        );
+        narrMsgEl = msgDiv;
+
+        // 显示播放状态
+        if (narrateFloat) {
+          narrateFloat.classList.add("visible", "playing");
+          narrateFloat.querySelector(".aig-narrate-float-icon").textContent = "🔊";
+        }
+
+        // 播放
+        narrationActive = true;
+        TTSPlayer.play(script, lang, () => {
+          stopHighlightTimer();
+          stopNarrationUI();
+        });
+        startHighlightTimer();
+      } catch {
+        appendMsg("assistant", "语音导览加载失败，请确认后端已启动。");
+      }
+    }
+
+    /* ── Float button events ────────────────────────────────────── */
+    narrateFloat.classList.add("visible");
+    narrateFloat.addEventListener("click", e => {
+      if (e.target.closest('[data-action="toggle"]')) return;
+      if (TTSPlayer.isPlaying() && !TTSPlayer.isPaused()) {
+        TTSPlayer.togglePause();
+        const tog = narrateFloat.querySelector('[data-action="toggle"]');
+        if (TTSPlayer.isPaused()) { tog.textContent = "▶"; tog.title = "继续"; }
+        else { tog.textContent = "⏸"; tog.title = "暂停"; }
+      } else {
+        startNarration();
+      }
+    });
+    narrateFloat.querySelector('[data-action="toggle"]').addEventListener("click", e => {
+      e.stopPropagation();
+      TTSPlayer.togglePause();
+      const tog = narrateFloat.querySelector('[data-action="toggle"]');
+      if (TTSPlayer.isPaused()) { tog.textContent = "▶"; tog.title = "继续"; }
+      else { tog.textContent = "⏸"; tog.title = "暂停"; }
     });
   }
 

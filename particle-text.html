@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>粒子文字 · Particle Text</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cormorant+Garamond:wght@500&display=swap" />
+<style>
+  :root{ --gold:#e7c66b; --gold-hi:#fff0c6; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; overflow:hidden; touch-action:none; }
+  body{ background:
+      radial-gradient(1200px 900px at 50% 42%, #3c1014 0%, #1a070a 48%, #0a0405 82%, #050203 100%);
+    color:var(--gold); font-family:"Cormorant Garamond",serif; }
+  #c{ position:fixed; inset:0; display:block; }
+  .ui{ position:fixed; left:0; right:0; bottom:26px; z-index:5; display:flex; gap:14px; justify-content:center; align-items:center;
+    flex-wrap:wrap; pointer-events:none; }
+  .ui *{ pointer-events:auto; }
+  .ui input{ width:min(46vw,260px); background:rgba(20,8,8,0.55); border:1px solid rgba(231,198,107,0.35); color:var(--gold-hi);
+    font-family:"Ma Shan Zheng",serif; font-size:16px; letter-spacing:0.12em; padding:9px 16px; border-radius:999px; outline:none; text-align:center; }
+  .ui input::placeholder{ color:rgba(231,198,107,0.45); }
+  .ui button{ background:rgba(231,198,107,0.1); border:1px solid rgba(231,198,107,0.45); color:var(--gold-hi);
+    font-family:"Cormorant Garamond",serif; letter-spacing:0.22em; text-transform:uppercase; font-size:12px; padding:9px 18px; border-radius:999px; cursor:pointer; }
+  .ui button:hover{ background:rgba(231,198,107,0.22); }
+  .hint{ position:fixed; top:22px; left:0; right:0; text-align:center; z-index:5; font-size:12px; letter-spacing:0.34em;
+    text-transform:uppercase; color:rgba(231,198,107,0.55); pointer-events:none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hint">移动鼠标驱散 · 点击炸开重组 · 输入文字回车</div>
+<div class="ui">
+  <input id="txt" maxlength="12" placeholder="古建智寻" />
+  <button id="burst">炸开重组</button>
+</div>
+<script>
+(function(){
+  var canvas = document.getElementById("c"), ctx = canvas.getContext("2d");
+  var W, H, dpr;
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    canvas.style.width = W+"px"; canvas.style.height = H+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+
+  // ---- 配置（金色粒子，匹配古建智寻主题）----
+  var GOLD = [231,198,107];          // 粒子主色
+  var GAP = 5;                       // 采样间距：越小粒子越多越密
+  var MAXDIST = 24;                  // 连线最大距离
+  var MOUSE_R = 110;                 // 鼠标驱散半径
+  var particles = [];
+  var mouse = { x:-9999, y:-9999, active:false };
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  // 把文字画到离屏 canvas，采样不透明像素 → 目标点集
+  function sampleText(text){
+    var off = document.createElement("canvas");
+    off.width = W; off.height = H;
+    var o = off.getContext("2d");
+    // 自适应字号：让文字占据画面约 78% 宽
+    var fontSize = Math.min(H*0.42, W*0.9 / Math.max(text.length,1) * 1.35);
+    o.fillStyle = "#fff";
+    o.textAlign = "center"; o.textBaseline = "middle";
+    o.font = "700 " + fontSize + 'px "Ma Shan Zheng", serif';
+    o.fillText(text, W/2, H/2);
+    var data = o.getImageData(0,0,W,H).data;
+    var pts = [];
+    for(var y=0; y<H; y+=GAP){
+      for(var x=0; x<W; x+=GAP){
+        var a = data[(y*W + x)*4 + 3];
+        if(a > 128) pts.push({ x:x, y:y });
+      }
+    }
+    return pts;
+  }
+
+  var MAX_PARTICLES = 2600;   // 粒子上限：保证连线性能
+  function build(text){
+    var targets = sampleText(text);
+    // 超过上限时随机抽稀（Fisher–Yates 洗牌后截断，保持均匀覆盖）
+    if(targets.length > MAX_PARTICLES){
+      for(var s=targets.length-1; s>0; s--){ var r=(Math.random()*(s+1))|0; var tmp=targets[s]; targets[s]=targets[r]; targets[r]=tmp; }
+      targets.length = MAX_PARTICLES;
+    }
+    // 复用现有粒子，多退少补
+    for(var i=0; i<targets.length; i++){
+      var t = targets[i];
+      if(i < particles.length){
+        particles[i].tx = t.x; particles[i].ty = t.y;
+      } else {
+        particles.push({
+          x: rand(0,W), y: rand(0,H), vx:0, vy:0,
+          tx: t.x, ty: t.y,
+          size: rand(1.1,2.2), k: rand(0.012,0.03)
+        });
+      }
+    }
+    particles.length = targets.length;     // 截掉多余的
+  }
+
+  // 把所有粒子向外炸开（保留目标点，会自动飞回重组）
+  function burst(){
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      var ang = Math.random()*Math.PI*2, sp = rand(8,22);
+      p.vx = Math.cos(ang)*sp; p.vy = Math.sin(ang)*sp;
+    }
+  }
+
+  function step(){
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      // 弹簧回到目标
+      var dxT = p.tx - p.x, dyT = p.ty - p.y;
+      p.vx += dxT * p.k; p.vy += dyT * p.k;
+      // 鼠标驱散
+      if(mouse.active){
+        var dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx*dx + dy*dy;
+        if(d2 < MOUSE_R*MOUSE_R){
+          var d = Math.sqrt(d2) || 1, f = (1 - d/MOUSE_R) * 6;
+          p.vx += dx/d * f; p.vy += dy/d * f;
+        }
+      }
+      // 阻尼 + 微抖动
+      p.vx *= 0.86; p.vy *= 0.86;
+      p.x += p.vx + rand(-0.15,0.15);
+      p.y += p.vy + rand(-0.15,0.15);
+    }
+  }
+
+  // 网格化邻接连线（性能友好）
+  var grid = {};
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation = "lighter";
+
+    // ---- 连线：把粒子放入网格，仅检查相邻格 ----
+    grid = {}; var cell = MAXDIST;
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      var gx = (p.x/cell)|0, gy = (p.y/cell)|0, key = gx+","+gy;
+      (grid[key] || (grid[key]=[])).push(p);
+    }
+    ctx.lineWidth = 0.6;
+    var CONN_CAP = 4;          // 每个粒子最多连 4 条，限制总描边数
+    for(var i2=0;i2<particles.length;i2++){
+      var a = particles[i2];
+      var gx2=(a.x/cell)|0, gy2=(a.y/cell)|0, conns=0;
+      neighbor:
+      for(var ox=0; ox<=1; ox++){ for(var oy=(ox===0?0:-1); oy<=1; oy++){
+        var bucket = grid[(gx2+ox)+","+(gy2+oy)]; if(!bucket) continue;
+        for(var j=0;j<bucket.length;j++){
+          var b = bucket[j]; if(b===a) continue;
+          var dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+          if(d2 < MAXDIST*MAXDIST){
+            var al = (1 - Math.sqrt(d2)/MAXDIST) * 0.5;
+            ctx.strokeStyle = "rgba("+GOLD[0]+","+GOLD[1]+","+GOLD[2]+","+al.toFixed(3)+")";
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+            if(++conns >= CONN_CAP) break neighbor;
+          }
+        }
+      }}
+    }
+
+    // ---- 粒子点 ----
+    for(var k=0;k<particles.length;k++){
+      var p2 = particles[k];
+      // 离目标越远越亮（飞行中发光）
+      var dist = Math.hypot(p2.tx-p2.x, p2.ty-p2.y);
+      var glow = Math.min(1, dist/60);
+      ctx.fillStyle = "rgba("+GOLD[0]+","+GOLD[1]+","+GOLD[2]+","+(0.7+0.3*glow).toFixed(3)+")";
+      ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.size*(1+glow*0.6), 0, 6.2832); ctx.fill();
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  function loop(){ step(); draw(); requestAnimationFrame(loop); }
+
+  // ---- 交互 ----
+  function setMouse(x,y){ mouse.x=x; mouse.y=y; mouse.active=true; }
+  addEventListener("mousemove", function(e){ setMouse(e.clientX, e.clientY); });
+  addEventListener("mouseleave", function(){ mouse.active=false; });
+  addEventListener("touchmove", function(e){ if(e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY); }, {passive:true});
+  addEventListener("touchend", function(){ mouse.active=false; });
+  canvas.addEventListener("click", burst);
+  document.getElementById("burst").addEventListener("click", function(e){ e.stopPropagation(); burst(); });
+
+  var input = document.getElementById("txt");
+  input.addEventListener("keydown", function(e){
+    if(e.key==="Enter"){ var v=input.value.trim() || "古建智寻"; build(v); burst(); input.blur(); }
+  });
+
+  addEventListener("resize", function(){ resize(); build(currentText); });
+
+  // ---- 启动（等字体就绪再采样，避免字形错位）----
+  var currentText = "古建智寻";
+  function start(){ build(currentText); burst(); loop(); }
+  if(document.fonts && document.fonts.ready){
+    document.fonts.load('700 100px "Ma Shan Zheng"').then(start).catch(start);
+    setTimeout(function(){ if(!particles.length) start(); }, 1500); // 兜底
+  } else { start(); }
+})();
+</script>
+</body>
+</html>

@@ -92,7 +92,7 @@ class RangeRequestHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8771
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get("PORT", 8771))
     root = os.path.dirname(os.path.abspath(__file__))
     handler = partial(RangeRequestHandler, directory=root)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), handler)

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>星际探索 · 古建智寻</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
+    />
+    <script src="./js/site-lang.js"></script>
+
+    <style>
+      :root { --gold: #e8b84b; --ink: rgba(10,10,14,.72); --line: rgba(255,255,255,.14); }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; background: #000; color: #f0f0f0;
+        font-family: "Noto Sans SC", system-ui, sans-serif; overflow: hidden; }
+
+      #galaxy { position: fixed; inset: 0; z-index: 0; cursor: grab; }
+      #galaxy canvas { display: block; width: 100%; height: 100%; }
+      #galaxy:active { cursor: grabbing; }
+
+      /* 标签层 */
+      #labels { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+      .star-label { position: absolute; left: 0; top: 0; white-space: nowrap;
+        font-family: "Noto Serif SC", serif; font-size: 12px; letter-spacing: .04em;
+        color: rgba(255,250,235,.94); text-shadow: 0 0 6px rgba(0,0,0,.92), 0 0 14px rgba(255,220,150,.25);
+        transition: opacity .35s ease; opacity: 0; will-change: transform, opacity; pointer-events: none; }
+      .star-label.hot { font-size: 16px; color: #fff; text-shadow: 0 0 12px rgba(255,220,140,.9); }
+      .star-label.rel { font-size: 13px; color: #ffe6a8; text-shadow: 0 0 10px rgba(232,184,75,.8); }
+      .star-label.spotlight { font-family: "Ma Shan Zheng", serif; font-size: 26px; letter-spacing: .14em;
+        color: #fff8e0; opacity: 1 !important;
+        text-shadow: 0 0 22px rgba(255,230,160,1), 0 0 48px rgba(232,184,75,.75), 0 0 8px rgba(0,0,0,.9); }
+
+      /* 顶部条 */
+      .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 6; display: flex; align-items: center;
+        justify-content: space-between; padding: 18px 24px; pointer-events: none; }
+      .topbar > * { pointer-events: auto; }
+      .brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; }
+      .brand b { font-family: "Ma Shan Zheng", serif; font-size: 30px; color: #fff; letter-spacing: .12em; text-shadow: 0 0 18px rgba(255,210,120,.4); }
+      .brand span { font-size: 12px; letter-spacing: .35em; color: rgba(230,220,200,.55); text-transform: uppercase; }
+      .toplinks { display: flex; align-items: center; gap: 6px; }
+      .pill { padding: 7px 16px; border-radius: 999px; font-size: 13px; letter-spacing: .12em; color: rgba(235,228,212,.82);
+        background: var(--ink); border: 1px solid var(--line); backdrop-filter: blur(10px); cursor: pointer; text-decoration: none;
+        transition: all .2s; white-space: nowrap; }
+      .pill:hover { border-color: rgba(232,184,75,.6); color: #fff; }
+      .pill.cur { color: var(--gold); border-color: rgba(232,184,75,.45); }
+      .stats { font-size: 13px; letter-spacing: .08em; color: rgba(235,228,212,.7); padding: 7px 14px; border-radius: 999px;
+        background: var(--ink); border: 1px solid var(--line); backdrop-filter: blur(10px); }
+      .stats b { color: var(--gold); font-weight: 600; }
+
+      /* 左侧控制台 */
+      .console { position: fixed; top: 78px; left: 24px; z-index: 6; display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
+      #filters { display: flex; gap: 8px; flex-wrap: wrap; }
+      .filter-chip { padding: 7px 16px; border-radius: 999px; font-size: 13px; letter-spacing: .1em; color: rgba(235,228,212,.8);
+        background: var(--ink); border: 1px solid var(--line); backdrop-filter: blur(10px); cursor: pointer; transition: all .2s; }
+      .filter-chip:hover { border-color: rgba(232,184,75,.55); color: #fff; }
+      .filter-chip.active { background: rgba(232,184,75,.9); color: #2a1c06; border-color: rgba(232,184,75,.95); font-weight: 600; }
+      #searchwrap { display: flex; }
+      #search { width: 260px; max-width: 60vw; padding: 10px 14px; border-radius: 10px 0 0 10px; border: 1px solid var(--line); border-right: none;
+        background: var(--ink); color: #f5efe2; font-size: 14px; outline: none; backdrop-filter: blur(10px); }
+      #search:focus { border-color: rgba(232,184,75,.6); }
+      #search.nores { border-color: #e0655a; }
+      #searchGo { padding: 10px 16px; border-radius: 0 10px 10px 0; border: 1px solid var(--line); background: rgba(232,184,75,.22); color: #f5efe2; cursor: pointer; }
+      #searchGo:hover { background: rgba(232,184,75,.4); }
+
+      /* 图例 / 提示 / 回到全景 */
+      #legend { position: fixed; bottom: 22px; left: 24px; z-index: 6; display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: rgba(235,228,212,.72); }
+      #legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 8px currentColor; }
+      #hint { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 6; font-size: 12px; letter-spacing: .14em; color: rgba(235,228,212,.5); white-space: nowrap; }
+      #resetView { position: fixed; bottom: 18px; right: 24px; z-index: 6; padding: 8px 18px; border-radius: 999px;
+        border: 1px solid var(--line); background: var(--ink); color: rgba(235,228,212,.85); font-size: 13px; letter-spacing: .12em; cursor: pointer; backdrop-filter: blur(10px); }
+      #resetView:hover { color: #fff; border-color: rgba(232,184,75,.6); }
+      #cruiseView { position: fixed; bottom: 18px; right: 236px; z-index: 6; padding: 8px 18px; border-radius: 999px;
+        border: 1px solid var(--line); background: var(--ink); color: rgba(235,228,212,.85); font-size: 13px; letter-spacing: .12em; cursor: pointer; backdrop-filter: blur(10px); }
+      #cruiseView:hover { color: #fff; border-color: rgba(232,184,75,.6); }
+      #cruiseView.active { color: var(--gold); border-color: rgba(232,184,75,.6); }
+      #gestureToggle { position: fixed; bottom: 18px; right: 140px; z-index: 6; padding: 8px 16px; border-radius: 999px;
+        border: 1px solid var(--line); background: var(--ink); color: rgba(235,228,212,.85); font-size: 16px; cursor: pointer; backdrop-filter: blur(10px); }
+      #gestureToggle:hover, #gestureToggle.active { color: #fff; border-color: rgba(232,184,75,.6); background: rgba(232,184,75,.22); }
+      #gestureHint { position: fixed; bottom: 22px; left: 200px; z-index: 9; display: none; align-items: center; gap: 8px;
+        padding: 6px 14px; border-radius: 999px; background: var(--ink); border: 1px solid var(--line); font-size: 12px; color: rgba(235,228,212,.85); }
+      #mpCam { position: fixed; left: 0; top: 0; width: 640px; height: 480px;
+        opacity: 0.01; pointer-events: none; z-index: -1; }
+      #mpPreview { position: fixed; bottom: 80px; right: 24px; z-index: 9; width: 240px; height: auto;
+        aspect-ratio: 4 / 3; border-radius: 12px; border: 1px solid rgba(232,184,75,.5); display: none;
+        background: #0a0a0a; object-fit: contain; }
+
+      /* 浮动详情卡 — 左上角窄条，选中时默认收起不挡中央 */
+      #panel { position: fixed; z-index: 7; left: 24px; top: 172px; width: min(268px, 30vw);
+        max-height: min(40vh, 360px); transform: translateX(-16px) scale(.97);
+        background: linear-gradient(155deg, rgba(10,11,18,.94), rgba(20,14,10,.92)); border: 1px solid rgba(232,184,75,.28);
+        border-radius: 14px; backdrop-filter: blur(18px); box-shadow: 0 16px 48px rgba(0,0,0,.5);
+        opacity: 0; pointer-events: none; transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .32s ease;
+        padding: 16px 18px 14px; overflow-y: auto; overflow-x: hidden; }
+      #panel.open { transform: none; opacity: 1; pointer-events: auto; }
+      body.panel-collapsed #panel.open { transform: translateX(calc(-100% - 36px)); opacity: 0; pointer-events: none; }
+      #panelHead { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin: -4px -6px 8px 0; }
+      #panelMinimize, #panelClose { background: none; border: none; color: rgba(235,228,212,.55); font-size: 13px;
+        cursor: pointer; line-height: 1; padding: 6px 8px; border-radius: 8px; letter-spacing: .08em; }
+      #panelMinimize:hover, #panelClose:hover { color: #fff; background: rgba(255,255,255,.06); }
+      #panelClose { font-size: 20px; padding: 4px 10px; }
+      #panelTab { position: fixed; left: 0; top: 172px; z-index: 7; display: none;
+        padding: 10px 9px; border-radius: 0 10px 10px 0; cursor: pointer;
+        background: linear-gradient(180deg, rgba(12,13,20,.94), rgba(22,16,12,.92)); border: 1px solid rgba(232,184,75,.35);
+        border-left: none; color: var(--gold); font-family: "Ma Shan Zheng", serif; font-size: 17px; letter-spacing: .1em;
+        box-shadow: 4px 0 24px rgba(0,0,0,.45); transition: background .2s, color .2s; max-width: 2.2em; line-height: 1.35;
+        writing-mode: vertical-rl; }
+      #panelTab .tab-hint { display: block; font-family: "Noto Sans SC", sans-serif; font-size: 10px;
+        color: rgba(235,228,212,.55); letter-spacing: .05em; margin-top: 6px; writing-mode: vertical-rl; }
+      #panelTab:hover { background: rgba(232,184,75,.15); color: #fff; }
+      .panel-type { font-size: 13px; letter-spacing: .2em; }
+      .panel-name { font-family: "Ma Shan Zheng", serif; font-size: 30px; margin: 2px 0 4px; line-height: 1.1; }
+      .panel-meta { font-size: 12px; color: rgba(235,228,212,.6); letter-spacing: .06em; margin-bottom: 10px; }
+      .panel-summary { font-family: "Noto Serif SC", serif; font-size: 13px; line-height: 1.8; color: rgba(245,238,225,.92);
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+      .panel-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+      .panel-tags span { font-size: 11px; padding: 2px 9px; border-radius: 999px; background: rgba(232,184,75,.13); border: 1px solid rgba(232,184,75,.3); color: rgba(245,238,225,.85); }
+      .panel-related { margin-top: 10px; font-size: 11px; color: rgba(235,228,212,.72); line-height: 1.75;
+        max-height: 22vh; overflow-y: auto; }
+      .panel-related .rel-group { margin-bottom: 10px; }
+      .panel-related b { color: var(--gold); font-weight: 600; margin-right: 6px; }
+      .panel-related i { font-style: normal; }
+      .panel-link { margin-top: 22px; display: none; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 9px;
+        background: rgba(232,184,75,.9); color: #2a1c06; font-weight: 600; text-decoration: none; letter-spacing: .08em; }
+      .panel-link:hover { background: var(--gold); }
+
+      /* 手势模式 · 隐藏文字，只保留图标反馈 */
+      body.gesture-on #hint,
+      body.gesture-on #labels,
+      body.gesture-on #gestureName,
+      body.gesture-on #voidCard { opacity: 0 !important; pointer-events: none !important; visibility: hidden; }
+      body.gesture-on #gestureHint { gap: 0; padding: 8px 10px; min-width: 0; }
+      body.gesture-on #gestureHint #gestureIcon { font-size: 18px; }
+
+      /* 隐藏界面（H） */
+      body.ui-hidden .topbar, body.ui-hidden .console, body.ui-hidden #legend,
+      body.ui-hidden #hint, body.ui-hidden #resetView, body.ui-hidden #cruiseView, body.ui-hidden #gestureToggle,
+      body.ui-hidden #gestureHint, body.ui-hidden #mpPreview,
+      body.ui-hidden #panel, body.ui-hidden #panelTab, body.ui-hidden #labels { opacity: 0; pointer-events: none; transition: opacity .3s; }
+
+      /* 点虚空捞古建（仿诗云从噪声里捞诗） */
+      #voidCard { position: fixed; z-index: 8; transform: translate(-50%, calc(-100% - 14px)) scale(.92);
+        max-width: 280px; padding: 12px 16px; border-radius: 12px; pointer-events: none;
+        background: linear-gradient(150deg, rgba(12,13,20,.94), rgba(20,16,12,.92)); border: 1px solid rgba(232,184,75,.4);
+        box-shadow: 0 14px 44px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s, transform .3s cubic-bezier(.22,1,.36,1); }
+      #voidCard.show { opacity: 1; transform: translate(-50%, calc(-100% - 14px)) scale(1); }
+      #voidCard b { display: block; font-family: "Ma Shan Zheng", serif; font-size: 22px; color: var(--gold); margin-bottom: 4px; }
+      #voidCard span { font-family: "Noto Serif SC", serif; font-size: 13px; line-height: 1.75; color: rgba(245,238,225,.9); }
+
+      #loading { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+        background: #000; color: rgba(235,228,212,.8); transition: opacity .6s; font-family: "Noto Serif SC", serif; letter-spacing: .3em; }
+      #loading.hidden { opacity: 0; pointer-events: none; }
+      #loading.err .spinner { display: none; }
+      #loading.err { color: #ffb4a8; max-width: 420px; text-align: center; line-height: 1.7; font-size: 14px; letter-spacing: .06em; }
+      .spinner { width: 36px; height: 36px; border: 2px solid rgba(232,184,75,.25); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      @media (max-width: 768px) {
+        .brand span { display: none; } .console { top: 70px; left: 12px; } #search { width: 180px; }
+        #hint { display: none; }
+        #panel { left: 12px; right: auto; width: min(280px, 78vw); max-width: none; max-height: 36vh;
+          top: auto; bottom: 64px; transform: translateY(10px) scale(.97); }
+        #panel.open { transform: none; }
+        body.panel-collapsed #panel.open { transform: translateX(calc(-100% - 24px)); }
+        #panelTab { top: auto; bottom: 64px; left: 0; max-width: none; writing-mode: horizontal-tb;
+          padding: 8px 12px; border-radius: 0 10px 10px 0; }
+        #panelTab .tab-hint { writing-mode: horizontal-tb; display: inline; margin-top: 0; margin-left: 6px; }
+        .topbar { padding: 12px; } .toplinks .pill.navlink { display: none; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="galaxy"></div>
+    <div id="labels"></div>
+    <div id="voidCard"></div>
+
+    <!-- 顶部条 -->
+    <div class="topbar">
+      <a class="brand" href="./index.html">
+        <b>古建星云</b><span>Ancient Architecture Cloud</span>
+      </a>
+      <div class="toplinks">
+        <a class="pill navlink" href="./index.html">首页</a>
+        <a class="pill navlink" href="./list.html">建筑分类</a>
+        <span class="stats">共 <b id="starCount">…</b> 颗星辰</span>
+        <button class="pill" id="hideUI">隐藏界面 · H</button>
+        <button class="pill" id="langSwitchBtn" type="button">EN</button>
+      </div>
+    </div>
+
+    <!-- 左侧控制台 -->
+    <div class="console">
+      <div id="filters"></div>
+      <div id="searchwrap">
+        <input id="search" type="text" placeholder="搜索：李诫 / 营造法式 / 斗拱…（回车飞到第一个）" />
+        <button id="searchGo">搜</button>
+      </div>
+    </div>
+
+    <div id="legend">
+      <div><i style="color:#fff4c8"></i>建筑科学家</div>
+      <div><i style="color:#d4f5e0"></i>建筑著作</div>
+      <div><i style="color:#a8d8cc"></i>建筑成就</div>
+      <div><i style="color:#ffd0dc"></i>建筑实例</div>
+    </div>
+
+    <div id="hint">☝️星粒行星 · ✌️星环扩张 · ✊→✋聚爆 · 🤏缩放 · 移掌旋转 · H隐藏</div>
+    <button id="gestureToggle" type="button" title="手势控制">✋</button>
+    <button id="cruiseView" type="button" title="电影漫游视角">漫游</button>
+    <button id="resetView">回到全景</button>
+
+    <video id="mpCam" playsinline muted autoplay webkit-playsinline></video>
+    <canvas id="mpPreview"></canvas>
+    <div id="gestureHint"><span id="gestureIcon">✋</span><span id="gestureName">请将手伸入摄像头</span></div>
+
+    <button id="panelTab" type="button" title="展开详情"><span id="panelTabName">详情</span><span class="tab-hint">展开</span></button>
+
+    <aside id="panel">
+      <div id="panelHead">
+        <button id="panelMinimize" type="button" title="收起详情，保留关联视角">收起</button>
+        <button id="panelClose" type="button" aria-label="关闭并取消选中">×</button>
+      </div>
+      <div class="panel-type"></div>
+      <div class="panel-name"></div>
+      <div class="panel-meta"></div>
+      <div class="panel-summary"></div>
+      <div class="panel-tags"></div>
+      <div class="panel-related"></div>
+      <a class="panel-link" href="#"></a>
+    </aside>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      <div>正在点亮星辰…</div>
+    </div>
+
+    <script>
+      (function () {
+        var btn = document.getElementById("langSwitchBtn");
+        var cur = (typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh");
+        if (btn) {
+          btn.textContent = cur === "en" ? "中" : "EN";
+          btn.addEventListener("click", function () {
+            var next = cur === "en" ? "zh" : "en";
+            if (typeof persistSiteLang === "function") persistSiteLang(next);
+            var u = new URL(window.location.href); u.searchParams.set("lang", next); window.location.href = u.toString();
+          });
+        }
+      })();
+    </script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script>
+      window.__starBootErr = function (msg) {
+        var el = document.getElementById("loading");
+        if (!el) return;
+        el.classList.add("err");
+        var t = el.querySelector("div:last-child");
+        if (t) t.textContent = msg;
+      };
+      window.addEventListener("error", function (e) {
+        if (e.message) window.__starBootErr("加载失败：" + e.message + "\n请用本地服务器打开，如 python3 -m http.server 8778");
+      });
+      window.addEventListener("unhandledrejection", function (e) {
+        var m = (e.reason && (e.reason.message || String(e.reason))) || "未知错误";
+        window.__starBootErr("加载失败：" + m + "\n请用本地服务器打开，如 python3 -m http.server 8778");
+      });
+      setTimeout(function () {
+        var el = document.getElementById("loading");
+        if (el && !el.classList.contains("hidden") && !el.classList.contains("err")) {
+          window.__starBootErr("加载超时，请检查网络或换用本地服务器：\npython3 -m http.server 8778\n然后访问 http://localhost:8778/star-explore.html");
+        }
+      }, 25000);
+    </script>
+    <script type="module" src="./js/star-explore.js?v=20260626n"></script>
+  </body>
+</html>

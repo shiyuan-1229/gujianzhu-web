@@ -5,3 +5,4 @@ edge-tts>=6.1.0
 pdfplumber
 python-docx
 python-dotenv
+firecrawl-py

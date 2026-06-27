@@ -1,0 +1,58 @@
+{
+  "note": "「星际探索」星云数据待抓取清单。collect_starcloud.py 会用 Firecrawl 抓取每条 url 的正文，（可选）再用 DeepSeek 抽取成 data/star-cloud.raw.json，最后人工校对并入 data/star-cloud.json。务必核对：年代≤1911、剔除庙宇/宝塔、对象限民居/官府/皇宫/桥梁。",
+  "sources": [
+    { "id": "lei-jingxiu", "name": "雷景修", "type": "scientist", "url": "https://baike.baidu.com/item/雷景修" },
+    { "id": "lei-siqi", "name": "雷思起", "type": "scientist", "url": "https://baike.baidu.com/item/雷思起" },
+    { "id": "lei-tingchang", "name": "雷廷昌", "type": "scientist", "url": "https://baike.baidu.com/item/雷廷昌" },
+    { "id": "yao-chengzu", "name": "姚承祖", "type": "scientist", "url": "https://baike.baidu.com/item/姚承祖" },
+    { "id": "zhang-nanyang", "name": "张南阳", "type": "scientist", "url": "https://baike.baidu.com/item/张南阳" },
+
+    { "id": "yijiayan", "name": "一家言·居室器玩部", "type": "book", "url": "https://baike.baidu.com/item/闲情偶寄" },
+    { "id": "luban-yingzao-zhengshi", "name": "鲁班营造正式", "type": "book", "url": "https://baike.baidu.com/item/鲁班营造正式" },
+
+    { "id": "hexi-caihua", "name": "和玺彩画", "type": "achievement", "url": "https://baike.baidu.com/item/和玺彩画" },
+    { "id": "xuanzi-caihua", "name": "旋子彩画", "type": "achievement", "url": "https://baike.baidu.com/item/旋子彩画" },
+    { "id": "sushi-caihua", "name": "苏式彩画", "type": "achievement", "url": "https://baike.baidu.com/item/苏式彩画" },
+    { "id": "yueliang", "name": "月梁", "type": "achievement", "url": "https://baike.baidu.com/item/月梁" },
+    { "id": "puzuo", "name": "铺作", "type": "achievement", "url": "https://baike.baidu.com/item/铺作" },
+    { "id": "huabiao", "name": "华表", "type": "achievement", "url": "https://baike.baidu.com/item/华表" },
+    { "id": "paifang", "name": "牌坊", "type": "achievement", "url": "https://baike.baidu.com/item/牌坊" },
+
+    { "id": "shenyang-gugong", "name": "沈阳故宫", "type": "building", "category": "皇宫", "url": "https://baike.baidu.com/item/沈阳故宫" },
+    { "id": "bishu-shanzhuang", "name": "承德避暑山庄", "type": "building", "category": "皇宫", "url": "https://baike.baidu.com/item/承德避暑山庄" },
+    { "id": "liuyuan", "name": "留园", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/留园" },
+    { "id": "wangshiyuan", "name": "网师园", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/网师园" },
+    { "id": "wangjia-dayuan", "name": "王家大院", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/王家大院" },
+    { "id": "huangcheng-xiangfu", "name": "皇城相府", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/皇城相府" },
+    { "id": "xidi-hongcun", "name": "西递宏村", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/西递" },
+    { "id": "neixiang-xianya", "name": "内乡县衙", "type": "building", "category": "官府", "url": "https://baike.baidu.com/item/内乡县衙" },
+    { "id": "nanyang-fuya", "name": "南阳府衙", "type": "building", "category": "官府", "url": "https://baike.baidu.com/item/南阳府衙" },
+    { "id": "anping-qiao", "name": "安平桥", "type": "building", "category": "桥梁", "url": "https://baike.baidu.com/item/安平桥" },
+    { "id": "luoyang-qiao", "name": "洛阳桥", "type": "building", "category": "桥梁", "url": "https://baike.baidu.com/item/洛阳桥" },
+    { "id": "chengyang-fengyuqiao", "name": "程阳风雨桥", "type": "building", "category": "桥梁", "url": "https://baike.baidu.com/item/程阳风雨桥" },
+    { "id": "xian-chengqiang", "name": "西安城墙", "type": "building", "category": "城墙", "url": "https://baike.baidu.com/item/西安城墙" },
+
+    { "id": "chen-gui", "name": "陈规", "type": "scientist", "url": "https://baike.baidu.com/item/陈规" },
+    { "id": "cai-xiang", "name": "蔡襄", "type": "scientist", "url": "https://baike.baidu.com/item/蔡襄" },
+    { "id": "shen-kuo", "name": "沈括", "type": "scientist", "url": "https://baike.baidu.com/item/沈括" },
+    { "id": "song-yingxing", "name": "宋应星", "type": "scientist", "url": "https://baike.baidu.com/item/宋应星" },
+    { "id": "xu-da", "name": "徐达", "type": "scientist", "url": "https://baike.baidu.com/item/徐达" },
+    { "id": "wen-zhengming", "name": "文徵明", "type": "scientist", "url": "https://baike.baidu.com/item/文徵明" },
+    { "id": "xue-jing-shi", "name": "薛景石", "type": "scientist", "url": "https://baike.baidu.com/item/薛景石" },
+
+    { "id": "kaogong-ji", "name": "考工记", "type": "book", "url": "https://baike.baidu.com/item/考工记" },
+    { "id": "tiangong-kaiwu", "name": "天工开物", "type": "book", "url": "https://baike.baidu.com/item/天工开物" },
+    { "id": "yingzao-suanli", "name": "营造算例", "type": "book", "url": "https://baike.baidu.com/item/工程做法" },
+
+    { "id": "jiayuguan", "name": "嘉峪关", "type": "building", "category": "城墙", "url": "https://baike.baidu.com/item/嘉峪关" },
+    { "id": "tiananmen", "name": "天安门", "type": "building", "category": "皇宫", "url": "https://baike.baidu.com/item/天安门" },
+    { "id": "canglangting", "name": "沧浪亭", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/沧浪亭" },
+    { "id": "yuyuan", "name": "豫园", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/豫园" },
+    { "id": "xidi", "name": "西递", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/西递" },
+    { "id": "hongcun", "name": "宏村", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/宏村" },
+    { "id": "yongding-tulou", "name": "永定土楼", "type": "building", "category": "民居", "url": "https://baike.baidu.com/item/福建土楼" },
+    { "id": "zhaozhou-qiao", "name": "赵州桥", "type": "building", "category": "桥梁", "url": "https://baike.baidu.com/item/赵州桥" },
+    { "id": "yuanmingyuan", "name": "圆明园", "type": "building", "category": "皇宫", "url": "https://baike.baidu.com/item/圆明园" },
+    { "id": "zhili-zongdushu", "name": "直隶总督署", "type": "building", "category": "官府", "url": "https://baike.baidu.com/item/直隶总督署" }
+  ]
+}

@@ -15,6 +15,11 @@ INDEX_FILE = BASE_DIR / "kb_index.json"
 
 load_dotenv(BASE_DIR / ".env")
 
+# Firecrawl + 星际探索星云数据
+FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY", "")
+STARCLOUD_SOURCES = BASE_DIR / "starcloud_sources.json"
+STARCLOUD_RAW = PROJECT_DIR / "data" / "star-cloud.raw.json"
+
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
 DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")

@@ -415,6 +415,7 @@
         margin-left: 4px;
       }
       .aig-narrate-float-tog:hover { background: rgba(255,255,255,.14); }
+
       .aig-narrate-float.playing { border-color: rgba(212,175,55,.55); }
       .aig-narrate-float.playing .aig-narrate-float-icon {
         background: rgba(212,175,55,.28);
@@ -506,10 +507,15 @@
 
      双语双引擎：
      ・中文（zh）→ Edge TTS 音频流（微软在线语音）
-     ・英文（en）→ Chrome SpeechSynthesis
+     ・英文（en）→ Chrome SpeechSynthesis（单 utterance，无断句间隔）
 
      generation 计数器：每次 play / stop 递增，旧的异步 callback
      看到 gen 不对就直接放弃，杜绝切换语言时的幽灵播放。
+
+     Chrome 坑点修复：
+     ① synth.resume() 必须在 speak() 前调用，否则可能被静默暂停
+     ② cancel() 异步，轮询等待最多 300ms
+     ③ Audio / utterance 显式设 volume=1.0 保证最大音量
      ═══════════════════════════════════════════════════════════════ */
   const TTSPlayer = (function () {
     const synth = window.speechSynthesis;
@@ -517,22 +523,30 @@
     let sentences = [], sentenceIdx = 0;
     let onEndCb = null;
     let bgmDucked = false;
-    let playGen = 0;  // generation 计数器
+    let playGen = 0;
 
-    // ── 常量 ──────────────────────────────────────────────────────
     const BGM_DUCK_VOLUME = 0.12;
     const CANCEL_POLL_MS  = 30;
-    const CANCEL_MAX_TRIES = 100;  // ~3s 超时，防止死循环
+    const CANCEL_MAX_TRIES = 3;   // 90ms，减少感知延迟
 
-    // ── Edge TTS 音频引擎（中文）────────────────────────────────
-    let audioEl = null;
-    let audioUrl = null;
-    let sentProps = [];  // [{start, end}] 每句在全文中的字符占比
+    // ── Edge TTS（中文）───────────────────────────────────────────
+    let audioEl = null, audioUrl = null;
+    let sentProps = [];  // [{start, end}] 句子在全文中的比例区间
 
-    // ── Web Speech 引擎（英文）──────────────────────────────────
+    // ── 音频预缓存（页面加载时后台下载，点击后零延迟）─────────────
+    let audioPreloadUrl = null;    // 完整音频的 blob URL（就绪后立即可播）
+    let audioPreloadText = "";
+    let _preloadActive = false;    // 标记预加载是否正在进行中
+
+    // ── Web Speech（英文）─────────────────────────────────────────
     let wsVoice = null;
+    let wsStartTime = 0;                    // utterance onstart 时间戳
+    let wsSentBounds = [];                 // 句子字符边界
+    let wsTotalChars = 0;                  // 合并后总字符数
+    let wsRate = 0.92;                     // 语速
+    let wsPauseStart = 0;                  // 暂停开始时间，恢复时补偿
 
-    /* ── 工具函数 ───────────────────────────────────────────────── */
+    /* ── 工具 ───────────────────────────────────────────────────── */
 
     function splitSentences(text) {
       const raw = String(text || "").replace(/\s+/g, " ").trim();
@@ -553,83 +567,175 @@
     }
 
     function finish() {
-      playing = false;
-      duckBGM(false);
+      playing = false; duckBGM(false);
+      wsStartTime = 0; wsSentBounds = []; wsTotalChars = 0; wsPauseStart = 0;
       if (onEndCb) { const cb = onEndCb; onEndCb = null; cb(); }
     }
 
-    /* ── Web Speech 引擎 ────────────────────────────────────────── */
+    // Chrome SpeechSynthesis 有时会被静默暂停，resume 是最佳防御
+    function synResume() {
+      try { if (synth && synth.paused) synth.resume(); } catch(e) {}
+    }
 
-    function getWSVoice() {
+    function synCancel() {
+      try { if (synth) synth.cancel(); } catch(e) {}
+    }
+
+    // ★ 获取英文女声 — 三层策略确保选到女声
+    function getWSVoiceSync() {
       if (!synth) return null;
       const voices = synth.getVoices();
       if (!voices.length) return null;
-      const pref = ["Google US English", "Microsoft David", "Microsoft Mark", "Samantha", "Karen", "Zira"];
-      for (const n of pref) {
-        const v = voices.find(vo => vo.name.toLowerCase().includes(n.toLowerCase()));
+
+      // 收集一次可用于日志调试（可关闭）
+      // console.log("[TTS] 可用语音:", voices.map(v => `${v.name} (${v.lang})`).join(", "));
+
+      // ── 策略1：严格 en-US / en-GB 女声关键词 ──
+      const femaleKws = [
+        // Windows 10/11
+        "zira", "microsoft zira",
+        // macOS
+        "samantha", "karen", "moira", "tessa", "veena", "fiona", "ava",
+        // Google / Android
+        "google us english female", "english (us) female",
+        "english (united states) female",
+        // Windows UK/AU/CA
+        "microsoft hazel", "microsoft heather", "microsoft linda",
+        "microsoft susan", "catherine",
+        // 通用女声关键词
+        "female", "woman", "girl",
+      ];
+      for (const kw of femaleKws) {
+        const v = voices.find(vo =>
+          /^en(-|$)/.test(vo.lang) && vo.name.toLowerCase().includes(kw));
         if (v) return v;
       }
-      return voices.find(v => v.lang.startsWith("en")) || null;
+
+      // ── 策略2：所有语言里找女声关键词 ──
+      for (const kw of femaleKws) {
+        const v = voices.find(vo => vo.name.toLowerCase().includes(kw));
+        if (v) return v;
+      }
+
+      // ── 策略3：找任意 en 语音（仅作最后兜底）──
+      const enFallback = voices.find(v => /^en(-|$)/.test(v.lang));
+      if (enFallback) {
+        console.warn("[TTS] 未找到英文女声，使用:", enFallback.name);
+        return enFallback;
+      }
+      return voices[0] || null;
     }
 
-    function playNextWS() {
-      if (!playing || paused) return;
-      if (sentenceIdx >= sentences.length) { finish(); return; }
-      const u = new SpeechSynthesisUtterance(sentences[sentenceIdx]);
-      u.lang = "en-US";
-      u.rate = 0.92;  u.pitch = 1.0;
-      if (wsVoice) u.voice = wsVoice;
-
-      u.onend   = () => { sentenceIdx++; playNextWS(); };
-      u.onerror = () => { sentenceIdx++; playNextWS(); };
-      try { synth.speak(u); } catch(e) { sentenceIdx++; playNextWS(); }
+    // ★ 等待 voices 就绪（Chrome 首次加载可能为空）
+    function ensureVoicesReady() {
+      return new Promise((resolve) => {
+        if (!synth) return resolve();
+        const voices = synth.getVoices();
+        if (voices.length) return resolve();
+        const onReady = () => { synth.removeEventListener("voiceschanged", onReady); resolve(); };
+        synth.addEventListener("voiceschanged", onReady);
+        setTimeout(() => { synth.removeEventListener("voiceschanged", onReady); resolve(); }, 2000);
+      });
     }
 
-    function doStartWS(text, gen) {
+    // ★ 英文改为单 utterance：把所有句子连成一段，消除断句间隔
+    async function doStartWS(text, gen) {
       if (gen !== playGen) return;
       sentences = splitSentences(text);
       if (!sentences.length) { playing = false; duckBGM(false); return; }
       sentenceIdx = 0;
-      playing = true; paused = false;
       duckBGM(true);
 
-      const kick = () => {
-        if (gen !== playGen) return;
-        wsVoice = getWSVoice();
-        playNextWS();
+      const fullText = sentences.join(" ");
+      const sentBounds = [];
+      let pos = 0;
+      for (let i = 0; i < sentences.length; i++) {
+        sentBounds.push(pos);
+        pos += sentences[i].length + 1;
+      }
+
+      // ★ 等待 Chrome voices 就绪再 speak（否则可能静默失败）
+      await ensureVoicesReady();
+      if (gen !== playGen) return;
+
+      wsVoice = getWSVoiceSync();
+      console.log("[TTS] 英文女声选用:", wsVoice ? wsVoice.name : "(系统默认)");
+
+      const u = new SpeechSynthesisUtterance(fullText);
+      u.lang = "en-US";
+      u.rate = 0.92;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+      if (wsVoice) u.voice = wsVoice;
+
+      u.onstart = () => {
+        wsStartTime = Date.now();
+        wsSentBounds = sentBounds;
+        wsTotalChars = fullText.length;
+        wsRate = u.rate;
       };
-      if (!synth.getVoices().length) {
-        let resolved = false;
-        const onVoices = () => { if (!resolved) { resolved = true; kick(); } };
-        synth.addEventListener("voiceschanged", onVoices, { once: true });
-        setTimeout(() => { if (!resolved) { resolved = true; synth.removeEventListener("voiceschanged", onVoices); kick(); } }, 500);
-      } else { kick(); }
+
+      u.onboundary = (e) => {
+        if (e.charIndex !== undefined) {
+          for (let i = sentBounds.length - 1; i >= 0; i--) {
+            if (e.charIndex >= sentBounds[i]) { sentenceIdx = i; break; }
+          }
+        }
+      };
+
+      u.onend = () => { wsStartTime = 0; wsSentBounds = []; finish(); };
+      u.onerror = (e) => {
+        // Chrome 间歇性报 "canceled" / "interrupted" 但可能已播完，不视为故障
+        if (e.error === "canceled" || e.error === "interrupted") {
+          wsStartTime = 0; wsSentBounds = [];
+          finish();
+          return;
+        }
+        console.warn("[TTS] WS error", e.error || e);
+        wsStartTime = 0; wsSentBounds = [];
+        finish();
+      };
+
+      // ★ 不要 synResume() 在 speak 前！Chrome cancel→resume→speak 会导致静默
+      try {
+        synth.speak(u);
+        // ★ speak 之后再检查：如果被 Chrome 自动暂停则 resume
+        setTimeout(() => {
+          try { if (synth && synth.paused && synth.speaking) synth.resume(); } catch(e) {}
+        }, 50);
+      } catch(e) {
+        console.warn("[TTS] WS speak failed", e);
+        wsStartTime = 0; wsSentBounds = [];
+        finish();
+      }
     }
 
-    // 轮询等待 synth.speaking 变 false，带超时上限
+    // 轮询等待 cancel 完成，然后启动 WS
     function waitAndStartWS(text, gen, attempt) {
       if (gen !== playGen) return;
       if (synth && synth.speaking) {
         if (attempt >= CANCEL_MAX_TRIES) {
-          // 超时，强行开始
-          console.warn("[TTS] cancel poll timeout, starting anyway");
-          doStartWS(text, gen);
+          synCancel();
+          // Chrome cancel 异步，加 60ms 等待再启动
+          setTimeout(() => { if (gen === playGen) doStartWS(text, gen); }, 60);
           return;
         }
-        try { synth.cancel(); } catch(e) {}
+        synCancel();
         setTimeout(() => waitAndStartWS(text, gen, attempt + 1), CANCEL_POLL_MS);
         return;
       }
       doStartWS(text, gen);
     }
 
-    /* ── Edge TTS 引擎 ──────────────────────────────────────────── */
+    /* ── Edge TTS 引擎（中文）───────────────────────────────────── */
 
     function cleanupAudio(el, url) {
       const a = el || audioEl;
       const u = url || audioUrl;
       if (a) { try { a.pause(); } catch(e) {} a.src = ""; a.load(); if (a === audioEl) audioEl = null; }
-      if (u) { URL.revokeObjectURL(u); if (u === audioUrl) audioUrl = null; }
+      // ★ 永不销毁预缓存 URL（后续播放复用）
+      if (u && u !== audioPreloadUrl) { URL.revokeObjectURL(u); }
+      if (u === audioUrl) audioUrl = null;
     }
 
     async function startEdgeTTS(text, onEnd, gen) {
@@ -644,102 +750,209 @@
       }
       sentenceIdx = 0;
       onEndCb = onEnd || null;
-      playing = true; paused = false;
-      duckBGM(true);
+      duckBGM(true);  // playing 已在 play() 中设为 true
 
-      // ★ 关键修复：在 await 之前同步创建 Audio 元素，让它继承
-      //    用户点击的 "用户手势" 上下文，从而绕过 Chrome 自动播放策略。
-      //    new Audio() 不播放任何内容，只是注册了播放许可。
+      // ★ 在 await 之前同步创建 Audio，继承用户手势，绕过自动播放策略
       const audio = new Audio();
       audio.setAttribute("data-aig-tts", "1");
       audio.preload = "auto";
+      audio.volume = 1.0;  // ★ 最大音量
 
       let localUrl = null;
 
       try {
-        console.log("[TTS] 请求 Edge TTS 语音合成…");
-        const resp = await fetch(API_BASE + "/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: fullText }),
-        });
-        if (gen !== playGen) { URL.revokeObjectURL(audio.src || ""); return; }
-        if (!resp.ok) throw new Error("TTS API HTTP " + resp.status + " — 请确认后端已启动");
+        let isStreaming = false;
+        // ★ 优先用预缓存 URL（永久保留，不消费），无需 await fetch
+        if (fullText === audioPreloadText && audioPreloadUrl) {
+          localUrl = audioPreloadUrl;
+          console.log("[TTS] 使用预缓存音频，即时播放");
+        } else {
+          // ★ 流式播放：并行 fetch + MediaSource 打开，首个 chunk 即播
+          console.log("[TTS] 请求 Edge TTS 流式合成…");
+          const mediaSource = new MediaSource();
+          localUrl = URL.createObjectURL(mediaSource);
 
-        const blob = await resp.blob();
-        if (gen !== playGen) { URL.revokeObjectURL(audio.src || ""); return; }
-        console.log("[TTS] Edge TTS 音频已就绪，大小", (blob.size / 1024).toFixed(0), "KB");
+          // 提前注册事件监听 + 设 src 触发 sourceopen
+          audio.addEventListener("timeupdate", () => {
+            if (!audio.duration || !isFinite(audio.duration)) return;
+            const p = audio.currentTime / audio.duration;
+            for (let i = sentProps.length - 1; i >= 0; i--) {
+              if (p >= sentProps[i].start) { sentenceIdx = i; break; }
+            }
+          });
+          audio.addEventListener("ended", () => { finish(); cleanupAudio(audio, localUrl); });
+          audio.addEventListener("error", () => { finish(); cleanupAudio(audio, localUrl); });
+          audio.addEventListener("pause", () => { if (!playing) cleanupAudio(audio, localUrl); });
+          audio.src = localUrl;  // 触发 sourceopen
 
-        localUrl = URL.createObjectURL(blob);
+          // ★ 并行：fetch TTS + 等待 MediaSource 打开（省 ~100-300ms）
+          const fetchPromise = fetch(API_BASE + "/api/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: fullText }),
+          });
+          const sourceopenPromise = new Promise((resolve, reject) => {
+            if (mediaSource.readyState === "open") { resolve(); return; }
+            mediaSource.addEventListener("sourceopen", resolve, { once: true });
+            setTimeout(() => reject(new Error("MediaSource 打开超时")), 3000);
+          });
 
-        // timeupdate 根据播放进度更新句子高亮索引
-        audio.addEventListener("timeupdate", () => {
-          if (!audio.duration || !isFinite(audio.duration)) return;
-          const p = audio.currentTime / audio.duration;
-          for (let i = sentProps.length - 1; i >= 0; i--) {
-            if (p >= sentProps[i].start) { sentenceIdx = i; break; }
+          const [resp, _] = await Promise.all([fetchPromise, sourceopenPromise]);
+          if (gen !== playGen) { cleanupAudio(audio, localUrl); return; }
+          if (!resp.ok) throw new Error("TTS API HTTP " + resp.status + " — 请确认后端已启动");
+
+          const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+          const reader = resp.body.getReader();
+
+          // ★ 读首个 chunk → 立即播放
+          const { done: done0, value: chunk0 } = await reader.read();
+          if (gen !== playGen) { cleanupAudio(audio, localUrl); return; }
+          if (!done0) {
+            await new Promise((resolve) => {
+              sourceBuffer.addEventListener("updateend", resolve, { once: true });
+              sourceBuffer.appendBuffer(chunk0);
+            });
+            audio.play().catch(() => {});
+            console.log("[TTS] 首块音频到达，开始流式播放");
           }
-        });
 
-        audio.addEventListener("ended", () => {
-          console.log("[TTS] Edge TTS 播放完成");
-          finish(); cleanupAudio(audio, localUrl);
-        });
-        audio.addEventListener("error", (e) => {
-          console.warn("[TTS] Audio 播放出错", e);
-          finish(); cleanupAudio(audio, localUrl);
-        });
-        audio.addEventListener("pause", () => {
-          if (!playing) { cleanupAudio(audio, localUrl); }
-        });
+          // ★ 后台追加剩余 chunk
+          (async () => {
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (gen !== playGen) break;
+                if (done) { if (mediaSource.readyState === "open") mediaSource.endOfStream(); break; }
+                await new Promise((r) => {
+                  sourceBuffer.addEventListener("updateend", r, { once: true });
+                  try { sourceBuffer.appendBuffer(value); } catch(e) { r(); }
+                });
+              }
+            } catch (e) { /* ignore */ }
+          })();
+
+          isStreaming = true;
+        }
+
+        if (!isStreaming) {
+          audio.addEventListener("timeupdate", () => {
+            if (!audio.duration || !isFinite(audio.duration)) return;
+            const p = audio.currentTime / audio.duration;
+            for (let i = sentProps.length - 1; i >= 0; i--) {
+              if (p >= sentProps[i].start) { sentenceIdx = i; break; }
+            }
+          });
+
+          audio.addEventListener("ended", () => {
+            console.log("[TTS] 播放完成");
+            finish(); cleanupAudio(audio, localUrl);
+          });
+          audio.addEventListener("error", (e) => {
+            console.warn("[TTS] Audio 播放出错", e);
+            finish(); cleanupAudio(audio, localUrl);
+          });
+          audio.addEventListener("pause", () => {
+            if (!playing) { cleanupAudio(audio, localUrl); }
+          });
+        }
 
         if (gen !== playGen) { URL.revokeObjectURL(localUrl); return; }
         audioUrl = localUrl;
         audioEl = audio;
-        audio.src = localUrl;
+        if (!isStreaming) { audio.src = localUrl; }  // 流式播放已在上面设好 src
 
-        // play() 返回 promise；若被浏览器阻止会在 catch 里处理
-        console.log("[TTS] 开始播放 Edge TTS 音频…");
-        await audio.play();
-        console.log("[TTS] 播放中…");
+        if (!isStreaming) {
+          console.log("[TTS] 开始播放…");
+          await audio.play();
+        }
       } catch (e) {
         if (gen !== playGen) return;
         console.warn("[TTS] Edge TTS 失败:", e.message || e);
         cleanupAudio(audio, localUrl);
-        // 中文降级：用 Web Speech 读（通常仍无声，但至少不报错）
-        fallbackToWS(text, gen);
+        // 降级：尝试用 Web Speech 读中文（通常无声但至少不崩溃）
+        if (gen === playGen) {
+          sentences = splitSentences(text);
+          if (sentences.length) {
+            sentenceIdx = 0;
+            duckBGM(true);
+            doStartWS(text, gen);
+          }
+        }
       }
-    }
-
-    // 中文播放失败时的降级路径
-    function fallbackToWS(text, gen) {
-      if (gen !== playGen) return;
-      sentences = splitSentences(text);
-      if (!sentences.length) { playing = false; duckBGM(false); return; }
-      sentenceIdx = 0;
-      playing = true; paused = false;
-      duckBGM(true);
-      doStartWS(text, gen);
     }
 
     /* ── Public API ─────────────────────────────────────────────── */
 
+    // 初始化时预热语音列表
+    if (synth) {
+      const tryWarm = () => {
+        const voices = synth.getVoices();
+        if (voices.length && !wsVoice) wsVoice = getWSVoiceSync();
+      };
+      tryWarm();
+      synth.addEventListener("voiceschanged", tryWarm, { once: true });
+    }
+
     return {
       isPlaying: () => playing,
       isPaused: () => paused,
-      getCurrentIndex: () => sentenceIdx,
+      getCurrentIndex: () => {
+        // ★ 英文（Web Speech）时间估算：当 onboundary charIndex 不可靠时用时间推算
+        if (wsStartTime > 0 && wsSentBounds.length > 0 && wsTotalChars > 0) {
+          const elapsed = (Date.now() - wsStartTime) / 1000;
+          // 英文字符朗读速度约 11.5 chars/sec at rate 1.0
+          const totalDuration = wsTotalChars / (11.5 * wsRate);
+          const estimatedCharIndex = Math.min(Math.floor(elapsed * wsTotalChars / totalDuration), wsTotalChars - 1);
+          let idx = 0;
+          for (let i = wsSentBounds.length - 1; i >= 0; i--) {
+            if (estimatedCharIndex >= wsSentBounds[i]) { idx = i; break; }
+          }
+          // 取 onboundary 和估算中的较大值（onboundary 更准，估算作兜底）
+          return Math.max(sentenceIdx, Math.min(idx, sentences.length - 1));
+        }
+        return sentenceIdx;
+      },
       getSentenceCount: () => sentences.length,
       splitSentences,
 
+      // ★ 后台预下载完整音频，完成后直接复用 blob URL
+      preloadAudio(text) {
+        if (!text || _preloadActive) return;
+        // 清理上一次的预缓存
+        if (audioPreloadUrl) { URL.revokeObjectURL(audioPreloadUrl); audioPreloadUrl = null; }
+        audioPreloadText = "";
+        _preloadActive = true;
+
+        // ★ 标准化文本，与 startEdgeTTS 中 sentences.join("") 一致
+        const sents = splitSentences(text);
+        const normalizedText = sents.join("");
+
+        (async () => {
+          try {
+            const resp = await fetch(API_BASE + "/api/tts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: normalizedText }),
+            });
+            if (!resp.ok) { _preloadActive = false; return; }
+
+            const blob = await resp.blob();
+            audioPreloadUrl = URL.createObjectURL(blob);
+            audioPreloadText = normalizedText;
+            _preloadActive = false;
+            console.log("[TTS] 预缓存就绪，大小", (blob.size / 1024).toFixed(0), "KB，点击即播");
+          } catch(e) { _preloadActive = false; console.warn("[TTS] 预缓存失败:", e); }
+        })();
+      },
+
       play(text, lang, onEnd) {
-        // 递增 generation 让所有旧的异步操作自行放弃
         playGen++;
         const gen = playGen;
 
-        // 状态清零
-        playing = false; paused = false; onEndCb = null;
+        // ★ 立即设 playing=true，保证高亮 poll 能正常工作
+        playing = true; paused = false; onEndCb = null;
         cleanupAudio();
-        try { if (synth) synth.cancel(); } catch(e) {}
+        synCancel();  // 杀掉可能残留的 WS 任务
 
         const isZh = !String(lang || "").toLowerCase().startsWith("en");
 
@@ -756,13 +969,20 @@
         paused = true;
         if (audioEl) { audioEl.pause(); }
         else { try { if (synth) synth.pause(); } catch(e) {} }
+        // ★ 记录暂停时间，恢复时补偿英文 time-based 估算
+        if (!audioEl && wsStartTime) wsPauseStart = Date.now();
       },
 
       resume() {
         if (!paused) return;
         paused = false;
         if (audioEl) { audioEl.play(); }
-        else { try { if (synth) synth.resume(); } catch(e) {} }
+        else { synResume(); }
+        // ★ 补偿暂停时长到 wsStartTime，避免时间估算跳跃
+        if (!audioEl && wsStartTime && wsPauseStart) {
+          wsStartTime += Date.now() - wsPauseStart;
+          wsPauseStart = 0;
+        }
       },
 
       togglePause() {
@@ -772,11 +992,12 @@
       stop() {
         playing = false; paused = false;
         sentenceIdx = 0; sentProps = [];
+        wsStartTime = 0; wsSentBounds = []; wsTotalChars = 0; wsPauseStart = 0;
         onEndCb = null;
-        playGen++;  // 让所有在飞的异步操作放弃
+        playGen++;
         duckBGM(false);
         cleanupAudio();
-        try { if (synth) synth.cancel(); } catch(e) {}
+        synCancel();
       }
     };
   })();
@@ -1141,13 +1362,41 @@
        ═══════════════════════════════════════════════════════════════ */
     if (!isNarrationPage) return; // 其他页面无语音导览
 
+    /* ── 预缓存：页面加载时后台下载双语讲解稿 + 中文 TTS 音频 ───── */
+    const narrCache = { zh: "", en: "" };
+    (function preloadNarrData() {
+      const langs = ["zh", "en"];
+      langs.forEach(lang => {
+        fetch(API_BASE + "/api/narration", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lang, page_id: pageId }),
+        }).then(r => r.json()).then(data => {
+          const script = (data.text || data.script || "").trim();
+          if (script) {
+            narrCache[lang] = script;
+            // 中文：后台下载 Edge TTS 音频
+            if (lang === "zh") TTSPlayer.preloadAudio(script);
+          }
+        }).catch(() => {});
+      });
+    })();
+
     /* ── Highlight polling timer ────────────────────────────────── */
     let narrHighlightTimer = null;
     let narrMsgEl = null; // 当前叙事 AI 消息 DOM
 
     function pollNarrHighlight() {
-      if (!TTSPlayer.isPlaying()) { stopHighlightTimer(); return; }
-      if (!narrMsgEl || !document.body.contains(narrMsgEl)) { stopHighlightTimer(); return; }
+      // ★ 用 narrationActive 而非 isPlaying()，避免中文异步预热期间的竞态
+      if (!narrationActive) { stopHighlightTimer(); return; }
+      // ★ 每次轮询都从 DOM 动态查找最新的旁白消息，不依赖可能残留的 narrMsgEl
+      const latestMsg = msgBox.querySelector(".aig-narr-msg:last-child");
+      if (latestMsg && latestMsg !== narrMsgEl) {
+        narrMsgEl = latestMsg;
+      }
+      if (!narrMsgEl || !document.body.contains(narrMsgEl)) {
+        return; // 消息还未渲染或已被移除，等下一轮
+      }
       const sIdx = TTSPlayer.getCurrentIndex();
       const allSegs = narrMsgEl.querySelectorAll(".aig-narr-seg");
       if (!allSegs.length) return;
@@ -1200,79 +1449,105 @@
 
     /* ── Start narration ────────────────────────────────────────── */
     async function startNarration() {
-      // 确保对话面板打开，用户能看到字幕
       if (!panelOpen) setOpen(true);
       refreshLang(); // 跟随站点语言切换
-      try {
-        const resp = await fetch(API_BASE + "/api/narration", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lang: currentLang, page_id: pageId }),
-        });
-        if (!resp.ok) throw new Error("narration API failed");
-        const data = await resp.json();
-        const script = data.text || data.script || "";
-        // API 返回 "zh"/"en"，统一转为合法 BCP 47 标签（Chrome 只认 zh-CN，不认 zh）
-        const rawLang = data.lang || currentLang;
-        const lang = String(rawLang).toLowerCase().startsWith("en") ? "en-US" : "zh-CN";
+      const langKey = currentLang === "en" ? "en" : "zh";
 
-        if (!script.trim()) {
-          appendMsg("assistant", "暂无语音导览内容。");
+      // 优先用缓存，未命中再用 live fetch
+      let script = narrCache[langKey];
+      if (!script) {
+        try {
+          const resp = await fetch(API_BASE + "/api/narration", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lang: currentLang, page_id: pageId }),
+          });
+          if (!resp.ok) throw new Error("narration API failed");
+          const data = await resp.json();
+          script = (data.text || data.script || "").trim();
+          if (script) narrCache[langKey] = script;
+        } catch {
+          appendMsg("assistant", "语音导览加载失败，请确认后端已启动。");
           return;
         }
-
-        // 分句并构建 HTML（与 TTSPlayer 共用同一分句逻辑，确保字幕与音频句数对齐）
-        const sentences = TTSPlayer.splitSentences(script);
-        const segsHtml = sentences.map((s, i) =>
-          `<span class="aig-narr-seg" data-idx="${i}">${s}</span>`
-        ).join("");
-
-        // 作为 AI 消息发送到对话面板（raw HTML 不经过 markdown 转义）
-        const msgDiv = appendMsg("assistant",
-          `<span class="aig-msg-content"><p class="aig-narr-body">${segsHtml}</p></span>`,
-          "aig-narr-msg",
-          true
-        );
-        narrMsgEl = msgDiv;
-
-        // 显示播放状态
-        if (narrateFloat) {
-          narrateFloat.classList.add("visible", "playing");
-          narrateFloat.querySelector(".aig-narrate-float-icon").textContent = "🔊";
-        }
-
-        // 播放
-        narrationActive = true;
-        TTSPlayer.play(script, lang, () => {
-          stopHighlightTimer();
-          stopNarrationUI();
-        });
-        startHighlightTimer();
-      } catch {
-        appendMsg("assistant", "语音导览加载失败，请确认后端已启动。");
       }
+
+      const rawLang = langKey;
+      const lang = rawLang === "en" ? "en-US" : "zh-CN";
+
+      if (!script) {
+        appendMsg("assistant", "暂无语音导览内容。");
+        return;
+      }
+
+      // 分句并构建 HTML
+      const sentences = TTSPlayer.splitSentences(script);
+      const segsHtml = sentences.map((s, i) =>
+        `<span class="aig-narr-seg" data-idx="${i}">${s}</span>`
+      ).join("");
+
+      // ★ 先停掉旧的旁白 UI，再创建新的，避免 narrMsgEl 残留
+      stopNarrationUI();
+
+      const msgDiv = appendMsg("assistant",
+        `<span class="aig-msg-content"><p class="aig-narr-body">${segsHtml}</p></span>`,
+        "aig-narr-msg",
+        true
+      );
+      narrMsgEl = msgDiv;
+
+      if (narrateFloat) {
+        narrateFloat.classList.add("visible", "playing");
+        narrateFloat.querySelector(".aig-narrate-float-icon").textContent = "🔊";
+      }
+
+      narrationActive = true;
+      TTSPlayer.play(script, lang, () => {
+        stopHighlightTimer();
+        stopNarrationUI();
+      });
+      startHighlightTimer();
     }
 
     /* ── Float button events ────────────────────────────────────── */
+    /* 左边主体（icon+label）：播放中→停止，停止→重新开始           */
+    /* 右边 toggle 按钮：暂停/继续                                    */
     narrateFloat.classList.add("visible");
+
+    // 停止语音导览（完全停止 + 清理 UI）
+    function stopNarration() {
+      TTSPlayer.stop();
+      stopNarrationUI();
+    }
+
     narrateFloat.addEventListener("click", e => {
+      // 右边的暂停按钮自己处理
       if (e.target.closest('[data-action="toggle"]')) return;
-      if (TTSPlayer.isPlaying() && !TTSPlayer.isPaused()) {
-        TTSPlayer.togglePause();
-        const tog = narrateFloat.querySelector('[data-action="toggle"]');
-        if (TTSPlayer.isPaused()) { tog.textContent = "▶"; tog.title = "继续"; }
-        else { tog.textContent = "⏸"; tog.title = "暂停"; }
+      // 左边主体：播放中或暂停 → 停止；已停止 → 重新开始
+      if (TTSPlayer.isPlaying() || TTSPlayer.isPaused()) {
+        stopNarration();
       } else {
         startNarration();
       }
     });
+
+    // 暂停/继续按钮
     narrateFloat.querySelector('[data-action="toggle"]').addEventListener("click", e => {
       e.stopPropagation();
+      if (!TTSPlayer.isPlaying() && !TTSPlayer.isPaused()) return; // 没在播放，忽略
       TTSPlayer.togglePause();
       const tog = narrateFloat.querySelector('[data-action="toggle"]');
-      if (TTSPlayer.isPaused()) { tog.textContent = "▶"; tog.title = "继续"; }
-      else { tog.textContent = "⏸"; tog.title = "暂停"; }
+      if (TTSPlayer.isPaused()) {
+        tog.textContent = "▶"; tog.title = "继续";
+      } else {
+        tog.textContent = "⏸"; tog.title = "暂停";
+        if (!narrHighlightTimer && TTSPlayer.isPlaying()) startHighlightTimer();
+        narrateFloat.classList.add("playing");
+        narrateFloat.querySelector(".aig-narrate-float-icon").textContent = "🔊";
+      }
     });
+
+
   }
 
   if (document.readyState === "loading") {

@@ -171,8 +171,8 @@ class TTSRequest(BaseModel):
 
 
 _EDGE_VOICES = {
-    "zh": "zh-CN-YunyangNeural",   # 云扬 · 男声播报，沉稳自然
-    "en": "en-US-GuyNeural",       # 英文备用
+    "zh": "zh-CN-XiaoxiaoNeural",  # 晓晓 · 女声播报，温柔自然
+    "en": "en-US-JennyNeural",     # Jenny · 女声
 }
 
 

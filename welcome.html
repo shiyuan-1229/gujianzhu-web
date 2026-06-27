@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>古建智寻 · 寻迹千年</title>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;500;700&family=Noto+Sans+SC:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" />
+    <style>
+      :root { --bg:#06060a; --fg:rgba(245,240,232,0.95); --muted:rgba(245,240,232,0.6); --gold:#e7c66b; --gold-soft:rgba(231,198,107,0.9); }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      html,body { height:100%; }
+      body { background:
+          radial-gradient(1300px 1000px at 50% 28%, #3c1014 0%, #1d080a 46%, #0b0405 80%, #070203 100%),
+          linear-gradient(180deg, #1a0709, #080203);
+        color:var(--fg); font-family:"Noto Sans SC",system-ui,sans-serif; overflow:hidden; }
+      ::selection { background:var(--gold); color:#0a0a0c; }
+
+      #globe, #gallery { position:fixed; inset:0; width:100%; height:100%; display:block; }
+      #gallery { z-index:1; opacity:0; transition:opacity 0.2s; }
+      #globe { z-index:2; cursor:grab; }
+      #globe:active { cursor:grabbing; }
+
+      .topbar { position:fixed; top:0; left:0; right:0; z-index:30; display:flex; align-items:center; justify-content:space-between; padding:22px 40px; mix-blend-mode:difference; }
+      .brand { font-family:"Ma Shan Zheng","Noto Serif SC",serif; font-size:26px; letter-spacing:0.18em; color:#fff; }
+      .brand .en { display:block; font-family:"Cormorant Garamond",serif; font-size:10px; letter-spacing:0.42em; opacity:0.7; margin-top:2px; text-transform:uppercase; }
+      .topnav { display:flex; gap:30px; align-items:center; font-size:13px; letter-spacing:0.22em; color:#fff; }
+      .topnav a { color:inherit; text-decoration:none; opacity:0.85; }
+      .enter-btn { border:1px solid rgba(255,255,255,0.55); border-radius:999px; padding:9px 22px; font-size:12px; letter-spacing:0.24em; }
+
+      /* 地球上的中国标签 + 进入提示 */
+      .globe-ui { position:fixed; inset:0; z-index:20; pointer-events:none; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; opacity:0; transition:opacity 1s ease; }
+      .globe-ui.show { opacity:1; }
+      .china-eyebrow { font-family:"Cormorant Garamond",serif; letter-spacing:0.5em; text-transform:uppercase; font-size:13px; color:var(--gold-soft); margin-bottom:14px; }
+      .china-title { font-family:"Ma Shan Zheng",serif; font-size:clamp(48px,8vw,120px); color:#fff; letter-spacing:0.1em; text-shadow:0 8px 50px rgba(0,0,0,0.6); }
+      .china-sub { margin-top:16px; font-size:15px; letter-spacing:0.3em; color:rgba(255,255,255,0.78); font-weight:300; }
+      .enter-cue { position:fixed; bottom:42px; left:50%; transform:translateX(-50%); z-index:21; display:flex; flex-direction:column; align-items:center; gap:10px; font-family:"Cormorant Garamond",serif; font-size:12px; letter-spacing:0.35em; text-transform:uppercase; color:rgba(255,255,255,0.8); opacity:0; transition:opacity 1s ease; pointer-events:none; }
+      .enter-cue.show { opacity:1; }
+      .enter-cue .arrow { width:1px; height:46px; background:linear-gradient(180deg,var(--gold),transparent); animation:cue 2s ease-in-out infinite; transform-origin:top; }
+      @keyframes cue { 0%,100%{ transform:scaleY(0.3); opacity:0.4; } 50%{ transform:scaleY(1); opacity:1; } }
+
+      /* 画廊里的提示 */
+      .gallery-hint { position:fixed; bottom:36px; left:50%; transform:translateX(-50%); z-index:22; font-family:"Cormorant Garamond",serif; font-size:12px; letter-spacing:0.35em; text-transform:uppercase; color:rgba(255,255,255,0.6); opacity:0; transition:opacity 1s ease; pointer-events:none; }
+      .gallery-hint.show { opacity:1; }
+
+      #grain { position:fixed; inset:0; z-index:25; pointer-events:none; opacity:0.05; mix-blend-mode:overlay; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+      #loader { position:fixed; inset:0; z-index:90; background:radial-gradient(900px 700px at 50% 40%, #3c1014, #0b0405 80%); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; transition:opacity 0.8s ease; }
+      #loader.hide { opacity:0; pointer-events:none; }
+      #loader .l-title { font-family:"Ma Shan Zheng",serif; font-size:40px; letter-spacing:0.2em; color:#fff; }
+      #loader .l-pct { font-family:"Cormorant Garamond",serif; letter-spacing:0.3em; font-size:12px; color:var(--muted); }
+
+      /* ===== 扫描卡片流（收尾段） ===== */
+      #scanner { position:fixed; inset:0; z-index:5; opacity:0; pointer-events:none; }
+      #scanParticles { position:absolute; top:50%; left:0; width:100%; height:300px; transform:translateY(-50%); z-index:1; pointer-events:none; }
+      #cardRowWrap { position:absolute; top:50%; left:0; width:100%; height:250px; transform:translateY(-50%); z-index:2; display:flex; align-items:center; overflow:visible; }
+      #cardRow { display:flex; align-items:center; white-space:nowrap; will-change:transform; gap:60px; cursor:grab; }
+      .card-wrapper { position:relative; width:400px; height:250px; flex-shrink:0; }
+      .card-normal { position:absolute; inset:0; border-radius:14px; overflow:hidden; z-index:2; box-shadow:0 16px 44px rgba(0,0,0,0.5); clip-path:inset(0 0 0 var(--clip-right,0%)); }
+      .card-normal img { width:100%; height:100%; object-fit:cover; filter:brightness(1.04) contrast(1.05) sepia(0.08); }
+      .card-ascii { position:absolute; inset:0; border-radius:14px; overflow:hidden; z-index:1; background:rgba(22,8,8,0.62); clip-path:inset(0 calc(100% - var(--clip-left,0%)) 0 0); }
+      .card-ascii pre { position:absolute; inset:0; margin:0; padding:0; font-family:ui-monospace,"SFMono-Regular",monospace; font-size:11px; line-height:13px; color:rgba(231,198,107,0.62); white-space:pre; overflow:hidden;
+        -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.15)); mask-image:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.15));
+        animation:asciiGlitch 0.12s infinite linear alternate; }
+      @keyframes asciiGlitch { 0%,50%,100%{ opacity:1; } 49%{ opacity:0.85; } 99%{ opacity:0.93; } }
+      #scanLine { position:absolute; top:50%; left:50%; width:2px; height:282px; transform:translate(-50%,-50%); border-radius:3px; z-index:6; pointer-events:none; opacity:0; transition:opacity 0.3s;
+        background:linear-gradient(to bottom, transparent, #f4c84e 45%, #fff0c6 50%, #f4c84e 55%, transparent);
+        box-shadow:0 0 10px #e7c66b, 0 0 22px #e7c66b, 0 0 38px #c9952f, 0 0 60px #b5791f; animation:scanPulse 1.5s infinite alternate ease-in-out; }
+      #scanLine.on { opacity:1; }
+      @keyframes scanPulse { 0%{ opacity:0.7; height:276px; } 100%{ opacity:1; height:292px; } }
+      #scanHint { position:fixed; bottom:40px; left:0; right:0; text-align:center; z-index:7; font-family:"Cormorant Garamond",serif; font-size:12px; letter-spacing:0.35em; text-transform:uppercase; color:rgba(231,198,107,0.72); opacity:0; transition:opacity 1s ease; pointer-events:none; }
+      #scanHint.show { opacity:1; }
+    </style>
+  </head>
+  <body>
+    <canvas id="gallery"></canvas>
+    <div id="scanner">
+      <canvas id="scanParticles"></canvas>
+      <div id="cardRowWrap"><div id="cardRow"></div></div>
+      <div id="scanLine"></div>
+    </div>
+    <div id="scanHint">向下滚动 · 一砖一瓦皆成代码</div>
+    <canvas id="globe"></canvas>
+
+    <div class="globe-ui" id="globeUI">
+      <div class="china-eyebrow">From the World to the Middle Kingdom</div>
+      <div class="china-title">中国</div>
+      <div class="china-sub">古 建 之 源 · 营 造 千 年</div>
+    </div>
+    <div class="enter-cue" id="enterCue"><span>Scroll to enter</span><span class="arrow"></span></div>
+    <div class="gallery-hint" id="galleryHint">滚动 · 穿行古建之间</div>
+
+    <header class="topbar">
+      <div class="brand">古建智寻<span class="en">Ancient Architecture</span></div>
+      <nav class="topnav"><a class="enter-btn" href="./index.html">进入 ENTER</a></nav>
+    </header>
+    <div id="grain"></div>
+
+    <div id="loader"><div class="l-title">古建智寻</div><div class="l-pct" id="lPct">加载 0%</div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script>
+    (function(){
+      var SP = new URLSearchParams(location.search);
+      var FORCE_GALLERY = SP.get("stage") === "gallery";
+      function clamp01(x){ return Math.max(0,Math.min(1,x)); }
+      function smoothstep(a,b,x){ var t=clamp01((x-a)/(b-a)); return t*t*(3-2*t); }
+      function lerp(a,b,t){ return a+(b-a)*t; }
+
+      var lPct = document.getElementById("lPct");
+      var loader = document.getElementById("loader");
+      var state = "loading";       // loading | globe | transition | gallery
+      var galleryReady = false, globeReady = false;
+
+      /* ============================================================
+         一、画廊（原生 Three.js · 无限照片推进 + 布料/淡入/模糊）
+         ============================================================ */
+      var GALLERY_IMAGES = [
+        "gugong-hero-1.png","gugong-hero-2.png","gugong-hero-5.png","gugong-hero-4.png",
+        "gugong-hero-6.png","gugong-hero-3.png","pingyao-hero.png","zhouzhuang-hero.png",
+        "qiao-hero.png","langzhong-hero.png","kaiping-hero.png","taihedian-hero.jpg"
+      ];
+      var VISIBLE = 16, DEPTH = 50, CRUISE = 1.25;
+      var gallery = (function(){
+        var canvas = document.getElementById("gallery");
+        var renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true, preserveDrawingBuffer:true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+        renderer.setSize(innerWidth, innerHeight);
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+        camera.position.set(0,0,0);
+
+        var clothVert = [
+          "uniform float scrollForce; uniform float time;",
+          "varying vec2 vUv;",
+          "void main(){ vUv = uv; vec3 pos = position;",
+          "  float curveIntensity = scrollForce * 0.3;",
+          "  float d = length(pos.xy);",
+          "  float curve = d*d*curveIntensity;",
+          "  float ripple = (sin(pos.x*2.0+scrollForce*3.0)*0.02 + sin(pos.y*2.5+scrollForce*2.0)*0.015) * abs(curveIntensity)*2.0;",
+          "  pos.z -= (curve + ripple);",
+          "  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0); }"
+        ].join("\n");
+        var clothFrag = [
+          "uniform sampler2D map; uniform float opacity; uniform float blurAmount; uniform vec2 texel; uniform float scrollForce;",
+          "varying vec2 vUv;",
+          "void main(){ vec4 color = texture2D(map, vUv);",
+          "  if(blurAmount>0.0){ vec4 b=vec4(0.0); float total=0.0;",
+          "    for(float x=-1.0;x<=1.0;x+=1.0){ for(float y=-1.0;y<=1.0;y+=1.0){",
+          "      vec2 off=vec2(x,y)*texel*blurAmount; float w=1.0/(1.0+length(vec2(x,y)));",
+          "      b+=texture2D(map, vUv+off)*w; total+=w; } } color=b/total; }",
+          "  color.rgb += vec3(abs(scrollForce)*0.005);",
+          "  gl_FragColor = vec4(color.rgb, color.a*opacity); }"
+        ].join("\n");
+        function makeMat(){ return new THREE.ShaderMaterial({ transparent:true, depthWrite:false, uniforms:{
+          map:{value:null}, opacity:{value:0}, blurAmount:{value:0}, scrollForce:{value:0}, time:{value:0}, texel:{value:new THREE.Vector2(0.001,0.001)} },
+          vertexShader:clothVert, fragmentShader:clothFrag }); }
+
+        var materials=[], meshes=[];
+        for(var i=0;i<VISIBLE;i++){ var m=makeMat(); materials.push(m);
+          var mesh=new THREE.Mesh(new THREE.PlaneGeometry(1,1,24,24), m); scene.add(mesh); meshes.push(mesh); }
+
+        // 散布的 x/y（金角分布）
+        var spatial=[]; for(var s=0;s<VISIBLE;s++){
+          var ha=(s*2.618)%(Math.PI*2), va=(s*1.618+Math.PI/3)%(Math.PI*2);
+          var hr=(s%3)*1.2, vr=((s+1)%4)*0.8;
+          spatial.push({ x:Math.sin(ha)*hr*5/3, y:Math.cos(va)*vr*5/4 });
+        }
+        var planes=[]; for(var p=0;p<VISIBLE;p++){ planes.push({ z:(DEPTH/VISIBLE)*p%DEPTH, imageIndex:p%GALLERY_IMAGES.length }); }
+
+        var textures=[]; var loaded=0;
+        var fade={ fadeIn:{start:0.02,end:0.16}, fadeOut:{start:0.42,end:0.49} };
+        var blurS={ blurIn:{start:0.0,end:0.12}, blurOut:{start:0.42,end:0.49}, maxBlur:6.0 };
+
+        var velocity=0, autoPlay=true, lastInteract=performance.now();
+        function onWheel(e){ e.preventDefault(); velocity += e.deltaY*0.01; autoPlay=false; lastInteract=performance.now(); }
+
+        function load(onProgress, onDone){
+          var mgr=new THREE.LoadingManager();
+          var tl=new THREE.TextureLoader(mgr);
+          mgr.onProgress=function(u,l,t){ onProgress(l/t); };
+          mgr.onLoad=function(){ onDone(); };
+          GALLERY_IMAGES.forEach(function(src,i){ tl.load("./assets/"+src, function(tex){ tex.encoding=THREE.sRGBEncoding; textures[i]=tex; }); });
+        }
+
+        function fadeAt(np){ var f=fade;
+          if(np<f.fadeIn.start) return 0;
+          if(np<=f.fadeIn.end) return (np-f.fadeIn.start)/(f.fadeIn.end-f.fadeIn.start);
+          if(np<f.fadeOut.start) return 1;
+          if(np<=f.fadeOut.end) return 1-(np-f.fadeOut.start)/(f.fadeOut.end-f.fadeOut.start);
+          return 0;
+        }
+        function blurAt(np){ var b=blurS;
+          if(np<b.blurIn.start) return b.maxBlur;
+          if(np<=b.blurIn.end) return b.maxBlur*(1-(np-b.blurIn.start)/(b.blurIn.end-b.blurIn.start));
+          if(np<b.blurOut.start) return 0;
+          if(np<=b.blurOut.end) return b.maxBlur*((np-b.blurOut.start)/(b.blurOut.end-b.blurOut.start));
+          return b.maxBlur;
+        }
+
+        function update(dt, time, active){
+          if(active){
+            if(performance.now()-lastInteract>2000) autoPlay=true;
+            if(autoPlay){ velocity = lerp(velocity, CRUISE, 1-Math.pow(0.02,dt)); }  // 持续巡航
+            else { velocity *= 0.94; }                                                // 用户滚动后缓停
+          } else { velocity *= 0.95; }
+          for(var i=0;i<planes.length;i++){
+            var pl=planes[i];
+            var nz=pl.z + velocity*dt*10;
+            if(nz>=DEPTH){ var wf=Math.floor(nz/DEPTH); nz-=DEPTH*wf; pl.imageIndex=(pl.imageIndex+wf*VISIBLE)%GALLERY_IMAGES.length; }
+            else if(nz<0){ var wb=Math.ceil(-nz/DEPTH); nz+=DEPTH*wb; pl.imageIndex=((pl.imageIndex-wb*VISIBLE)%GALLERY_IMAGES.length+GALLERY_IMAGES.length)%GALLERY_IMAGES.length; }
+            pl.z=((nz%DEPTH)+DEPTH)%DEPTH;
+            var np=pl.z/DEPTH;
+            var op=clamp01(fadeAt(np)), bl=Math.max(0,Math.min(blurS.maxBlur,blurAt(np)));
+            var tex=textures[pl.imageIndex], mesh=meshes[i], mat=materials[i];
+            mesh.visible = op>0.002 && !!tex;
+            if(!mesh.visible) continue;
+            mat.uniforms.map.value=tex;
+            if(tex.image){ mat.uniforms.texel.value.set(1/tex.image.width, 1/tex.image.height); }
+            mat.uniforms.opacity.value=op; mat.uniforms.blurAmount.value=bl;
+            mat.uniforms.time.value=time; mat.uniforms.scrollForce.value=velocity;
+            var asp = tex.image ? tex.image.width/tex.image.height : 1;
+            var sx,sy; if(asp>1){ sx=2.7*asp; sy=2.7; } else { sx=2.7; sy=2.7/asp; }
+            mesh.scale.set(sx,sy,1);
+            mesh.position.set(spatial[i].x, spatial[i].y, pl.z - DEPTH/2);
+          }
+        }
+        function render(){ renderer.render(scene,camera); }
+        function resize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); }
+        addEventListener("resize", resize);
+
+        return { canvas:canvas, load:load, update:update, render:render, onWheel:onWheel,
+          setVelocity:function(v){ velocity=v; }, kick:function(){ velocity+=2.5; autoPlay=false; lastInteract=performance.now(); } };
+      })();
+
+      /* ============================================================
+         二、地球（d3 · 网点风 · 定位中国）
+         ============================================================ */
+      var globe = (function(){
+        var canvas=document.getElementById("globe");
+        var ctx=canvas.getContext("2d");
+        var W,H,radius,baseScale,projection,path,dpr,stars=[];
+        function setup(){
+          dpr=Math.min(window.devicePixelRatio||1, 1.5); W=innerWidth; H=innerHeight;
+          radius=Math.min(W,H)/2.6; baseScale=radius;
+          canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.width=W+"px"; canvas.style.height=H+"px";
+          ctx.setTransform(dpr,0,0,dpr,0,0);
+          projection=d3.geoOrthographic().scale(radius).translate([W/2,H/2]).clipAngle(90);
+          path=d3.geoPath().projection(projection).context(ctx);
+          stars=[]; for(var i=0;i<180;i++){ stars.push({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.5+0.3, a:Math.random()*0.5+0.15 }); }
+        }
+        setup();
+        addEventListener("resize", function(){ setup(); render(); });
+
+        var D2R=Math.PI/180, land=null, china=null, gratObj=null, dots=[], rotation=[0,-12], zoom=1, alpha=1;
+        var CHINA=[104,35];
+
+        function pip(pt,poly){ var x=pt[0],y=pt[1],inside=false;
+          for(var i=0,j=poly.length-1;i<poly.length;j=i++){ var xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];
+            if((yi>y)!==(yj>y) && x<(xj-xi)*(y-yi)/(yj-yi)+xi) inside=!inside; } return inside; }
+        function pif(pt,f){ var g=f.geometry;
+          if(g.type==="Polygon"){ if(!pip(pt,g.coordinates[0])) return false; for(var i=1;i<g.coordinates.length;i++) if(pip(pt,g.coordinates[i])) return false; return true; }
+          if(g.type==="MultiPolygon"){ for(var k=0;k<g.coordinates.length;k++){ var po=g.coordinates[k]; if(pip(pt,po[0])){ var hole=false; for(var m=1;m<po.length;m++) if(pip(pt,po[m])){hole=true;break;} if(!hole) return true; } } return false; }
+          return false; }
+        function genDots(f,spacing){ var out=[], b=d3.geoBounds(f); var step=(spacing||16)*0.08;
+          for(var lng=b[0][0];lng<=b[1][0];lng+=step) for(var lat=b[0][1];lat<=b[1][1];lat+=step){ var pt=[lng,lat]; if(pif(pt,f)) out.push(pt); } return out; }
+
+        var bd=null, bdScale=-1;
+        function buildBackdrop(sc){
+          if(!bd) bd=document.createElement("canvas");
+          bd.width=Math.round(W*dpr); bd.height=Math.round(H*dpr);
+          var b=bd.getContext("2d"); b.setTransform(dpr,0,0,dpr,0,0); b.clearRect(0,0,W,H);
+          var cx=W/2, cy=H/2, sf=sc/radius;
+          for(var s=0;s<stars.length;s++){ var st=stars[s]; b.globalAlpha=st.a; b.fillStyle="#ffdcb8"; b.fillRect(st.x,st.y,st.r,st.r); }
+          b.globalAlpha=1;
+          var glow=b.createRadialGradient(cx,cy,sc*0.92, cx,cy,sc*1.35);
+          glow.addColorStop(0,"rgba(224,96,72,0)"); glow.addColorStop(0.4,"rgba(232,108,80,0.26)"); glow.addColorStop(1,"rgba(232,108,80,0)");
+          b.fillStyle=glow; b.beginPath(); b.arc(cx,cy,sc*1.35,0,2*Math.PI); b.fill();
+          var oc=b.createRadialGradient(cx-sc*0.34,cy-sc*0.34,sc*0.08, cx,cy,sc);
+          oc.addColorStop(0,"#5e1c22"); oc.addColorStop(0.55,"#2c0e11"); oc.addColorStop(1,"#150708");
+          b.beginPath(); b.arc(cx,cy,sc,0,2*Math.PI); b.fillStyle=oc; b.fill();
+          b.strokeStyle="rgba(231,198,107,0.55)"; b.lineWidth=1.4*sf; b.stroke();
+          bdScale=sc;
+        }
+        function render(){
+          var sc=baseScale*zoom; projection.scale(sc); projection.rotate(rotation);
+          var sf=sc/radius;
+          if(bdScale!==sc) buildBackdrop(sc);
+          ctx.clearRect(0,0,W,H);
+          ctx.globalAlpha=alpha; ctx.drawImage(bd,0,0,W,H);
+          if(land){
+            if(!gratObj) gratObj=d3.geoGraticule().step([24,24])();
+            ctx.beginPath(); path(gratObj); ctx.strokeStyle="rgba(230,150,108,1)"; ctx.lineWidth=0.6*sf; ctx.globalAlpha=alpha*0.16; ctx.stroke(); ctx.globalAlpha=alpha;
+            // 网点：背面廉价剔除 + 批量一次填充（金点已勾出陆地与中国真实形状）
+            var clo=-rotation[0]*D2R, cla=-rotation[1]*D2R, ccl=Math.cos(cla);
+            var cvx=ccl*Math.cos(clo), cvy=ccl*Math.sin(clo), cvz=Math.sin(cla);
+            var bp=new Path2D(), cp2=new Path2D();
+            for(var i=0;i<dots.length;i++){ var d=dots[i];
+              if(d.vx*cvx + d.vy*cvy + d.vz*cvz <= 0.02) continue;
+              var pr=projection([d.lng,d.lat]); if(!pr) continue;
+              var rad=(d.cn?1.5:1.1)*sf, tp=d.cn?cp2:bp;
+              tp.moveTo(pr[0]+rad,pr[1]); tp.arc(pr[0],pr[1],rad,0,6.2832);
+            }
+            ctx.fillStyle="rgba(216,130,86,0.85)"; ctx.fill(bp);
+            ctx.fillStyle="rgba(244,200,78,0.98)"; ctx.fill(cp2);
+            // 中国脉冲标记 + 辉光
+            if(d3.geoDistance(CHINA,[-rotation[0],-rotation[1]])<Math.PI/2){ var cp=projection(CHINA);
+              if(cp){ var t=(performance.now()%2200)/2200; var rr=(9+t*20)*sf;
+                ctx.beginPath(); ctx.arc(cp[0],cp[1],rr,0,2*Math.PI); ctx.strokeStyle="rgba(244,206,98,"+(0.65*(1-t)).toFixed(2)+")"; ctx.lineWidth=1.6*sf; ctx.stroke();
+                var cg=ctx.createRadialGradient(cp[0],cp[1],0,cp[0],cp[1],11*sf); cg.addColorStop(0,"rgba(244,206,98,0.85)"); cg.addColorStop(1,"rgba(244,206,98,0)");
+                ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(cp[0],cp[1],11*sf,0,2*Math.PI); ctx.fill();
+                ctx.beginPath(); ctx.arc(cp[0],cp[1],3.5*sf,0,2*Math.PI); ctx.fillStyle="#fff0c6"; ctx.fill(); }
+            }
+          }
+          ctx.globalAlpha=1;
+        }
+
+        function markChinaDots(){ // 把中国境内的点标成金色（按真实国界）
+          if(china){
+            for(var i=0;i<dots.length;i++){ var d=dots[i];
+              if(d.lng<70||d.lng>140||d.lat<14||d.lat>56) continue;   // 预筛，加速
+              if(pif([d.lng,d.lat], china)) d.cn=true; }
+          } else {                                                     // 兜底：矩形框
+            for(var j=0;j<dots.length;j++){ var e=dots[j];
+              if(e.lng>73 && e.lng<135 && e.lat>18 && e.lat<54) e.cn=true; }
+          }
+        }
+
+        function loadData(onProgress,onDone){
+          var urls=[
+            "./assets/data/ne_110m_land.json",
+            "https://cdn.jsdelivr.net/gh/martynafford/natural-earth-geojson@master/110m/physical/ne_110m_land.json"
+          ];
+          (function tryUrl(k){
+            if(k>=urls.length){ onDone(false); return; }
+            fetch(urls[k]).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(json){
+              land=json;
+              land.features.forEach(function(f){ genDots(f,22).forEach(function(p){
+                var lo=p[0]*D2R, la=p[1]*D2R, cl=Math.cos(la);
+                dots.push({lng:p[0],lat:p[1], vx:cl*Math.cos(lo), vy:cl*Math.sin(lo), vz:Math.sin(la)});
+              }); });
+              fetch("./assets/data/china.json").then(function(r){ return r.ok?r.json():null; }).then(function(cj){
+                if(cj && cj.features && cj.features[0]) china=cj.features[0];
+                markChinaDots(); onProgress(1); onDone(true);
+              }).catch(function(){ markChinaDots(); onProgress(1); onDone(true); });
+            }).catch(function(){ tryUrl(k+1); });
+          })(0);
+        }
+
+        // 拖拽旋转
+        var dragging=false, sx0, sy0, r0;
+        canvas.addEventListener("mousedown", function(e){ dragging=true; sx0=e.clientX; sy0=e.clientY; r0=rotation.slice(); autoFind=false; });
+        addEventListener("mousemove", function(e){ if(!dragging) return; var k=0.4; rotation[0]=r0[0]+(e.clientX-sx0)*k; rotation[1]=Math.max(-90,Math.min(90,r0[1]-(e.clientY-sy0)*k)); });
+        addEventListener("mouseup", function(){ dragging=false; });
+
+        var autoFind=true, found=false, idleSpin=0.12;
+        function update(dt){
+          if(!dragging){
+            if(autoFind && !found){
+              // 缓动旋转到中国
+              var tgt=[-CHINA[0], -CHINA[1]];
+              rotation[0]=lerp(rotation[0], tgt[0], 1-Math.pow(0.001,dt));
+              rotation[1]=lerp(rotation[1], tgt[1], 1-Math.pow(0.001,dt));
+              if(Math.abs(rotation[0]-tgt[0])<0.6 && Math.abs(rotation[1]-tgt[1])<0.6){ found=true; onFound&&onFound(); }
+            } else if(!found){ rotation[0]+=idleSpin*dt*60; }
+          }
+        }
+        var onFound=null;
+        return { render:render, update:update, loadData:loadData, setAlpha:function(a){ alpha=a; }, setZoom:function(z){ zoom=z; },
+          isFound:function(){ return found; }, onFound:function(cb){ onFound=cb; }, hasLand:function(){ return !!land; } };
+      })();
+
+      /* ============================================================
+         二点五、扫描卡片流（古建照片经扫描线被扫成代码 · 收尾段）
+         ============================================================ */
+      var scanner = (function(){
+        var root=document.getElementById("scanner");
+        var canvas=document.getElementById("scanParticles");
+        var ctx=canvas.getContext("2d");
+        var line=document.getElementById("scanLine");
+        var row=document.getElementById("cardRow");
+        var CW=400, CH=250, GAP=60, REPEAT=5;
+        var CH_SET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789(){}[]<>;:,._-+=!@#$%^&*|/\\\"'`~?";
+        var COLS=Math.floor(CW/6.5), ROWS=Math.floor(CH/13);
+        function genCode(){ var t=""; for(var i=0;i<COLS*ROWS;i++) t+=CH_SET[(Math.random()*CH_SET.length)|0]; var o=""; for(var r=0;r<ROWS;r++) o+=t.substr(r*COLS,COLS)+"\n"; return o; }
+        var built=false, total=0, lineW=0, pos=0, vel=72, dir=-1, MINV=48;
+        function build(){
+          if(built) return; built=true;
+          total=GALLERY_IMAGES.length*REPEAT; var html="";
+          for(var i=0;i<total;i++){ var src="./assets/"+GALLERY_IMAGES[i%GALLERY_IMAGES.length];
+            html+='<div class="card-wrapper"><div class="card-normal"><img src="'+src+'" alt=""></div><div class="card-ascii"><pre>'+genCode()+'</pre></div></div>'; }
+          row.innerHTML=html;
+          Array.prototype.forEach.call(row.querySelectorAll(".card-ascii pre"), function(p){ p.dataset.orig=p.textContent; });
+          lineW=(CW+GAP)*total; pos=innerWidth;
+        }
+        function resize(){ canvas.width=innerWidth; canvas.height=300; }
+        addEventListener("resize", resize);
+        var bg=[], sp=[], scanning=false;
+        function initParticles(){ resize(); bg=[]; for(var i=0;i<130;i++) bg.push({ x:Math.random()*innerWidth, y:Math.random()*300, vx:Math.random()*55+22, r:Math.random()*1.4+0.4, a:Math.random()*0.5+0.18 }); sp=[]; }
+        function newSp(){ return { x:innerWidth/2+(Math.random()-0.5)*3, y:Math.random()*300, vx:Math.random()*1.7+0.5, vy:(Math.random()-0.5)*0.6, r:Math.random()*0.7+0.4, a:Math.random()*0.4+0.6, life:1, decay:Math.random()*0.02+0.006 }; }
+        function scramble(pre){ if(pre.dataset.s==="1") return; pre.dataset.s="1"; var n=0; var iv=setInterval(function(){ pre.textContent=genCode(); if(++n>=8){ clearInterval(iv); pre.textContent=pre.dataset.orig; pre.dataset.s="0"; } }, 32); }
+        function updateCards(){
+          var sx=innerWidth/2, sl=sx-4, sr=sx+4, any=false, ws=row.children;
+          for(var i=0;i<ws.length;i++){ var w=ws[i], rect=w.getBoundingClientRect(), normal=w.firstChild, ascii=w.lastChild;
+            if(rect.left<sr && rect.right>sl){ any=true;
+              if(w.dataset.sc!=="1"){ scramble(ascii.firstChild); w.dataset.sc="1"; }
+              var il=Math.max(sl-rect.left,0), ir=Math.min(sr-rect.left,rect.width);
+              normal.style.setProperty("--clip-right",(il/rect.width*100).toFixed(1)+"%");
+              ascii.style.setProperty("--clip-left",(ir/rect.width*100).toFixed(1)+"%");
+            } else { w.dataset.sc="0";
+              if(rect.right<sl){ normal.style.setProperty("--clip-right","100%"); ascii.style.setProperty("--clip-left","100%"); }
+              else { normal.style.setProperty("--clip-right","0%"); ascii.style.setProperty("--clip-left","0%"); }
+            }
+          }
+          scanning=any; line.classList.toggle("on", any);
+        }
+        function update(dt){ if(!built) return;
+          if(vel>MINV) vel*=0.96; else vel=MINV;
+          pos += vel*dir*dt; var cw=innerWidth;
+          if(pos < -lineW) pos=cw; else if(pos>cw) pos=-lineW;
+          row.style.transform="translateX("+pos.toFixed(1)+"px)";
+          updateCards();
+        }
+        function render(){ if(!canvas.width) resize();
+          ctx.clearRect(0,0,innerWidth,300);
+          ctx.globalCompositeOperation="lighter";
+          for(var i=0;i<bg.length;i++){ var p=bg[i]; p.x+=p.vx*0.016; if(p.x>innerWidth+10) p.x=-10;
+            ctx.globalAlpha=p.a*0.55; ctx.fillStyle="#e7c66b"; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.2832); ctx.fill(); }
+          var target=scanning?1300:340; while(sp.length<target) sp.push(newSp()); if(sp.length>target) sp.length=target;
+          for(var j=0;j<sp.length;j++){ var s=sp[j]; s.x+=s.vx; s.y+=s.vy; s.life-=s.decay;
+            if(s.life<=0||s.x>innerWidth){ sp[j]=newSp(); s=sp[j]; }
+            ctx.globalAlpha=s.a*s.life; ctx.fillStyle="#fff3d4"; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.2832); ctx.fill(); }
+          ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
+        }
+        function onWheel(e){ e.preventDefault(); vel=Math.min(950, vel+Math.abs(e.deltaY)*0.5); }
+        return { build:build, initParticles:initParticles, update:update, render:render, onWheel:onWheel,
+          setOpacity:function(o){ root.style.opacity=o; root.style.pointerEvents=o>0.5?"auto":"none"; },
+          kick:function(){ vel=Math.min(950, vel+300); } };
+      })();
+
+      /* ============================================================
+         三、编排：加载 → 地球找中国 → 滚动 → 画廊 → 扫描收尾
+         ============================================================ */
+      var globeUI=document.getElementById("globeUI"), enterCue=document.getElementById("enterCue"), galleryHint=document.getElementById("galleryHint");
+      var transP=0, scanP=0, scannerScroll=0; // 过渡进度 / 扫描过渡 / 进入扫描的滚动累积
+      var scanHintEl=document.getElementById("scanHint");
+      var galleryCanvas=document.getElementById("gallery");
+
+      function startTransition(){ if(state!=="globe") return; state="transition"; globeUI.classList.remove("show"); enterCue.classList.remove("show"); gallery.kick(); }
+      function startScanner(){ if(state!=="gallery") return; state="toScanner"; scanner.build(); scanner.initParticles(); scanner.kick(); galleryHint.classList.remove("show"); scanHintEl.classList.remove("show"); }
+
+      window.addEventListener("wheel", function(e){
+        if(state==="gallery"){ gallery.onWheel(e);
+          if(e.deltaY>0){ scannerScroll+=e.deltaY; if(scannerScroll>900) scanHintEl.classList.add("show"); if(scannerScroll>2600) startScanner(); }
+        }
+        else if(state==="scanner"){ scanner.onWheel(e); }
+        else if(state==="globe" && globe.isFound() && e.deltaY>0){ e.preventDefault(); startTransition(); }
+        else { e.preventDefault(); }
+      }, { passive:false });
+      // 触屏/点击也可进入
+      window.addEventListener("click", function(){ if(state==="globe" && globe.isFound()) startTransition(); });
+
+      globe.onFound(function(){ globeUI.classList.add("show"); enterCue.classList.add("show"); });
+
+      var t0=performance.now();
+      function loop(){
+        var now=performance.now(), dt=Math.min(0.05,(now-t0)/1000); t0=now;
+        var time=now/1000;
+
+        if(state==="globe" || state==="transition"){ globe.update(dt); }
+
+        if(state==="transition"){
+          transP=Math.min(1, transP + dt/1.4);
+          globe.setZoom(1 + transP*3.2);          // 俯冲放大
+          globe.setAlpha(1 - smoothstep(0.1,0.85,transP));
+          document.getElementById("gallery").style.opacity = smoothstep(0.2,1.0,transP).toFixed(3);
+          if(transP>=1){ state="gallery"; document.getElementById("globe").style.display="none"; galleryHint.classList.add("show"); setTimeout(function(){ galleryHint.classList.remove("show"); }, 4000); }
+        }
+
+        if(state==="globe" || state==="transition"){ globe.render(); }
+
+        if(state==="toScanner"){
+          scanP=Math.min(1, scanP + dt/1.2);
+          galleryCanvas.style.opacity=(1-smoothstep(0,0.7,scanP)).toFixed(3);
+          scanner.setOpacity(smoothstep(0.25,1,scanP).toFixed(3));
+          if(scanP>=1){ state="scanner"; galleryCanvas.style.display="none"; }
+        }
+
+        gallery.update(dt, time, state==="gallery");
+        if(state!=="globe" && state!=="scanner") gallery.render();   // globe 之后、未完全进入扫描前都渲染画廊
+        if(state==="toScanner" || state==="scanner"){ scanner.update(dt); scanner.render(); }
+
+        requestAnimationFrame(loop);
+      }
+
+      /* ---- 启动加载 ---- */
+      var gp=0, lp=0;
+      function setLoad(){ lPct.textContent="加载 "+Math.round(clamp01(gp*0.5+lp*0.5)*100)+"%"; }
+      gallery.load(function(f){ lp=f; setLoad(); }, function(){ galleryReady=true; tryStart(); });
+      globe.loadData(function(f){ gp=f; setLoad(); }, function(ok){ globeReady=true; tryStart(); });
+      // 地球数据兜底：8 秒还没好也继续
+      setTimeout(function(){ if(!globeReady){ globeReady=true; tryStart(); } }, 8000);
+
+      var started=false;
+      function tryStart(){
+        if(started) return;
+        if(!(galleryReady && globeReady)) return;
+        started=true;
+        loader.classList.add("hide");
+        scanner.build(); scanner.initParticles();   // 预建卡片+粒子
+        if(SP.get("stage")==="scanner"){ state="scanner"; document.getElementById("globe").style.display="none"; galleryCanvas.style.display="none"; scanner.setOpacity(1); scanner.kick(); }
+        else if(FORCE_GALLERY){ state="gallery"; document.getElementById("globe").style.display="none"; galleryCanvas.style.opacity="1"; }
+        else { state="globe"; }
+        requestAnimationFrame(loop);
+      }
+
+      // 调试钩子
+      window.__state=function(){ return state; };
+      window.__toGallery=function(){ startTransition(); };
+      window.__toScanner=function(){ if(state!=="gallery"){ state="gallery"; } startScanner(); };
+    })();
+    </script>
+  </body>
+</html>

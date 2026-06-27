@@ -1,0 +1,196 @@
+# 太和殿详情页联动高亮功能实现
+
+## 1. CSS 文件 (`css/map-svg-hotspots.css`)
+
+```css
+/* 高亮热区 SVG 样式 */
+.map-hotspot-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.map-hotspot-path {
+  fill: rgba(0, 0, 0, 0);
+  stroke: transparent;
+  stroke-width: 2;
+  pointer-events: all;
+  transition: all 0.3s ease;
+  filter: none;
+}
+
+.map-hotspot-path:hover,
+.map-hotspot-path.is-linked-hover {
+  fill: rgba(0, 0, 0, 0.02);
+  stroke: #ffe566;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700) drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500) drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
+}
+
+/* 图例样式 */
+.map-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 20;
+  font-size: 12px;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.map-legend-color {
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+/* 提示框样式 */
+.map-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  z-index: 100;
+  pointer-events: none;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+/* 禁用文本选择 */
+.map-hotspot-svg {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .map-legend {
+    bottom: 10px;
+    left: 10px;
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .map-tooltip {
+    font-size: 10px;
+    max-width: 150px;
+  }
+}
+```
+
+## 2. JavaScript 文件 (`js/map-svg-hotspots.js`)
+
+```javascript
+// SVG 热区联动高亮功能
+
+// 存储所有链接组的热区
+const linkedHoverRegistry = new Map();
+
+// 从元素获取链接组键
+function getLinkGroupKey(element) {
+  return element.getAttribute('data-link-group');
+}
+
+// 注册链接组的热区
+function registerLinkedPath(path) {
+  const key = getLinkGroupKey(path);
+  if (!key) return;
+  
+  if (!linkedHoverRegistry.has(key)) {
+    linkedHoverRegistry.set(key, new Set());
+  }
+  linkedHoverRegistry.get(key).add(path);
+}
+
+// 设置链接组的悬停状态
+function setLinkedHover(path, active) {
+  const key = getLinkGroupKey(path);
+  if (!key) return;
+  
+  const group = linkedHoverRegistry.get(key);
+  if (!group) return;
+  
+  group.forEach(function (el) {
+    if (!el || !el.isConnected) return;
+    if (active) {
+      el.classList.add('is-linked-hover');
+    } else {
+      el.classList.remove('is-linked-hover');
+    }
+  });
+}
+
+// 初始化热区联动功能
+function initLinkedHotspots() {
+  // 注册所有带 data-link-group 属性的热区
+  const allHotspots = document.querySelectorAll('.map-hotspot-path[data-link-group]');
+  allHotspots.forEach(registerLinkedPath);
+  
+  // 为每个热区添加事件监听器
+  allHotspots.forEach(function (path) {
+    path.addEventListener('mouseenter', function () {
+      setLinkedHover(path, true);
+    });
+    
+    path.addEventListener('mouseleave', function () {
+      setLinkedHover(path, false);
+    });
+  });
+}
+
+// 当 DOM 加载完成后初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLinkedHotspots);
+} else {
+  initLinkedHotspots();
+}
+```
+
+## 3. HTML 文件修改 (`detail.html`)
+
+在 `detail.html` 文件中，为太和殿相关热区添加了 `data-link-group` 属性：
+
+```html
+<!-- 太和殿屋顶与屋顶右边大图 -->
+<path data-link-group="taihe-roof" ...>
+...
+<path data-link-group="taihe-roof" ...>
+
+<!-- 太和殿屋檐角与屋檐角右边大图 -->
+<path data-link-group="taihe-ridge" ...>
+...
+<path data-link-group="taihe-ridge" ...>
+
+<!-- 太和殿屋檐底与屋檐底右边大图 -->
+<path data-link-group="taihe-eave" ...>
+...
+<path data-link-group="taihe-eave" ...>
+```
+
+## 功能说明
+
+当鼠标移到太和殿屋顶时，太和殿屋顶右侧大图会跟着联动高亮；鼠标移到太和殿屋檐角时，太和殿屋檐角右侧大图会跟着高亮；鼠标移到太和殿屋檐底时，太和殿屋檐底右侧大图会跟着高亮。
+
+## 实现原理
+
+1. 使用 `data-link-group` 属性将相关热区分组
+2. 通过 `linkedHoverRegistry` 存储链接组的热区
+3. 实现 `setLinkedHover` 函数同步链接组内所有热区的悬停状态
+4. 使用 CSS 样式定义高亮效果，包括阴影和颜色变化

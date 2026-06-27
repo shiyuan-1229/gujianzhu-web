@@ -234,6 +234,11 @@
           drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
       }
 
+      /* ★ 无建筑详情页的省份 → 默认光标（不可点击） */
+      #chinaMapHotspotSvg .map-hotspot-path:not([data-href]) {
+        cursor: default;
+      }
+
       /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
       #app {
         position: relative;
@@ -1644,7 +1649,7 @@
         "海南省",
         "台湾省",
       ];
-      const validClickNav = validHoverProvinces.filter((province) => province !== "北京市");
+      const validClickNav = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
       const hotspotNameToProvince = {
         北京: "北京市",
         河北: "河北省",
@@ -1748,12 +1753,20 @@
 
         attachPreviewHandlers(sichuanHitBtn, "四川省");
 
+        // ★ 只有 5 个有建筑详情页的省份可点击跳转，其余仅高亮+悬浮卡片
+        const PROVINCES_WITH_BUILDINGS = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
+
         mapHotspotSvgEl?.querySelectorAll(".map-hotspot-path").forEach((pathEl) => {
           const nameZh = pathEl.getAttribute("data-name-zh") || "";
           const province = hotspotNameToProvince[nameZh] || nameZh;
           if (!province) return;
           pathEl.setAttribute("data-province", province);
           attachPreviewHandlers(pathEl, province);
+
+          // 非建筑省份：移除 data-href 禁止点击跳转（悬浮高亮不受影响）
+          if (!PROVINCES_WITH_BUILDINGS.includes(province)) {
+            pathEl.removeAttribute("data-href");
+          }
         });
 
         mapHotspotsEl.addEventListener("mouseout", (e) => {

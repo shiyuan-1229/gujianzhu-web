@@ -29,6 +29,43 @@ var scsInsetWrap = null;
 var ORBIT_CLICK_PX = 8;
 var FORBIDDEN_CIPAI = { 鹊桥仙: true, 隔帘听: true, 驻马听: true, 红窗听: true };
 
+/** 项目内在 detail.html 已有简介详情页的古建（离线 fallback） */
+var PROJECT_DETAIL_BUILDINGS = {
+  "北京故宫": true,
+  "故宫太和殿": true,
+  "故宫御花园": true,
+  "北京四合院": true,
+  "卢沟桥": true,
+  "颐和园": true,
+  "万宁桥": true,
+  "乔家大院": true,
+  "霍州署": true,
+  "鱼沼飞梁": true,
+  "平遥古城墙": true,
+  "苏州拙政园": true,
+  "淮安府衙": true,
+  "宝带桥": true,
+  "周庄民居": true,
+  "阆中古城民居": true,
+  "泸州龙脑桥": true,
+  "泸定桥": true,
+  "陈家祠": true,
+  "潮州广济桥": true,
+  "开平碉楼": true,
+};
+
+var PROJECT_BUILDING_LABEL_EN = {
+  "北京故宫": "Forbidden City",
+  "卢沟桥": "Lugou Bridge",
+  "颐和园": "Summer Palace",
+  "万宁桥": "Wanning Bridge",
+  "鱼沼飞梁": "Yuzhao Flying Bridge",
+  "苏州拙政园": "Humble Administrator's Garden",
+  "宝带桥": "Baodai Bridge",
+  "泸定桥": "Luding Bridge",
+  "潮州广济桥": "Guangji Bridge, Chaozhou",
+};
+
 function escapeHtml(text) {
   return String(text || "")
     .replace(/&/g, "&amp;")
@@ -58,7 +95,33 @@ function getSiteLang() {
   return m ? decodeURIComponent(m[1]) : "zh";
 }
 
+function getBuildingEntry(buildingName) {
+  if (!projectData || !projectData.buildings) return null;
+  return projectData.buildings.find(function (b) {
+    return b.name === buildingName;
+  });
+}
+
+/** 该项目是否在 detail.html 中有建筑简介（无简介则不显示进入按钮） */
+function hasProjectDetailPage(buildingName) {
+  var entry = getBuildingEntry(buildingName);
+  if (entry && typeof entry.has_detail_page === "boolean") {
+    return entry.has_detail_page;
+  }
+  return !!PROJECT_DETAIL_BUILDINGS[buildingName];
+}
+
+function getBuildingEnterLabel(buildingName) {
+  if (getSiteLang() === "en") {
+    return (
+      "Enter " + (PROJECT_BUILDING_LABEL_EN[buildingName] || buildingName)
+    );
+  }
+  return "进入" + buildingName;
+}
+
 function getBuildingDetailUrl(buildingName) {
+  if (!hasProjectDetailPage(buildingName)) return "#";
   var lang = getSiteLang();
   return (
     "./detail.html?building=" +
@@ -66,6 +129,20 @@ function getBuildingDetailUrl(buildingName) {
     "&lang=" +
     encodeURIComponent(lang)
   );
+}
+
+function syncBuildingEnterLink(buildingName, show) {
+  if (!buildingLink) return;
+  if (!show || !hasProjectDetailPage(buildingName)) {
+    buildingLink.hidden = true;
+    buildingLink.setAttribute("aria-hidden", "true");
+    buildingLink.removeAttribute("href");
+    return;
+  }
+  buildingLink.hidden = false;
+  buildingLink.setAttribute("aria-hidden", "false");
+  buildingLink.href = getBuildingDetailUrl(buildingName);
+  buildingLink.textContent = getBuildingEnterLabel(buildingName);
 }
 
 function normalizeMapData(raw) {
@@ -439,7 +516,8 @@ function renderPoemBody(content) {
     .join("");
 }
 
-function openPoemStage(poem, buildingName, province) {
+function openPoemStage(poem, buildingName, province, opts) {
+  opts = opts || {};
   if (!layer || !poemStage) return;
   if (poemTitle) poemTitle.textContent = poem.title || "";
   if (poemMeta) {
@@ -451,10 +529,7 @@ function openPoemStage(poem, buildingName, province) {
     if (poem.relation) tag += " · " + poem.relation;
     poemTag.textContent = tag;
   }
-  if (buildingLink) {
-    buildingLink.href = getBuildingDetailUrl(buildingName);
-    buildingLink.textContent = "查看「" + buildingName.replace(/^北京/, "") + "」详情";
-  }
+  syncBuildingEnterLink(buildingName, opts.showEnterLink !== false);
   isPoemOpen = true;
   setControlsEnabled(false);
   layer.classList.add("is-poem-open");
@@ -467,13 +542,6 @@ function closePoemStage() {
   setControlsEnabled(isOpen);
   layer.classList.remove("is-poem-open");
   poemStage.setAttribute("aria-hidden", "true");
-}
-
-function getBuildingEntry(buildingName) {
-  if (!projectData || !projectData.buildings) return null;
-  return projectData.buildings.find(function (b) {
-    return b.name === buildingName;
-  });
 }
 
 function isPoemStrictForBuilding(poemId, buildingName) {
@@ -532,7 +600,8 @@ function openBuildingEmpty(buildingName, province) {
       relation: "待补充经核实的文献"
     },
     buildingName,
-    province
+    province,
+    { showEnterLink: false }
   );
 }
 

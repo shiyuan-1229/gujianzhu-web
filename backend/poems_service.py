@@ -247,7 +247,19 @@ def load_project_poetry_map(force_reload: bool = False) -> dict[str, Any]:
 
     with path.open(encoding="utf-8") as f:
         data = json.load(f)
+    data = _attach_detail_page_flags(data)
     _project_map_cache = (mtime, data)
+    return data
+
+
+def _attach_detail_page_flags(data: dict[str, Any]) -> dict[str, Any]:
+    from project_buildings import DETAIL_PAGE_BUILDING_NAMES
+
+    for building in data.get("buildings", []):
+        name = building.get("name", "")
+        building["has_detail_page"] = name in DETAIL_PAGE_BUILDING_NAMES
+    meta = data.setdefault("meta", {})
+    meta["detail_page_buildings"] = sorted(DETAIL_PAGE_BUILDING_NAMES)
     return data
 
 
@@ -263,6 +275,7 @@ def load_extended_poetry_map(force_reload: bool = False) -> dict[str, Any]:
 
     with path.open(encoding="utf-8") as f:
         data = json.load(f)
+    data = _attach_detail_page_flags(data)
     _project_map_cache = (mtime, data)
     return data
 

@@ -29,6 +29,33 @@ PROJECT_BUILDING_NAMES: frozenset[str] = frozenset(
     }
 )
 
+# 在 detail.html BUILDINGS_DB 中已有详情页/简介的古建（可跳转）
+DETAIL_PAGE_BUILDING_NAMES: frozenset[str] = frozenset(
+    {
+        "北京故宫",
+        "故宫太和殿",
+        "故宫御花园",
+        "北京四合院",
+        "卢沟桥",
+        "颐和园",
+        "万宁桥",
+        "乔家大院",
+        "霍州署",
+        "鱼沼飞梁",
+        "平遥古城墙",
+        "苏州拙政园",
+        "淮安府衙",
+        "宝带桥",
+        "周庄民居",
+        "阆中古城民居",
+        "泸州龙脑桥",
+        "泸定桥",
+        "陈家祠",
+        "潮州广济桥",
+        "开平碉楼",
+    }
+)
+
 # 项目在地图上标注的 5 省
 PROJECT_PROVINCES: frozenset[str] = frozenset(
     {"北京", "山西", "江苏", "四川", "广东"}

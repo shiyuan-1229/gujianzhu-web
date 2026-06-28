@@ -186,7 +186,7 @@
           <div id="poetryMap3dPoemBody" class="poetry-map-3d__poem-stage-body"></div>
           <p id="poetryMap3dPoemTag" class="poetry-map-3d__poem-stage-tag"></p>
           <div class="poetry-map-3d__poem-actions">
-            <a id="poetryMap3dBuildingLink" class="poetry-map-3d__building-link" href="#">查看建筑详情</a>
+            <a id="poetryMap3dBuildingLink" class="poetry-map-3d__building-link" href="#" hidden aria-hidden="true">进入建筑</a>
           </div>
         </article>
       </div>
@@ -313,7 +313,7 @@
             if (entrySub) {
               entrySub.textContent = isEn() ? "Starting poetry map…" : "正在启动诗词山河…";
             }
-            await import("./js/poetry-map-3d.js?v=66");
+            await import("./js/poetry-map-3d.js?v=68");
             await yieldMain(16);
 
             var tries = 0;

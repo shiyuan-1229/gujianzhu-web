@@ -194,33 +194,23 @@
         top: 0;
         width: 50%;
         height: 100%;
-        background:
-          linear-gradient(180deg, rgba(103, 16, 16, 0.95), rgba(40, 8, 8, 0.96)),
-          repeating-linear-gradient(
-            90deg,
-            rgba(212, 175, 55, 0.08) 0px,
-            rgba(212, 175, 55, 0.08) 2px,
-            rgba(0, 0, 0, 0) 2px,
-            rgba(0, 0, 0, 0) 22px
-          );
+        background: linear-gradient(180deg, rgba(103, 16, 16, 0.95), rgba(40, 8, 8, 0.96));
         border-top: 4px solid rgba(212, 175, 55, 0.62);
         border-bottom: 4px solid rgba(212, 175, 55, 0.62);
-        box-shadow: inset 0 0 0 2px rgba(212, 175, 55, 0.22);
+        will-change: transform;
+        contain: layout style paint;
       }
       .transition-door::before {
         content: "";
         position: absolute;
         inset: 8%;
         border: 2px solid rgba(212, 175, 55, 0.46);
-        box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.2);
       }
       .transition-door::after {
         content: "";
         position: absolute;
         inset: 16% 14%;
-        background:
-          radial-gradient(circle, rgba(212, 175, 55, 0.42) 0 2px, transparent 2.5px) 0 0 / 22px 22px,
-          linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.14));
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.14));
         opacity: 0.95;
       }
 
@@ -244,31 +234,17 @@
         transform-origin: center top;
         opacity: 0;
         border-radius: 20px;
-        background:
-          linear-gradient(180deg, rgba(245, 226, 187, 0.95), rgba(216, 194, 152, 0.94)),
-          repeating-linear-gradient(
-            0deg,
-            rgba(110, 82, 41, 0.05) 0px,
-            rgba(110, 82, 41, 0.05) 2px,
-            rgba(0, 0, 0, 0) 2px,
-            rgba(0, 0, 0, 0) 7px
-          );
+        background: linear-gradient(180deg, rgba(245, 226, 187, 0.95), rgba(216, 194, 152, 0.94));
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+        will-change: transform, opacity;
+        contain: layout style;
       }
       .transition-scroll .scroll-ornament {
         position: absolute;
         inset: 18% 9% 22%;
         border: 1px solid rgba(118, 83, 38, 0.28);
         border-radius: 14px;
-        background:
-          radial-gradient(460px 180px at 50% 0%, rgba(188, 142, 74, 0.18), transparent 62%),
-          repeating-linear-gradient(
-            90deg,
-            rgba(118, 83, 38, 0.04) 0px,
-            rgba(118, 83, 38, 0.04) 1px,
-            transparent 1px,
-            transparent 8px
-          );
+        background: radial-gradient(460px 180px at 50% 0%, rgba(188, 142, 74, 0.18), transparent 62%);
       }
       .transition-scroll .scroll-seal {
         position: absolute;
@@ -299,6 +275,7 @@
         border-radius: 9999px;
         background: linear-gradient(180deg, #9b6f2d, #6d4a1f);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+        will-change: transform;
       }
 
       .transition-scroll::before {
@@ -320,6 +297,7 @@
         color: #4a2e16;
         opacity: 0;
         text-shadow: 0 2px 0 rgba(255, 255, 255, 0.22);
+        will-change: transform, opacity;
       }
       .transition-subtext {
         position: absolute;
@@ -331,25 +309,26 @@
         letter-spacing: 0.22em;
         color: rgba(84, 55, 20, 0.78);
         opacity: 0;
+        will-change: transform, opacity;
       }
 
       .transition-mask--play .transition-door--left {
-        animation: doorOpenLeft 2000ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+        animation: doorOpenLeft 900ms cubic-bezier(0.25, 0.6, 0.15, 1) forwards;
       }
 
       .transition-mask--play .transition-door--right {
-        animation: doorOpenRight 2000ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+        animation: doorOpenRight 900ms cubic-bezier(0.25, 0.6, 0.15, 1) forwards;
       }
 
       .transition-mask--play .transition-scroll {
-        animation: scrollUnroll 2100ms 560ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+        animation: scrollUnroll 1000ms 350ms cubic-bezier(0.25, 0.6, 0.15, 1) forwards;
       }
 
       .transition-mask--play .transition-text {
-        animation: textReveal 620ms 980ms ease forwards, textFadeOut 720ms 2200ms ease forwards;
+        animation: textReveal 500ms 600ms ease forwards, textFadeOut 500ms 1100ms ease forwards;
       }
       .transition-mask--play .transition-subtext {
-        animation: textReveal 620ms 1120ms ease forwards, textFadeOut 720ms 2200ms ease forwards;
+        animation: textReveal 500ms 700ms ease forwards, textFadeOut 500ms 1100ms ease forwards;
       }
 
       @keyframes doorOpenLeft {
@@ -364,8 +343,8 @@
 
       @keyframes scrollUnroll {
         0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.03); }
-        24% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
-        70% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+        22% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+        60% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
         100% { opacity: 0; transform: translate(-50%, -50%) scaleY(1.02); }
       }
 
@@ -400,7 +379,7 @@
     </style>
   </head>
   <body class="font-sansCN">
-    <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
+    <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.25)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(140, 90, 45, 0.72), rgba(180, 145, 85, 0.48));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <a id="gxBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
@@ -418,11 +397,11 @@
           <a
             id="gxHomeReturn"
             href="./map.html"
-            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:text-xl md:tracking-[0.16em]"
+            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#9a5a2e]/78 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#b07040]/85 md:text-xl md:tracking-[0.16em]"
           >
             返回首页
           </a>
-          <button id="gxLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#7b1f1f]/90">EN</button>
+          <button id="gxLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#9a5a2e]/78 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#b07040]/85">EN</button>
         </div>
       </div>
     </nav>
@@ -714,10 +693,10 @@
           mask.classList.add("transition-mask--play");
           window.setTimeout(function () {
             mask.style.opacity = "0";
-          }, 2550);
+          }, 1300);
           window.setTimeout(function () {
             window.location.href = targetHref;
-          }, 2860);
+          }, 1500);
         };
 
         trigger.addEventListener("mouseenter", function () { setHotspotActive(true); });

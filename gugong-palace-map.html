@@ -154,17 +154,11 @@
         transform: translate(-50%, -50%) scaleY(0.08);
         transform-origin: center top;
         border-radius: 18px;
-        background:
-          linear-gradient(180deg, rgba(245, 226, 188, 0.96), rgba(214, 192, 148, 0.95)),
-          repeating-linear-gradient(
-            0deg,
-            rgba(110, 82, 41, 0.06) 0px,
-            rgba(110, 82, 41, 0.06) 2px,
-            rgba(0, 0, 0, 0) 2px,
-            rgba(0, 0, 0, 0) 7px
-          );
+        background: linear-gradient(180deg, rgba(245, 226, 188, 0.96), rgba(214, 192, 148, 0.95));
         box-shadow: 0 16px 46px rgba(0, 0, 0, 0.45);
         opacity: 0;
+        will-change: transform, opacity;
+        contain: layout style;
       }
       .detail-scroll::before,
       .detail-scroll::after {
@@ -176,6 +170,7 @@
         transform: translateX(-50%);
         border-radius: 999px;
         background: linear-gradient(180deg, #986e2c, #68481f);
+        will-change: transform;
       }
       .detail-scroll::before { top: -7px; }
       .detail-scroll::after { bottom: -7px; }
@@ -189,16 +184,17 @@
         letter-spacing: 0.16em;
         color: #4d3118;
         opacity: 0;
+        will-change: transform, opacity;
       }
       .detail-transition--play .detail-scroll {
-        animation: detailUnroll 760ms cubic-bezier(0.2, 0.7, 0.1, 1) forwards;
+        animation: detailUnroll 600ms cubic-bezier(0.22, 0.61, 0.2, 1) forwards;
       }
       .detail-transition--play .detail-title {
-        animation: detailFade 520ms 340ms ease forwards;
+        animation: detailFade 480ms 260ms ease forwards;
       }
       @keyframes detailUnroll {
-        0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.08); }
-        35% { opacity: 1; }
+        0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.06); }
+        30% { opacity: 1; }
         100% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
       }
       @keyframes detailFade {
@@ -252,7 +248,7 @@
     </style>
   </head>
   <body class="font-sansCN">
-    <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
+    <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.25)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(140, 90, 45, 0.72), rgba(180, 145, 85, 0.48));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <a id="pmBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
@@ -263,18 +259,18 @@
           <a
             id="pmBack"
             href="javascript:void(0)"
-            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:px-5 md:text-lg md:tracking-[0.16em]"
+            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#9a5a2e]/78 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#b07040]/85 md:px-5 md:text-lg md:tracking-[0.16em]"
           >
             返回上一页
           </a>
           <a
             id="pmHomeReturn"
             href="./map.html"
-            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:px-5 md:text-lg md:tracking-[0.16em]"
+            class="site-nav-btn rounded-md border border-amber-200/45 bg-[#9a5a2e]/78 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#b07040]/85 md:px-5 md:text-lg md:tracking-[0.16em]"
           >
             返回首页
           </a>
-          <button id="pmLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#7b1f1f]/90">EN</button>
+          <button id="pmLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn rounded-md border border-amber-200/45 bg-[#9a5a2e]/78 px-4 py-2.5 text-amber-50/95 transition-colors hover:bg-[#b07040]/85">EN</button>
         </div>
       </div>
     </nav>
@@ -636,7 +632,7 @@
           transition.classList.add("detail-transition--play");
           window.setTimeout(function () {
             window.location.href = targetHref;
-          }, 920);
+          }, 720);
         };
 
         document.querySelectorAll(".map-pill--link").forEach(function (link) {
@@ -660,6 +656,23 @@
           },
           true
         );
+
+        // 修复：从详情页返回时 bfcache 会保留过渡遮罩状态造成闪屏
+        // pagehide 在页面进入 bfcache 前触发——在此清掉脏状态，恢复时就是干净的
+        window.addEventListener("pagehide", function (e) {
+          if (e.persisted) {
+            document.body.classList.remove("is-detail-transition");
+            transition.classList.remove("detail-transition--play");
+          }
+        });
+        // 兜底：若浏览器不支持 pagehide.persisted，pageshow 时再清一次
+        window.addEventListener("pageshow", function (e) {
+          if (document.body.classList.contains("is-detail-transition")) {
+            document.body.classList.remove("is-detail-transition");
+            transition.classList.remove("detail-transition--play");
+          }
+          locking = false;
+        });
       })();
     </script>
       <!-- AI 导览悬浮组件 -->

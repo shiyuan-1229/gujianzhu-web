@@ -477,6 +477,15 @@
               <span>星际探索</span>
             </a>
           </div>
+
+          <!-- 诗词探索 -->
+          <div class="group relative">
+            <a id="indexNavPoetry" href="./poetry-explore.html" class="site-nav-btn flex items-center gap-1.5 text-amber-50/90 transition-all duration-300 hover:text-amber-50"
+              style="background: linear-gradient(120deg, rgba(40,70,55,0.72), rgba(90,24,24,0.65)); box-shadow: 0 0 14px rgba(180,220,180,0.15);">
+              <span class="text-sm">📜</span>
+              <span id="indexNavPoetryLabel">诗词探索</span>
+            </a>
+          </div>
         </div>
 
         <!-- 搜索框与语言切换 -->
@@ -1115,6 +1124,8 @@
           const starLabel = starNavEl.querySelector("span:last-child");
           if (starLabel) starLabel.textContent = isEn() ? "Star Explore" : "星际探索";
         }
+        const poetryLabelEl = document.getElementById("indexNavPoetryLabel");
+        if (poetryLabelEl) poetryLabelEl.textContent = isEn() ? "Poetry Explore" : "诗词探索";
         const searchInputEl = document.getElementById("searchInput");
         if (searchInputEl) searchInputEl.placeholder = t("searchPlaceholder");
         const searchBtnEl = document.getElementById("searchBtn");

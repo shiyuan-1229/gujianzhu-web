@@ -12,6 +12,11 @@ DOCS_DIR = PROJECT_DIR / "古建筑文献资料"
 CHROMA_DIR = BASE_DIR / "chroma_db"
 COLLECTION_NAME = "ancient_architecture_kb"
 INDEX_FILE = BASE_DIR / "kb_index.json"
+POEMS_DIR = BASE_DIR / "data"
+POEMS_FILE = POEMS_DIR / "architecture_poems.json"
+BUILDING_POEMS_INDEX = POEMS_DIR / "building_poems_index.json"
+PROJECT_POETRY_MAP = POEMS_DIR / "project_poetry_map.json"
+EXTENDED_POETRY_MAP = POEMS_DIR / "extended_poetry_map.json"
 
 load_dotenv(BASE_DIR / ".env")
 

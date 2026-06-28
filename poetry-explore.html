@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>诗词探索 · 诗词山河 · 古建智寻</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&display=swap"
+    />
+    <link rel="stylesheet" href="./css/site-nav.css" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm" />
+    <link rel="preload" href="./js/poetry-map-positions.js?v=66" as="script" />
+    <link rel="preload" href="./assets/china-bound-100000.json" as="fetch" crossorigin />
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="./css/poetry-map-3d.css?v=68" />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #141c18;
+      }
+
+      /* 进入缓冲页：优先渲染，避免长时间白屏/未响应 */
+      .poetry-entry-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(900px 620px at 50% 38%, rgba(52, 88, 72, 0.35), transparent 62%),
+          linear-gradient(165deg, #1a2e24 0%, #141c18 48%, #0f1210 100%);
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+      }
+
+      .poetry-entry-splash.is-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .poetry-entry-splash__inner {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        color: #f5efe3;
+      }
+
+      .poetry-entry-splash__spinner {
+        width: 44px;
+        height: 44px;
+        margin: 0 auto 1.25rem;
+        border: 2px solid rgba(212, 175, 120, 0.22);
+        border-top-color: rgba(232, 201, 120, 0.95);
+        border-radius: 50%;
+        animation: poetry-entry-spin 0.9s linear infinite;
+      }
+
+      @keyframes poetry-entry-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .poetry-entry-splash__title {
+        margin: 0 0 0.65rem;
+        font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+        font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+        letter-spacing: 0.18em;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+      }
+
+      .poetry-entry-splash__sub {
+        margin: 0;
+        font-family: "Noto Serif SC", serif;
+        font-size: 0.95rem;
+        letter-spacing: 0.12em;
+        color: rgba(226, 208, 182, 0.82);
+      }
+
+      .poetry-explore-page .poetry-map-3d {
+        z-index: 10;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.45s ease, visibility 0.45s ease;
+      }
+
+      .poetry-explore-page.poetry-map-ready .poetry-map-3d.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .poetry-explore-page:not(.poetry-map-ready) .site-nav,
+      .poetry-explore-page:not(.poetry-map-ready) .poetry-map-3d {
+        visibility: hidden;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body class="poetry-explore-page">
+    <!-- 缓冲页：脚本加载完成前始终可见 -->
+    <div id="poetryEntrySplash" class="poetry-entry-splash" aria-live="polite" aria-busy="true">
+      <div class="poetry-entry-splash__inner">
+        <div class="poetry-entry-splash__spinner" aria-hidden="true"></div>
+        <p id="poetryEntryTitle" class="poetry-entry-splash__title">正在进入诗词探索</p>
+        <p id="poetryEntrySub" class="poetry-entry-splash__sub">请稍后…</p>
+      </div>
+    </div>
+
+    <nav
+      class="site-nav fixed left-0 right-0 top-0 z-[60] border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl"
+      style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52))"
+    >
+      <div class="site-nav-container container mx-auto flex items-center justify-between px-4 py-4">
+        <a id="poetryNavBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
+
+        <div class="flex items-center gap-3 font-flow text-[17px] tracking-[0.22em] md:gap-6 md:text-lg">
+          <a id="poetryNavHome" href="./map.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+          <a id="poetryNavCategories" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
+          <a
+            id="poetryNavStar"
+            href="./star-explore.html"
+            class="site-nav-btn flex items-center gap-1.5 text-amber-50/90 transition-all duration-300 hover:text-amber-50"
+            style="background: linear-gradient(120deg, rgba(35, 22, 55, 0.72), rgba(85, 28, 20, 0.65)); box-shadow: 0 0 18px rgba(212, 175, 55, 0.2)"
+          >
+            <span class="text-sm text-[#d4af37]">✦</span>
+            <span id="poetryNavStarLabel">星际探索</span>
+          </a>
+          <span
+            id="poetryNavCurrent"
+            class="site-nav-btn site-nav-btn--current flex items-center gap-1.5 text-amber-100"
+            style="background: linear-gradient(120deg, rgba(40, 70, 55, 0.82), rgba(90, 24, 24, 0.72))"
+          >
+            <span aria-hidden="true">📜</span>
+            <span id="poetryNavPoetryLabel">诗词探索</span>
+          </span>
+        </div>
+
+        <button id="poetryLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn text-amber-50/90 hover:text-amber-100">EN</button>
+      </div>
+    </nav>
+
+    <!-- 诗词山河 · 全屏三维地图（就绪后显示） -->
+    <div id="poetryMap3dLayer" class="poetry-map-3d" aria-hidden="true">
+      <div class="poetry-map-3d__backdrop" aria-hidden="true">
+        <div class="poetry-map-3d__bg-cloudsky"></div>
+        <div class="poetry-map-3d__bg-cloudlayer"></div>
+        <div class="poetry-map-3d__bg-cloudlayer poetry-map-3d__bg-cloudlayer--far"></div>
+        <div class="poetry-map-3d__bg-vignette"></div>
+      </div>
+      <div id="poetryMap3dLoading" class="poetry-map-3d__loading" aria-live="polite">
+        <span class="poetry-map-3d__loading-text">山河加载中…</span>
+      </div>
+      <div class="poetry-map-3d__topbar">
+        <div class="poetry-map-3d__hud">
+          <p class="poetry-map-3d__hud-title">诗词山河</p>
+          <p id="poetryMap3dSub" class="poetry-map-3d__hud-sub">古建 · 每处一诗</p>
+        </div>
+        <div class="poetry-map-3d__top-actions">
+          <button id="poetryMap3dReset" type="button" class="poetry-map-3d__reset-btn" title="复位视角与缩放">复位</button>
+          <a id="poetryMap3dClose" href="./map.html" class="poetry-map-3d__close-mode">返回首页</a>
+        </div>
+      </div>
+      <div id="poetryMap3dViewport" class="poetry-map-3d__viewport">
+        <div id="poetryMap3dCanvasHost" class="poetry-map-3d__canvas-host"></div>
+      </div>
+      <div id="poetryMapScsInset" class="poetry-map-3d__scs-inset" aria-label="南海诸岛附图">
+        <span class="poetry-map-3d__scs-inset-label">南海诸岛</span>
+        <div id="poetryMapScsInsetHost" class="poetry-map-3d__scs-inset-host"></div>
+      </div>
+      <div id="poetryMap3dPoemStage" class="poetry-map-3d__poem-stage" aria-hidden="true">
+        <button id="poetryMap3dPoemBack" type="button" class="poetry-map-3d__poem-back">← 返回山河</button>
+        <article class="poetry-map-3d__poem-article">
+          <h2 id="poetryMap3dPoemTitle" class="poetry-map-3d__poem-stage-title"></h2>
+          <p id="poetryMap3dPoemMeta" class="poetry-map-3d__poem-stage-meta"></p>
+          <div id="poetryMap3dPoemBody" class="poetry-map-3d__poem-stage-body"></div>
+          <p id="poetryMap3dPoemTag" class="poetry-map-3d__poem-stage-tag"></p>
+          <div class="poetry-map-3d__poem-actions">
+            <a id="poetryMap3dBuildingLink" class="poetry-map-3d__building-link" href="#">查看建筑详情</a>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <script src="./js/site-lang.js"></script>
+    <script>
+      (function () {
+        var splash = document.getElementById("poetryEntrySplash");
+        var entryTitle = document.getElementById("poetryEntryTitle");
+        var entrySub = document.getElementById("poetryEntrySub");
+
+        function isEn() {
+          return typeof resolveSiteLang === "function" && resolveSiteLang() === "en";
+        }
+
+        function applyLang() {
+          var en = isEn();
+          document.documentElement.classList.toggle("lang-en", en);
+          var star = document.getElementById("poetryNavStarLabel");
+          var poetry = document.getElementById("poetryNavPoetryLabel");
+          if (star) star.textContent = en ? "Star Explore" : "星际探索";
+          if (poetry) poetry.textContent = en ? "Poetry Explore" : "诗词探索";
+          if (entryTitle) entryTitle.textContent = en ? "Entering Poetry Explore" : "正在进入诗词探索";
+          if (entrySub) entrySub.textContent = en ? "Please wait…" : "请稍后…";
+          var sub = document.getElementById("poetryMap3dSub");
+          if (sub) sub.textContent = en ? "Heritage · One poem per site" : "古建 · 每处一诗";
+        }
+
+        applyLang();
+
+        var langBtn = document.getElementById("poetryLangSwitchBtn");
+        if (langBtn) {
+          langBtn.addEventListener("click", function () {
+            if (typeof toggleSiteLang === "function") toggleSiteLang();
+            else {
+              var next = isEn() ? "zh" : "en";
+              var u = new URL(location.href);
+              u.searchParams.set("lang", next);
+              location.href = u.toString();
+            }
+            applyLang();
+          });
+        }
+
+        function yieldMain(ms) {
+          return new Promise(function (resolve) {
+            setTimeout(resolve, ms == null ? 16 : ms);
+          });
+        }
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src;
+            s.async = true;
+            s.onload = function () {
+              resolve();
+            };
+            s.onerror = function () {
+              reject(new Error("failed to load " + src));
+            };
+            document.body.appendChild(s);
+          });
+        }
+
+        function hideSplash() {
+          document.body.classList.add("poetry-map-ready");
+          if (splash) {
+            splash.classList.add("is-hidden");
+            splash.setAttribute("aria-busy", "false");
+          }
+        }
+
+        function showSplashError(msg) {
+          if (entrySub) entrySub.textContent = msg;
+          if (splash) splash.setAttribute("aria-busy", "false");
+        }
+
+        document.addEventListener(
+          "poetry-map-ready",
+          function () {
+            hideSplash();
+          },
+          { once: true }
+        );
+
+        document.addEventListener(
+          "poetry-map-error",
+          function (e) {
+            showSplashError((e && e.detail) || (isEn() ? "Load failed. Please refresh." : "加载失败，请刷新重试"));
+          },
+          { once: true }
+        );
+
+        async function bootPoetryExplore() {
+          var heartbeatDots = 0;
+          var heartbeatTimer = setInterval(function () {
+            heartbeatDots = (heartbeatDots + 1) % 4;
+            if (entrySub && !document.body.classList.contains("poetry-map-ready")) {
+              var base = isEn() ? "Please wait" : "请稍后";
+              entrySub.textContent = base + ".".repeat(heartbeatDots + 1);
+            }
+          }, 450);
+
+          function stopHeartbeat() {
+            clearInterval(heartbeatTimer);
+          }
+
+          document.addEventListener("poetry-map-ready", stopHeartbeat, { once: true });
+          document.addEventListener("poetry-map-error", stopHeartbeat, { once: true });
+
+          fetch("/api/poetry-landscape?scope=extended", { cache: "no-store" }).catch(function () {});
+          fetch("./assets/china-bound-100000.json", { cache: "force-cache" }).catch(function () {});
+          fetch("./assets/china-provinces-bound.json", { cache: "force-cache" }).catch(function () {});
+
+          await yieldMain(32);
+          try {
+            if (entrySub) {
+              entrySub.textContent = isEn() ? "Loading map resources…" : "正在加载地图资源…";
+            }
+            await loadScript("./js/poetry-map-positions.js?v=66");
+            await yieldMain(16);
+            if (entrySub) {
+              entrySub.textContent = isEn() ? "Starting poetry map…" : "正在启动诗词山河…";
+            }
+            await import("./js/poetry-map-3d.js?v=66");
+            await yieldMain(16);
+
+            var tries = 0;
+            while (!window.PoetryMap3d && tries < 60) {
+              await yieldMain(24);
+              tries += 1;
+            }
+            if (!window.PoetryMap3d || typeof window.PoetryMap3d.open !== "function") {
+              throw new Error("PoetryMap3d unavailable");
+            }
+
+            window.PoetryMap3d.open();
+          } catch (err) {
+            stopHeartbeat();
+            console.error(err);
+            showSplashError(
+              isEn()
+                ? "Failed to enter Poetry Explore. Please refresh."
+                : "进入诗词探索失败，请刷新页面重试"
+            );
+          }
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", bootPoetryExplore);
+        } else {
+          bootPoetryExplore();
+        }
+      })();
+    </script>
+  </body>
+</html>

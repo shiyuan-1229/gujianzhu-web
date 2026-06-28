@@ -3017,7 +3017,7 @@
     >
       <div class="site-nav-container container mx-auto flex flex-nowrap items-center justify-between gap-3 px-3 py-1 md:px-4 md:py-1.5">
         <div class="site-nav-brand-wrap select-none leading-tight">
-          <a id="detailNavBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
+          <a id="detailNavBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
           <div id="detailNavSub" class="site-nav-sub mt-0.5 font-flow text-[0.65rem] tracking-[0.16em] text-zinc-400 md:text-[0.7rem]">华夏建筑选集</div>
       </div>
 
@@ -3028,7 +3028,7 @@
             class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100"
             >返回上一页</a
           >
-          <a id="detailNavHome" href="./index.html" class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
+          <a id="detailNavHome" href="./map.html" class="site-nav-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100">返回首页</a>
           <button id="langSwitchBtn" type="button" class="site-nav-btn lang-switch-btn whitespace-nowrap text-amber-50/90 transition-colors hover:text-amber-100" aria-label="切换为英文">EN</button>
 
         </div>
@@ -7640,10 +7640,10 @@
         const navHomeEl = document.getElementById("detailNavHome");
         if (navHomeEl) {
           navHomeEl.textContent = t("home");
-          navHomeEl.setAttribute("href", `./index.html?lang=${encodeURIComponent(currentLang)}`);
+          navHomeEl.setAttribute("href", `./map.html?lang=${encodeURIComponent(currentLang)}`);
         }
         if (navBrandEl) {
-          navBrandEl.setAttribute("href", `./index.html?lang=${encodeURIComponent(currentLang)}`);
+          navBrandEl.setAttribute("href", `./map.html?lang=${encodeURIComponent(currentLang)}`);
         }
         if (navBackEl) {
           navBackEl.textContent = t("back");

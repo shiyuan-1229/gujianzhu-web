@@ -1,1957 +1,322 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>首页 · 古建智寻</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>古建智寻 · 探寻千年遗韵</title>
 
-    <!-- 首屏地图：优先同仓库本地 PNG（避免 jsDelivr 在国内偶发极慢/超时）；缺文件时再走 onerror 回退 CDN -->
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link rel="preload" as="image" href="./assets/index-bg.png" />
-    <link rel="preload" as="image" href="./assets/index-map-china.png" />
-
-    <!-- Fonts：非阻塞加载，避免与首屏大图抢主线程/连接 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
-      media="print"
-      onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
     />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@300;400;600&display=swap"
-      />
-    </noscript>
-    <!-- AI 导览：defer + 提前声明，与首屏并行下载，不阻塞下方主逻辑 -->
-    <script defer src="./js/ai-chat-widget.js"></script>
-    <script defer src="./js/bgm-film.js"></script>
-    <link rel="stylesheet" href="./css/map-svg-hotspots.css" />
-    <link rel="stylesheet" href="./css/site-nav.css" />
-
-    <!-- Tailwind CSS (CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              deep: "#050505",
-              nebula: "#1a1a2e",
-              gold: "#d4af37",
-            },
-            fontFamily: {
-              ancient: ["Ma Shan Zheng", "ZCOOL XiaoWei", "Noto Serif SC", "serif"],
-              flow: ["Zhi Mang Xing", "Ma Shan Zheng", "Noto Serif SC", "serif"],
-              serifCN: ["Noto Serif SC", "SimSun", "serif"],
-              sansCN: ["Noto Sans SC", "system-ui", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
-
-    <style>
-      :root {
-        --bg0: #1a1a2e;
-        --bg1: #050505;
-        --fg: rgba(240, 240, 240, 0.92);
-        --muted: rgba(240, 240, 240, 0.66);
-        --gold: #d4af37;
-        --panel: rgba(10, 11, 18, 0.55);
-      }
-
-      html,
-      body {
-        height: 100%;
-        /* 与山水底图衔接，避免导航与首屏之间出现死黑条 */
-        background: radial-gradient(1200px 900px at 50% 18%, #2d3d34, #141c18 55%, #0d1210 100%);
-        color: var(--fg);
-        overflow: hidden;
-      }
-
-      /* 半透明立体层 */
-      .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.02);
-        backdrop-filter: blur(1px);
-        z-index: 1;
-      }
-
-      /* Canvas 星空粒子：最底层 */
-      #starCanvas {
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 0;
-        pointer-events: none;
-      }
-
-      /* 单图首页不再需要旧的长城剪影层 */
-      .wall-silhouette {
-        display: none;
-      }
-
-      /* 右侧详情竖排标题 */
-      .vertical-title {
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        letter-spacing: 0.12em;
-      }
-
-      /* 占位“古建图”——用光影做出纸本与檐口感 */
-      .placeholder-arch {
-        position: relative;
-        border-radius: 18px;
-        background: radial-gradient(
-            120% 140% at 20% 10%,
-            rgba(22, 97, 171, 0.28),
-            transparent 55%
-          ),
-          radial-gradient(140% 120% at 80% 90%, rgba(255, 70, 31, 0.14), transparent 60%),
-          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-        border: 1px solid rgba(240, 240, 240, 0.10);
-        box-shadow: 0 18px 70px rgba(0, 0, 0, 0.55);
-        overflow: hidden;
-      }
-
-      .placeholder-arch::before {
-        content: "";
-        position: absolute;
-        inset: -40% -30%;
-        background: conic-gradient(
-          from 230deg,
-          transparent,
-          rgba(22, 97, 171, 0.22),
-          transparent,
-          rgba(255, 70, 31, 0.12),
-          transparent
-        );
-        filter: blur(18px);
-        opacity: 0.55;
-      }
-
-      .placeholder-arch::after {
-        content: "";
-        position: absolute;
-        left: 12%;
-        right: 12%;
-        top: 16%;
-        bottom: 16%;
-        border-radius: 14px;
-        border: 1px dashed rgba(240, 240, 240, 0.14);
-        opacity: 0.55;
-      }
-
-      /* 与插画同坐标系的热区层（百分比相对 #mapHotspots，随容器缩放） */
-      #mapHotspots {
-        position: absolute;
-        inset: 0;
-        /* 低于热区 SVG，避免挡在省界 path 之上导致点不到北京等省份 */
-        z-index: 2;
-        pointer-events: none;
-      }
-
-      #mapHotspots .map-sichuan-hit-face {
-        pointer-events: auto;
-      }
-
-      /* 四川省热区：按底图 3448×1900 与 SVG 数据精确定位（X=1502.5, Y=1103） */
-      .map-sichuan-overlay {
-        position: absolute;
-        left: 43.5765661253%;
-        top: 58.0526315789%;
-        width: 11.0504640371%;
-        height: 19.8421052632%;
-        transform: none;
-        /* 仍压在地图 SVG 之上，保证四川可点 */
-        z-index: 6;
-        box-sizing: border-box;
-        pointer-events: none;
-      }
-
-      .map-sichuan-overlay .map-sichuan-hit-svg {
-        position: absolute;
-        inset: 0;
-        display: block;
-        width: 100%;
-        height: 100%;
-        overflow: visible;
-        pointer-events: none;
-      }
-
-      .map-sichuan-overlay .map-sichuan-hit-svg path {
-        pointer-events: none;
-        fill: rgba(0, 0, 0, 0.02);
-        stroke: transparent;
-        stroke-width: 3;
-        vector-effect: non-scaling-stroke;
-        transition: stroke 0.15s ease, filter 0.15s ease;
-      }
-
-      .map-sichuan-overlay.sichuan-lit .map-sichuan-hit-svg path {
-        fill: rgba(0, 0, 0, 0.02);
-        stroke: #ffe566;
-        stroke-width: 3;
-        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
-          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
-          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
-      }
-
-      .map-sichuan-hit-face {
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        border: none;
-        cursor: pointer;
-        pointer-events: auto;
-        background: transparent;
-        appearance: none;
-        -webkit-appearance: none;
-      }
-
-      .map-sichuan-hit-face:focus-visible {
-        outline: 2px solid rgba(212, 175, 55, 0.95);
-        outline-offset: 2px;
-      }
-
-      /* 允许 JS 持续高亮其它省份热区（非仅 hover） */
-      #chinaMapHotspotSvg .map-hotspot-path.is-active {
-        fill: rgba(0, 0, 0, 0.02);
-        stroke: #ffe566;
-        stroke-width: 3;
-        filter: drop-shadow(0 0 1px #fff0a0) drop-shadow(0 0 4px #ffd700)
-          drop-shadow(0 0 10px #ffb800) drop-shadow(0 0 20px #ff9500)
-          drop-shadow(0 0 40px rgba(255, 140, 0, 0.7)) drop-shadow(0 0 60px rgba(255, 120, 0, 0.4));
-      }
-
-      /* ★ 无建筑详情页的省份 → 默认光标（不可点击） */
-      #chinaMapHotspotSvg .map-hotspot-path:not([data-href]) {
-        cursor: default;
-      }
-
-      /* 关键布局兜底：即使 Tailwind CDN 失败也不至于塌陷成一片黑 */
-      #app {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        background: transparent;
-      }
-
-      #layout {
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
-
-      #spacer {
-        display: none;
-      }
-
-      /* 全屏铺满视口（底图延至导航栏下缘，导航单独 z-50 浮于其上） */
-      #mapWrap {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 3;
-      }
-
-      #mapPanel {
-        width: 100%;
-        height: 100%;
-        border-radius: 0;
-        overflow: visible;
-        outline: none;
-        box-shadow: none;
-        background: transparent;
-      }
-
-      /* 双层：底层山水全屏铺底，上层中国地图（透明底）与热区同坐标系 */
-      #mapPanel.map-panel--illustration {
-        background: transparent !important;
-      }
-
-      #mapHeroBg {
-        mix-blend-mode: normal;
-        object-fit: cover;
-        object-position: center center;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        transform: translateZ(0);
-      }
-
-      /* 地图与省份高亮、图标热区同层，完整展示含南海十段线的全国范围 */
-      .map-china-layer {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-      }
-
-      .map-china-map-media {
-        position: relative;
-        flex: 0 0 auto;
-        line-height: 0;
-        overflow: hidden;
-      }
-
-      #mapChinaMap {
-        position: absolute;
-        display: block !important;
-        max-width: none !important;
-        object-fit: fill !important;
-        object-position: left top !important;
-        mix-blend-mode: normal;
-        filter: brightness(1.04) saturate(1.02) contrast(1.02)
-          drop-shadow(0 12px 40px rgba(20, 35, 25, 0.35));
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        transform: translateZ(0);
-      }
-
-      /* 南海十字线岛礁附图外框：与底图同坐标系，仅突出右下角下方岛礁附图 */
-      .map-china-nanhai-frame {
-        position: absolute;
-        pointer-events: none;
-        z-index: 2;
-        box-sizing: border-box;
-        border: 1.5px solid rgba(255, 236, 195, 0.48);
-        border-radius: 3px;
-        background: rgba(255, 248, 230, 0.06);
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
-      }
-
-      /* 左下角：浑天仪/罗盘线稿水印 */
-      .armillary {
-        display: none;
-      }
-
-      .armillary svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-
-      #mapStatus {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: rgba(250, 240, 220, 0.72);
-        font-size: 12px;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        z-index: 5;
-        pointer-events: none;
-      }
-
-      #detail {
-        position: absolute;
-        right: clamp(12px, 2.5vw, 48px);
-        top: 50%;
-        width: min(420px, 38vw);
-        transform: translateY(-50%);
-        display: block;
-        padding: 0;
-        z-index: 10;
-      }
-
-      .glass-card {
-        border-radius: 26px;
-        background: rgba(10, 11, 18, 0.44);
-        border: 1px solid rgba(212, 175, 55, 0.24);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-      }
-
-      /* 增加一点“星云流光”，让画面更有纵深 */
-      .ink-wash {
-        display: none;
-      }
-
-      /* 胶片动画样式 */
-      .film-reel {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 120px;
-        height: 120px;
-        z-index: 15;
-        opacity: 0;
-        transform: scale(0.8) rotate(0deg);
-        transition: all 0.5s ease;
-      }
-
-      .film-reel.visible {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-      }
-
-      .film-reel.spinning {
-        animation: spin 10s linear infinite;
-      }
-
-      .lang-switch-btn {
-        min-width: 64px;
-        text-align: center;
-      }
-      html.lang-en body {
-        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-      }
-      html.lang-en .site-nav-brand {
-        letter-spacing: 0.04em;
-      }
-      html.lang-en .site-nav-btn {
-        letter-spacing: 0.08em;
-      }
-      html.lang-en #detail .font-serifCN {
-        font-family: "Cinzel", "Georgia", "Times New Roman", serif !important;
-      }
-      html.lang-en #buildingDesc {
-        line-height: 1.72;
-        letter-spacing: 0.02em;
-      }
-
-      @keyframes spin {
-        from {
-          transform: scale(1) rotate(0deg);
-        }
-        to {
-          transform: scale(1) rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-
-  <body class="font-sansCN">
-    <!-- 半透明立体层 -->
-    <div class="overlay"></div>
-    
-    <!-- 导航栏 -->
-    <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
-      <div class="site-nav-container container mx-auto flex items-center justify-between px-4 py-4">
-        <!-- 网页名称 -->
-        <div id="indexNavBrand" class="site-nav-brand">古建智寻</div>
-
-        <!-- 导航项 -->
-        <div class="flex items-center space-x-8 font-flow text-[17px] tracking-[0.22em] md:text-lg">
-          <!-- 首页 -->
-          <div class="group relative">
-            <a id="indexNavHome" href="#" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
-            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a id="indexNavMap" href="#" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
-            </div>
-          </div>
-
-          <!-- 建筑分类 -->
-          <div class="group relative">
-            <a id="indexNavCategories" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
-            <div class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100">
-              <a id="indexCatResidence" href="./list.html?category=民居" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">民居</a>
-              <a id="indexCatPalace" href="./list.html?category=皇宫" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">皇宫</a>
-              <a id="indexCatBridge" href="./list.html?category=桥梁" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">桥梁</a>
-              <a id="indexCatYamen" href="./list.html?category=官府" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">官府</a>
-            </div>
-          </div>
-
-          <!-- 星际探索 -->
-          <div class="group relative">
-            <a id="indexNavStar" href="./star-explore.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">星际探索</a>
-          </div>
-        </div>
-
-        <!-- 搜索框 -->
-        <div class="flex items-center">
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="搜索建筑名"
-            class="site-nav-input rounded-l-md border border-amber-200/35 bg-amber-50/90 px-4 py-2 text-[#4a2c1a] placeholder:text-[#8a6a4a] focus:outline-none focus:ring-2 focus:ring-amber-300/70"
-          />
-          <button id="searchBtn" class="site-nav-btn rounded-r-md border border-amber-200/40 bg-[#6b1a1a]/82 px-4 py-2 font-flow text-amber-50 tracking-[0.12em] transition-colors hover:bg-[#7b1f1f]/90">
-            搜索
-          </button>
-          <button id="indexLangSwitchBtn" type="button" class="site-nav-btn lang-switch-btn ml-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-amber-50/90 transition-colors hover:border-amber-200/40 hover:text-amber-100">EN</button>
-        </div>
-      </div>
-    </nav>
-    
-    <main id="app" class="fixed inset-0 z-[3] bg-transparent">
-      <canvas id="starCanvas" aria-hidden="true"></canvas>
-      
-      <img class="wall-silhouette" src="./tiananmen.png" alt="" loading="lazy" decoding="async" fetchpriority="low" />
-
-      <!-- 古建筑简笔画动画 -->
-      <canvas id="archCanvas" class="absolute inset-0 w-full h-full z-1 pointer-events-none" aria-hidden="true"></canvas>
-
-      <div class="armillary" aria-hidden="true">
-        <svg viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="210" cy="210" r="160" opacity="0.9" />
-            <circle cx="210" cy="210" r="118" opacity="0.75" />
-            <circle cx="210" cy="210" r="78" opacity="0.6" />
-            <path d="M50 210 H370" opacity="0.65" />
-            <path d="M210 50 V370" opacity="0.65" />
-            <path d="M96 96 L324 324" opacity="0.45" />
-            <path d="M324 96 L96 324" opacity="0.45" />
-            <ellipse cx="210" cy="210" rx="150" ry="70" transform="rotate(-22 210 210)" opacity="0.7" />
-            <ellipse cx="210" cy="210" rx="150" ry="70" transform="rotate(22 210 210)" opacity="0.55" />
-            <path d="M210 50 L210 66" />
-            <path d="M210 354 L210 370" />
-            <path d="M50 210 L66 210" />
-            <path d="M354 210 L370 210" />
-            <circle cx="210" cy="210" r="6" opacity="0.9" />
-          </g>
-        </svg>
-      </div>
-
-      <!-- 主体：全屏底图 + 右侧悬浮详情（详情叠在图上） -->
-      <section id="layout" class="relative h-full w-full">
-        <!-- 星际探索入口（地图右上角悬浮按钮） -->
-        <a
-          id="mapStarBtn"
-          href="./star-explore.html"
-          class="group absolute z-[20] flex items-center gap-2 rounded-full border border-amber-200/40 px-5 py-2.5 font-flow text-amber-50 tracking-[0.18em] backdrop-blur-md transition-all duration-300 hover:border-amber-200/80 hover:text-white"
-          style="top: clamp(84px, 11vh, 120px); right: clamp(12px, 2.5vw, 48px); background: linear-gradient(120deg, rgba(40,28,60,0.55), rgba(90,24,24,0.45)); box-shadow: 0 0 24px rgba(212,175,55,0.25);"
-        >
-          <span class="text-gold transition-transform duration-500 group-hover:rotate-180">✦</span>
-          <span>星际探索</span>
-        </a>
-        <div id="mapWrap">
-          <div id="mapPanel" class="h-full w-full map-panel--illustration">
-              <div class="relative h-full w-full">
-                <img
-                id="mapHeroBg"
-                class="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-cover"
-                src="./assets/index-bg.png"
-                  alt=""
-                  decoding="async"
-                  fetchpriority="high"
-                  referrerpolicy="no-referrer"
-                  onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E8%83%8C%E6%99%AF.png'"
-                />
-              <div class="map-china-layer">
-                <div
-                  id="mapChinaMapMedia"
-                  class="map-china-map-media z-[1]"
-                >
-                  <img
-                    id="mapChinaMap"
-                    class="pointer-events-none z-0 select-none"
-                    src="./assets/index-map-china.png"
-                    alt=""
-                    decoding="async"
-                    fetchpriority="high"
-                    referrerpolicy="no-referrer"
-                    onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/gh/shiyuan-1229/gujianzhu-web@main/assets/%E5%9C%B0%E5%9B%BE.png'"
-                  />
-                  <div id="mapChinaNanhaiFrameLower" class="map-china-nanhai-frame" aria-hidden="true"></div>
-                  <div id="chinaMapSvgAnchor" class="map-svg-overlay-anchor" aria-hidden="true">
-                    <svg
-                      id="chinaMapHotspotSvg"
-                      class="map-hotspot-svg"
-                      viewBox="0 0 3448 1900"
-                      preserveAspectRatio="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <g class="map-hotspot-g" transform="translate(2155.5, 769)">
-                        <path
-                          class="map-hotspot-path"
-                          data-name-zh="北京"
-                          data-name-en="Beijing"
-                          data-category="都城 · 直辖市"
-                          data-desc="北京为六朝古都，中轴秩序与宫城坛庙共同构成都城营造的典范。由此可入卷探秘，沿中轴走进紫禁城的建筑序列。"
-                          d="M23.166 58.798L6.66602 65.798L0.666016 72.298L11.166 84.798L17.666 79.298H23.166H37.166L41.666 84.798H53.166L59.666 79.298L67.666 72.298H59.666V65.798L67.666 58.798H76.666H82.666L98.166 54.298H88.166L82.666 47.298V36.298L88.166 30.798H98.166V22.298H88.166H82.666L76.666 17.798L67.666 9.79803L59.666 0.798035L53.166 9.79803L59.666 17.798L53.166 22.298H41.666L37.166 17.798L26.666 26.798L29.166 41.798L37.166 47.298L23.166 58.798Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2096, 711.5)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=河北省"
-                          data-name-zh="河北"
-                          data-name-en="Hebei Province"
-                          data-category="省份 · 燕赵"
-                          data-desc="河北环拱京畿，长城关隘、皇家陵寝与古城村镇类型齐全，体现北方防御体系与礼制空间的双重传统。"
-                          d="M0.5 268.149V295.649L35 301.649L50.5 285.649L70.5 252.649L93 225.149L117.5 216.149L131 202.649L123.5 186.149L104.5 174.649L76.5 166.649L59 153.649L50.5 114.649L76.5 62.1494L117.5 55.6494L167 81.6494V125.149L185 143.149L204.5 119.649L180 75.6494V62.1494L161.5 45.6494L150.5 24.1494L142.5 13.6494L131 0.649414L117.5 9.14941L104.5 24.1494L87 33.6494H70.5L59 38.1494L50.5 55.6494L35 75.6494L9 81.6494L20 105.149L9 119.649L20 134.649V153.649L9 166.649L0.5 186.149V202.649L9 233.149L0.5 268.149Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1942.5, 1518)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=广东省"
-                          data-name-zh="广东省"
-                          data-name-en="Guangdong Province"
-                          data-category="省份 · 岭南"
-                          data-desc="广东地处岭南，气候湿热，孕育了镬耳山墙、蚝壳墙与通透的庭院组织；陈家祠等建筑以砖雕、灰塑与陶塑装饰著称。"
-                          d="M0.5 167.096V205.596L23.5 209.596L27.5 179.596L50.5 171.096L98.5 153.596L132.5 133.596L149.5 116.596L162 123.596L172 116.596V103.596L214 65.5959L245.5 99.0959L270 68.5959L257 31.0959L245.5 26.5959L225 14.5959V31.0959H214L201.5 26.5959L184 31.0959V21.0959H172L156.5 14.5959L132.5 0.595947L109 17.5959L81.5 26.5959L86.5 31.0959L81.5 39.0959H68.5L81.5 48.0959V58.0959L68.5 89.0959L40.5 123.596L0.5 167.096Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1962, 783)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=山西省"
-                          data-name-zh="山西省"
-                          data-name-en="Shanxi Province"
-                          data-category="省份 · 晋地"
-                          data-desc="山西表里山河，地上木构古建筑存量极丰；平遥古城、晋祠与大院民居共同呈现了北方合院与礼制空间的多样面貌。"
-                          d="M151.52 36.2501L132.02 1.25012L123.52 27.7501L94.0204 36.2501L53.5204 52.7501L28.5204 94.7501L9.02039 133.75L20.0204 161.75L9.02039 199.25V255.25L0.520386 291.25L9.02039 315.25L53.5204 291.25L66.5204 267.75H109.52L132.02 237.25V217.25V186.75L141.52 161.75L123.52 122.75L132.02 94.7501L151.52 73.7501L132.02 45.7501L151.52 36.2501Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2174.5, 1060.5)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=江苏省"
-                          data-name-zh="江苏省"
-                          data-name-en="Jiangsu Province"
-                          data-category="省份 · 江南"
-                          data-desc="江苏水网密布，园林与民居讲究曲径与借景；拙政园、周庄与宝带桥等体现了江南营造在尺度与细部上的精致追求。"
-                          d="M194.831 164.477H212.831V152.977L194.831 133.477L173.831 123.977V94.4772L194.831 86.4772L155.331 62.4772L124.831 20.4772L116.331 0.977173L88.3311 37.4772L68.8311 20.4772L47.8311 30.4772H31.3311V9.47717L0.831055 30.4772L31.3311 55.4772H47.8311L68.8311 72.4772L78.8311 86.4772L88.3311 94.4772L102.331 111.477L88.3311 123.977V164.477L102.331 187.977H116.331L124.831 201.977L138.831 187.977L155.331 201.977H173.831L194.831 164.477Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1800, 1193.5)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=重庆市"
-                          data-name-zh="重庆市"
-                          data-name-en="Chongqing"
-                          data-category="省份 · 巴渝"
-                          data-desc="重庆山城临江而建，吊脚楼、码头街巷与崖壁聚落共同塑造立体城市肌理，巴渝民居因地制宜，空间层次鲜明。"
-                          d="M97.5503 0.706787L89.0503 11.2068L77.0503 24.2068L63.5503 39.7068L43.0503 54.2068L30.5503 70.7068L23.5503 87.2068L10.5503 99.2068V111.707L0.550293 126.707L6.55029 145.207L17.5503 150.207H30.5503L43.0503 159.707L58.0503 155.707L73.0503 134.207L89.0503 126.707V141.707L93.0503 155.707L103.05 171.207L117.55 195.207H132.05V181.707L124.05 171.207L132.05 155.707L124.05 141.707L117.55 126.707L103.05 108.207L110.55 99.2068L117.55 87.2068L132.05 82.2068L144.55 70.7068L161.05 63.2068V47.2068L149.05 36.2068L132.05 28.2068L117.55 17.2068L97.5503 0.706787Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1507, 1352)">
-                        <path
-                          class="map-hotspot-path"
-                          data-href="./list.html?province=云南省"
-                          data-name-zh="云南省"
-                          data-name-en="Yunnan Province"
-                          data-category="省份 · 滇地"
-                          data-desc="云南山川纵横、民族聚居，民居与寺庙建筑常结合高原气候与地方工艺，形成院落、木构与彩饰并重的多样风貌。"
-                          d="M36.5 69.2299L23.5 46.7299V26.2299H36.5L47.5 1.22986L65.5 41.2299L75.5 35.2299V10.2299L84 15.7299L99.5 61.2299L110 54.2299L148.5 135.23L171 129.73L204.5 116.73V79.2299L216.5 61.2299L228 35.2299L239.5 21.7299L244 46.7299H263.5L281.5 41.2299L287 46.7299L273.5 61.2299L259 69.2299H233.5L223 79.2299L233.5 105.73H254V116.73L244 137.73L254 157.23L259 170.23L254 195.23H269.5L273.5 206.73L287 218.73L293 213.73L314 218.73V232.73L302 247.23L287 259.23H273.5L254 278.73H233.5L216.5 272.23L198.5 278.73H179L152.5 303.23V344.73H142L120 319.73V330.23H106L84 310.73L65.5 303.23L56 278.73L42 247.23L36.5 213.73L0.5 225.23V184.73L13.5 170.23L36.5 137.73L42 97.2299L36.5 69.2299Z"
-                        />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1744, 1330)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=贵州省" data-name-zh="贵州省" data-name-en="Guizhou Province" data-category="省份 · 黔地" data-desc="贵州多山湿润，吊脚楼、石板寨与鼓楼风雨桥共同构成多民族聚落景观，建筑强调地形适应与木石工艺结合。" d="M43 200.895L34 209.895H23.5V181.895L19.5 159.895L23.5 143.895V128.395L0.5 116.395V99.8948L37 93.3948L53.5 80.3948V69.8948L61 64.3948V47.3948L71.5 53.8948L81 47.3948L95.5 43.3948V29.3948L123.5 17.8948L126.5 8.89478L139.5 0.894775V13.8948L148.5 29.3948L171 57.8948L182.5 64.3948L190.5 80.3948L177.5 89.3948L182.5 99.8948L190.5 109.895L182.5 133.395L190.5 151.395L182.5 156.895L171 168.895L160.5 174.895H148.5L139.5 187.895H126.5L118.5 174.895H107L95.5 187.895L82.5 194.895L76 209.895H61L43 200.895Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1783, 1470.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=广西壮族自治区" data-name-zh="广西壮族自治区" data-name-en="Guangxi Zhuang Autonomous Region" data-category="省份 · 岭南西部" data-desc="广西喀斯特山水与多民族聚落相映，干栏式建筑、风雨桥与鼓楼体现了南方木构传统与山地生活智慧。" d="M132 207.572L157.5 215.572L194 182.572L209.5 164.572L223 140.072L226.5 117.572L242.5 107.572V94.5718L229.5 86.0718L236 80.0718L223 74.5718V59.0718L209.5 67.0718V49.5718L223 36.5718L226.5 26.5718L217.5 19.0718L214 6.07178L198 0.571777L176 21.5718L170.5 13.5718H157.5L151.5 21.5718L132 40.5718H116L109.5 49.5718L90 59.0718L76 40.5718L65 49.5718L47 59.0718L38 73.0718L16 74.5718L0.5 67.0718V74.5718L10.5 90.0718H22L42 94.5718V122.572L22 140.072L47 147.572L57.5 156.572L52 174.572L65 193.072L97.5 207.572H132Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1880, 1727)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=海南省" data-name-zh="海南省" data-name-en="Hainan Province" data-category="省份 · 海岛" data-desc="海南四面环海，聚落与民居常结合热带气候、骑楼街区与侨乡文化，空间通风开敞、遮阳避雨特征鲜明。" d="M26.9088 91L51.9088 107H75.4088L88.4088 91L98.4088 81L121.909 79.5L114.409 66.5V46L129.409 37L107.909 31.5L102.409 24H114.409V18.5L102.409 13L88.4088 0.5H42.9088L32.4088 13L17.9088 24H26.9088V31.5L12.9088 37H1.90881L17.9088 46V66.5L12.9088 79.5H22.9088L26.9088 91Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1928.5, 1304)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=湖南省" data-name-zh="湖南省" data-name-en="Hunan Province" data-category="省份 · 湘地" data-desc="湖南依山带水，书院、祠堂与民居兼具湖湘文脉与山地适应性，木构穿斗、封火墙与院落组合富有地域辨识度。" d="M106.159 231L89.1588 238.5H81.6588V222L71.6588 214L78.1588 208L86.1588 201L81.6588 187L86.1588 183L89.1588 174.5H75.6588V165.5H66.1588L59.1588 159H50.1588L30.1588 177.5L25.1588 168L11.1588 177.5L5.65881 155L11.1588 142V130.5L0.658813 117.5L11.1588 106L5.65881 90.5L11.1588 77L5.65881 63V51V38V29L25.1588 9.5L37.1588 17.5L43.6588 9.5L53.6588 0.5H67.1588H89.1588L106.159 17.5H116.659L123.159 9.5L134.659 18.5H141.159L151.659 9.5L159.659 38H172.659V51V69.5L151.659 106L159.659 123L164.659 142L172.659 150V168L181.159 177.5L172.659 201L164.659 206L151.659 201H141.159L128.159 214H112.659L106.159 231Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2112, 1364.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=福建省" data-name-zh="福建省" data-name-en="Fujian Province" data-category="省份 · 闽地" data-desc="福建山海相依，土楼、宗祠与滨海聚落并存，夯土围合与木构穿斗体现了闽地建筑在防御、聚族与适应气候上的智慧。" d="M14.5 150.5L0.5 148V127.5L14.5 115.5L18.5 107.5V66.5L14.5 55V39L26 23.5L44.5 14.5L69.5 6.5L91.5 0.5H121H147.5L186.5 9.5L201.5 16.5L214.5 23.5L225.5 34L228.5 50.5L222.5 66.5V84.5V103.5L218.5 123.5L194 142L175 148L144.5 177L105.5 216L91.5 180L80.5 177L69.5 169.5L56.5 160L52 165V180L42 177L26 172.5H11.5L9 160L14.5 150.5Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1910, 1153)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=湖北省" data-name-zh="湖北省" data-name-en="Hubei Province" data-category="省份 · 荆楚" data-desc="湖北位居长江中游，古城、书院与桥梁建筑类型丰富，荆楚地区建筑兼具水网环境适应与礼制空间传统。" d="M258.114 136.647L255.114 152.647L243.614 148.647L230.614 165.647H219.614L210.114 173.647H198.114L185.114 184.147L179.614 179.147L177.614 158.647L166.614 152.647L161.614 158.647L153.114 165.647L144.114 156.147L133.114 161.647L125.614 158.647L110.614 148.647L91.1135 145.147L77.1135 141.147L68.6135 145.147L57.1135 158.647L48.1135 152.647L37.6135 156.147L16.1135 176.647L12.6135 168.647L0.613525 145.147L16.1135 130.147L29.6135 119.647L45.1135 111.147L54.6135 104.647L58.6135 89.1472L37.6135 71.1472L33.6135 37.1472L54.6135 32.1472V21.6472L33.6135 3.64722V0.647217L45.1135 3.64722H58.6135H84.6135L96.1135 24.6472L110.614 37.1472L115.114 29.1472L121.614 21.6472L125.614 29.1472H173.114V21.6472H177.614L185.114 32.1472L193.614 43.1472L206.614 50.6472L198.114 55.1472L206.614 65.6472L215.614 71.1472L219.614 77.6472H230.614L236.114 89.1472L243.614 93.6472L258.114 100.647L255.114 107.647L249.114 119.647L258.114 136.647Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2088.5, 1299)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=江西省" data-name-zh="江西省" data-name-en="Jiangxi Province" data-category="省份 · 赣地" data-desc="江西山水与书院文化深厚，白墙黛瓦、祠堂书院与古村落相互映照，赣派建筑在礼制与生活之间取得平衡。" d="M23.0759 176.5L18.5759 204.5L27.5759 184L36.0759 176.5V159.5V134.5V128L30.5759 115.5L36.0759 100.5L45.5759 89L61.5759 80L81.0759 73L105.076 63.5H168.076L154.576 41.5V35L163.576 26.5L135.576 22.5L128.076 5.5L115.076 22.5L105.076 16.5L110.576 0.5H105.076L98.5759 9.5L81.0759 16.5L72.5759 9.5L57.5759 22.5L40.5759 26.5L30.5759 32H23.0759L18.5759 41.5L23.0759 51.5L18.5759 76.5L0.575928 111.5L11.0759 128V144.5L18.5759 156V168L23.0759 176.5Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2249.5, 1228)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=浙江省" data-name-zh="浙江省" data-name-en="Zhejiang Province" data-category="省份 · 江南东部" data-desc="浙江河港密布、商贸兴盛，古城街巷、廊桥与江南宅院共同塑造精巧细腻的空间气质，兼具山地与水乡特色。" d="M0.596436 112.293L13.5964 132.293L20.0964 136.793L50.0964 145.293L72.0964 153.293L90.5964 168.793L117.596 145.293L128.596 124.293L133.596 102.793L140.096 81.2933L127.096 65.7933L120.596 63.7933L97.0964 68.2933L88.0964 63.7933L90.5964 54.2933L99.5964 45.7933L109.596 39.2933L125.096 33.2933L131.096 24.2933L128.596 19.7933L133.596 9.79333V1.29333L128.596 6.79333H117.596L109.596 17.2933L99.5964 33.2933L88.0964 39.2933L75.5964 36.7933L64.5964 24.2933L53.0964 36.7933L41.5964 43.2933L46.0964 57.7933L32.0964 63.7933L24.5964 81.2933L13.5964 92.2933L0.596436 112.293Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1974.5, 1013)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=河南省" data-name-zh="河南省" data-name-en="Henan Province" data-category="省份 · 中原" data-desc="河南位居中原腹地，宫殿、寺观、石窟与古城遗存丰厚，是中华礼制建筑与都城文明的重要承载地。" d="M0.5 86.6351V82.1351L14.5 72.1351L37 64.1351L41 57.1351L50 38.6351L62.5 36.1351L99.5 38.6351L109 31.1351L114.5 18.1351L124 0.635132L147.5 7.63513L159.5 5.13513L169 0.635132L177.5 13.1351V18.1351L156.5 41.1351V57.1351L164 60.6351L169 72.1351L177.5 82.1351H193.5L197.5 89.6351L207.5 98.6351H202L193.5 105.635L185.5 103.635L177.5 98.6351L172.5 103.635L177.5 118.135L172.5 127.135L159.5 144.135L153 146.635L159.5 153.635L164 168.135L169 174.135L182.5 180.135L185.5 192.135L182.5 201.135L169 213.635L156.5 210.635L147.5 206.135L138 195.635L147.5 192.135L141 185.135L127 174.135L117 158.635H109L103 165.635H66.5L62.5 163.135L56 158.635L44.5 168.135L30 156.135V144.135L19 138.135V127.135L0.5 86.6351Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1809, 862.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=陕西省" data-name-zh="陕西省" data-name-en="Shaanxi Province" data-category="省份 · 关中" data-desc="陕西关中平原与陕北高原并存，帝都遗址、塔寺与窑洞民居交织，是中国古代都城与陵寝建筑的重要区域。" d="M0.5 281.066L4 276.566L25 270.066V244.066V235.566L16 224.066L31.5 221.566V208.066V193.066H45.5L54.5 182.066L45.5 178.566L42.5 173.566L62.5 169.566V163.066L51 159.066L69.5 151.566L82 139.066V142.066H91V135.066L82 124.566L59.5 115.566L51 105.566L62.5 99.566V87.066L69.5 84.066L87.5 87.066L100.5 84.066L109 67.066L118 44.566L135 26.566L146 11.066L161.5 0.56604L171 4.56604L182 11.066L161.5 56.066L168 92.066L155.5 115.566L161.5 182.066L155.5 199.566V217.566L161.5 230.566V249.066L179 286.066L146 290.066L138 281.066L126.5 286.066L129.5 297.566L149 318.566H135L126.5 323.066L129.5 357.566L100.5 335.566L87.5 328.566L72.5 335.566L59.5 323.066L45.5 318.566L42.5 307.566L31.5 302.566L13 311.566L0.5 302.566V281.066Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1771.5, 950.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=宁夏回族自治区" data-name-zh="宁夏回族自治区" data-name-en="Ningxia Hui Autonomous Region" data-category="省份 · 塞上" data-desc="宁夏地处黄河上游，清真寺、夯土聚落与灌溉绿洲共生，建筑兼具西北防护需求与回族文化特色。" d="M7.5 4.52234L12 1.02234V9.52234L21.5 16.5223L35 22.0223L49.5 25.5223L55 33.5223L49.5 50.0223L55 54.5223L69 70.0223L65.5 87.0223H55L41 93.5223L21.5 70.0223V54.5223L18 43.5223V33.5223L12 22.0223L0.5 13.0223V4.52234H7.5Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1346.5, 708)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=甘肃省" data-name-zh="甘肃" data-name-en="Gansu Province" data-category="省份 · 河西陇原" data-desc="甘肃地跨陇中与河西走廊，关隘城堡、石窟寺院与夯土聚落沿丝路展开，建筑风貌兼具交通要冲与多元文化交汇特征。" d="M45.5295 151L7.02954 156.5L0.529541 125.5L3.52954 120.5L7.02954 98H18.5295L35.0295 82.5L49.0295 56.5L79.0295 42H97.0295L117.03 28.5L126.03 0.5H158.03L182.03 52L154.53 56.5L133.53 70.5H105.53L97.0295 56.5L79.0295 52L68.5295 70.5L49.0295 98L31.0295 120.5H49.0295V137H79.0295L84.5295 143H105.53L149.53 136H175.03L178.03 131L201.53 120.5L194.53 98L214.53 89L253.53 82.5V94L238.53 127.5L253.53 137L281.53 151L290.03 178L317.53 186.5L324.53 178L332.03 166.5H364.53L383.53 151L395.53 156.5L402.03 169.5L383.53 190L369.03 212L375.53 231.5L399.03 251L420.03 247.5L416.53 257L433.53 267.5V282L439.03 299V313L464.03 342.5L478.03 338.5L495.53 329L501.53 309.5L481.53 290.5L485.53 287V271.5L505.03 261.5L517.53 273.5L538.53 290.5L520.03 306L509.53 313L520.03 323H509.53L501.53 329L509.53 338.5L505.03 342.5H490.53L485.53 347V357.5L490.53 369L471.03 375V380.5L478.03 389V397L475.53 425H464.03L457.03 436.5L451.53 450.5L439.03 458L425.03 468.5L416.53 464.5V454.5L409.03 436.5L399.03 422L383.53 413L369.03 406.5V393L359.03 389L340.53 393L324.53 403V413V429L306.03 441.5L309.03 422L290.03 413L281.53 393L306.03 399.5L329.03 393L332.03 380.5L317.53 369L329.03 362L336.03 347L347.53 338.5L359.03 318.5V299L353.03 290.5L347.53 271.5V261.5L336.03 247.5L314.53 226H301.03L266.53 195L253.53 202.5L214.53 170.5L201.53 166.5L182.03 178L158.03 161L140.03 156.5V161V195L117.03 181.5L79.0295 156.5L45.5295 151Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1223, 865.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=青海省" data-name-zh="青海省" data-name-en="Qinghai Province" data-category="省份 · 高原" data-desc="青海高原辽阔，寺院、城堡式聚落与高原民居顺应气候与地形，展现出厚重、朴实而富宗教气息的空间特征。" d="M0.880371 155.515L11.8804 166.015L4.88037 194.015L31.8804 189.015L43.3804 194.015V216.015H49.3804V249.515L67.3804 244.015L80.3804 255.515L83.8804 289.515L144.88 311.015L167.88 304.515L181.38 308.015L206.38 322.515L224.38 351.015L244.38 344.015L254.88 355.015L261.88 338.015L275.38 334.015V322.515L278.38 308.015L270.38 281.015L282.88 274.515L275.38 260.015V244.015L295.88 232.515L327.38 244.015L339.88 274.515L364.38 294.015H376.88L387.38 311.015H401.38L412.38 284.515L428.38 281.015V264.015H410.88L401.38 254.015L392.88 232.515L401.38 228.515H410.88L436.88 237.015L449.88 228.515L436.88 216.015V207.515L449.88 200.015L456.38 185.515L465.38 172.015L475.38 147.515L472.88 137.015L465.38 120.515V106.015L436.88 74.5148H421.38L392.88 51.5148H371.38L327.38 16.5148L304.38 26.5148L270.38 11.0148V33.0148L261.88 45.0148L244.38 33.0148L206.38 11.0148L171.38 0.514771L118.88 11.0148L33.8804 37.5148L43.3804 59.0148L39.3804 67.5148L62.3804 83.0148L71.8804 106.015L53.3804 116.015L62.3804 143.515L49.3804 155.515L26.8804 143.515L11.8804 150.515L0.880371 155.515Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2139.5, 1081)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=安徽省" data-name-zh="安徽省" data-name-en="Anhui Province" data-category="省份 · 徽州" data-desc="安徽南北风貌差异鲜明，徽派民居以白墙黛瓦、马头墙和精细木石砖雕著称，是中国传统民居的重要代表。" d="M100.556 234.381L116.056 239.381L132.056 220.881L137.056 203.881L146.556 200.881V188.881L154.556 175.881L146.556 166.381H132.056L125.056 154.881L120.556 147.881L116.056 134.881V98.381L125.056 91.881V83.881L114.056 69.881L108.056 71.881L100.556 64.881V58.881V45.881H90.5557L80.0557 35.881L69.5557 28.381L55.5557 18.881L43.0557 0.880981L36.5557 10.381L39.5557 18.881L52.0557 28.381V38.381L43.0557 45.881L26.0557 49.881L17.5557 38.381V49.881L13.0557 64.881L0.555664 79.881L6.05566 98.381L22.5557 102.381L36.5557 98.381L26.0557 114.881V134.881L10.0557 147.881V154.881L26.0557 159.881L36.5557 175.881L26.0557 188.881L32.5557 203.881V228.881L48.0557 211.881L61.5557 214.881L66.5557 228.881L77.5557 214.881L90.5557 234.381H100.556Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2135, 919)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=山东省" data-name-zh="山东省" data-name-en="Shandong Province" data-category="省份 · 齐鲁" data-desc="山东兼具齐鲁礼乐传统与海岱山川格局，府城、祠庙、书院与海防建筑丰富，承载深厚的儒家文化空间。" d="M19.6213 168.641H34.6213L45.6213 155.641L62.1213 147.641L71.6213 150.641L74.6213 164.141L94.1213 169.641L100.621 161.641H110.121L116.621 168.641L139.121 140.641H152.621L155.621 135.141L178.121 105.141L198.621 84.1409L229.621 64.1409L253.121 57.6409L269.121 50.6409L272.121 35.6409L262.121 29.6409H238.121L213.121 19.1409H202.621L182.121 35.6409L163.121 54.6409L149.621 50.6409L138.121 29.6409L139.121 9.64087L127.121 6.14087H110.121L96.6213 0.640869L91.1213 12.1409L76.1213 15.1409H67.1213L57.1213 27.1409L34.6213 54.6409L11.6213 88.1409L25.6213 102.141L34.6213 98.1409V105.141L19.6213 110.141L16.6213 119.641L4.62134 135.141L0.621338 147.641L8.62134 150.641L19.6213 168.641Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2382.5, 1217)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=上海市" data-name-zh="上海市" data-name-en="Shanghai" data-category="省份 · 江海都会" data-desc="上海地处江海交汇，近代里弄、石库门与开埠建筑并存，展现传统民居向近现代都市建筑转型的独特面貌。" d="M13.0977 6.97449L10.0977 0.974487L3.09766 10.9745L5.09766 20.9745L0.597656 30.9745L5.09766 35.4745L13.0977 30.9745L23.0977 25.9745L26.5977 20.9745L18.0977 13.4745L13.0977 6.97449Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2279, 688.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=辽宁省" data-name-zh="辽宁省" data-name-en="Liaoning Province" data-category="省份 · 辽东" data-desc="辽宁连接关内外，清代宫苑、城垣与东北民居类型并存，建筑形态兼具北方秩序与边疆开拓特征。" d="M21.1326 122L28.6326 135L43.6326 131L55.6326 109L67.1326 92V98.5L63.6326 116H117.133L87.6326 160.5V175.5L78.6326 195.5L149.133 150.5L188.133 141.5L197.633 125.5L201.633 116L193.633 92V66L208.633 55.5L182.633 41.5L188.133 38.5L197.633 27.5L174.633 20L158.133 0.5H103.633L87.6326 20L63.6326 27.5L67.1326 35L37.6326 62L18.1326 35L11.1326 55.5L18.1326 62L14.1326 72L4.63257 92L0.632568 102L14.1326 109L21.1326 122Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(648, 393.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=新疆维吾尔自治区" data-name-zh="新疆维吾尔自治区" data-name-en="Xinjiang Uygur Autonomous Region" data-category="省份 · 西域" data-desc="新疆地域辽阔，绿洲城镇、清真寺与夯土街巷深受丝路文明影响，建筑风貌兼具防风避暑与商旅交流特征。" d="M26.5936 502.116L12.5936 488.616L0.593628 470.116L12.5936 451.116L41.0936 423.616L75.5936 408.616L87.0936 415.616H102.594L113.594 398.116L137.594 386.616H164.094L179.094 367.116L215.594 344.616L245.094 323.116L259.094 290.116L253.094 259.616L238.594 206.116L272.594 197.616L313.594 182.116L334.094 132.616L351.094 96.1158L364.594 109.116H392.094L424.094 113.616L433.594 109.116V80.1158L424.094 58.6158L438.094 46.6158L469.094 31.1158L479.094 11.6158L500.094 0.615845L556.594 58.6158H576.094L599.594 80.1158L615.594 109.116L629.594 136.116L615.594 177.116L635.594 197.616L726.594 209.616L754.594 231.616L781.594 241.116L805.594 287.616L818.594 311.616L805.594 343.116L788.094 348.616L764.094 358.116L742.594 363.116L733.594 382.616L718.594 401.616L702.094 406.616L696.094 427.116L690.594 439.116L696.094 473.616L599.594 507.616L611.594 525.616L607.594 544.116L629.594 558.116L635.594 576.116L619.094 587.616L629.594 605.616L625.594 615.616L599.594 605.616L578.594 615.616L569.594 610.616L556.094 605.616L521.594 600.616L472.594 610.616L447.594 633.616H387.094V642.616L354.094 647.616L329.594 633.616H318.094L291.094 653.616L272.594 647.616L243.094 653.616L224.594 684.116L198.594 693.116L174.094 679.116L169.094 653.616L160.594 647.616L132.094 633.616L94.0936 624.116V605.616L75.5936 578.116L45.0936 569.616L51.0936 557.116L55.5936 531.616L51.0936 512.116L26.5936 502.116Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(827, 1002.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=西藏自治区" data-name-zh="西藏自治区" data-name-en="Xizang Autonomous Region" data-category="省份 · 雪域" data-desc="西藏高寒高海拔，宫殿、寺院与碉房依山就势，厚墙小窗与鲜明色彩共同回应高原环境与宗教生活。" d="M12 98.5098L22.5 89.5098L51.5 78.5098L67 55.0098L93.5 44.5098L110 55.0098L128 44.5098L141.5 33.0098L162.5 44.5098H184.5L216 33.0098L272 28.0098L291 11.0098L322.5 0.509766L368.5 6.00977L390.5 11.0098V20.0098L395.5 33.0098L390.5 55.0098L399.5 62.0098H431V78.5098L441 82.5098V115.01H461L470 124.51L480.5 159.51L544 181.51L572 175.51L598 192.51L604 214.01L625.5 220.01L638 214.01L660.5 224.51V205.01L676 199.01L685 186.01L705 205.01L719.5 235.01V252.01L728.5 269.01L724.5 314.51L719.5 345.01L705 365.51L694.5 378.51L685 365.51L668.5 386.51L660.5 378.51L618.5 365.51L598 378.51L537.5 426.01H488.5L470 386.51L431 372.51H390.5L380 410.01H368.5V372.51L361.5 365.51L342.5 386.51H322.5L265.5 378.51L248.5 359.01L179.5 314.51L141.5 284.51L116.5 268.01L93.5 284.51L59 263.01L0.5 217.01V172.51L22.5 157.01V137.51L12 109.01V98.5098Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(1513.5, 201.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=内蒙古自治区" data-name-zh="内蒙古自治区" data-name-en="Inner Mongolia Autonomous Region" data-category="省份 · 草原" data-desc="内蒙古横跨北疆，草原聚落、召庙与边塞城镇并存，建筑在广袤气候条件下形成开阔、厚实的地域特征。" d="M22.2384 570L0.738403 507.5L46.7384 514L72.7384 509.5L144.738 519L210.738 549.5L249.238 553L262.738 560.5L316.238 533L398.738 509.5L469.238 492L477.738 480.5L504.238 464.5L514.738 453.5L509.738 444.5L497.238 426L514.738 399L529.238 393L557.738 409H584.238L601.238 393L617.238 376.5H646.738L664.738 364L683.738 341.5L699.738 334L716.738 332L752.238 314.5L790.238 325L797.238 310.5V294L771.738 272.5L735.238 246.5L702.238 262L687.238 252.5L664.738 257L644.238 262V252.5L652.738 229L664.738 205L676.738 182.5L692.238 169L712.738 173L735.238 169L764.238 158L771.738 148L781.738 128L790.238 107.5L804.738 83L820.238 66.5L825.738 52.5L820.238 38L804.738 26L816.738 15.5L837.738 0.5H853.738L858.238 9L845.238 30.5L861.238 46.5L878.738 42L890.238 59.5L896.238 75.5L912.738 99.5H929.238H957.238L987.238 83L1006.24 119L982.738 161L987.238 182.5L975.738 195L960.238 229H946.238L920.238 252.5L886.738 282L896.238 300L924.738 310.5L912.738 325V332L890.238 341.5L853.738 349.5L858.238 364L875.238 374.5L868.738 393L875.238 409L890.238 434.5L907.238 420.5L920.238 434.5L912.738 461.5L929.238 468.5L920.238 480L868.738 483L858.238 493L831.238 505.5L824.738 519L805.238 537.5L782.738 513L767.738 545L777.738 554L771.738 562H761.738L737.238 537.5L740.738 527L734.238 523L712.738 499L689.738 513L676.238 534H661.238L648.738 541.5L641.738 534L629.738 554L576.238 576.5L584.238 597.5L537.238 611L504.238 625.5L497.238 646L479.738 667.5L468.238 655.5H454.738L426.738 679L388.238 740L370.738 735.5L355.738 740L351.738 727.5H359.238L342.238 716L351.738 710.5L342.238 701.5L345.238 694.5L342.238 685.5L338.738 679L345.238 673L333.238 667.5L342.238 662.5L333.238 650H342.238L316.238 633.5V615.5L307.738 629L292.738 650V655.5L286.738 662.5L292.738 667.5L286.738 679V685.5L280.238 694.5L286.738 698.5L280.238 710.5L286.738 716L274.238 727.5L280.238 735.5L266.238 745L237.238 749.5L210.738 727.5L220.238 705L243.738 685.5V662.5L220.238 650L188.238 667.5L156.738 662.5L148.738 685.5L130.238 673L122.238 655.5L83.2384 629L94.2384 606V585H56.7384L22.2384 596V570Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2374, 532.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=吉林省" data-name-zh="吉林省" data-name-en="Jilin Province" data-category="省份 · 东北" data-desc="吉林地跨山地与平原，长白山周边聚落、关东民居与近代城市遗存并存，建筑风貌质朴而适应寒冷环境。" d="M142.229 252.016L113.729 272.516L104.729 232.016L113.729 221.516L120.229 207.516L104.729 200.516V163.516L89.7285 136.016L64.7285 124.516V111.016V99.0162L54.7285 86.5162H25.7285L21.7285 57.0162V40.5162L1.22852 20.5162H18.7285L58.2285 0.516235L84.2285 4.01624L79.7285 16.0162L113.729 34.0162L138.729 40.5162L142.229 26.0162L174.229 20.5162L200.229 29.5162V49.0162L196.729 65.5162L216.229 99.0162L232.229 107.516L245.229 86.5162L249.229 107.516L271.729 128.516L287.229 111.016L308.229 107.516L312.229 99.0162V119.516L308.229 147.516L291.229 171.516L263.229 190.016L241.229 200.516L245.229 215.516L227.229 221.516L196.729 207.516H188.729L162.729 238.516L142.229 252.016Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2366.5, 193)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=黑龙江省" data-name-zh="黑龙江省" data-name-en="Heilongjiang Province" data-category="省份 · 北疆" data-desc="黑龙江地处中国最北，寒地聚落、边境城镇与近现代工业遗存并见，建筑重视保温、防雪与边疆交通联系。" d="M11.5552 17.5044L5.05518 8.00436L11.5552 3.50436L77.5552 0.504364L111.555 14.0044L137.555 17.5044L164.555 42.0044L195.055 93.0044L204.055 82.5044L208.555 61.5044L211.555 79.0044L231.055 99.0044L226.055 105.504L235.055 111.004L231.055 116.004L235.055 120.504V127.004L240.055 132.004L235.055 141.004L243.555 145.004L240.055 152.004V160.504L248.555 167.004L243.555 179.004L284.055 194.004L296.555 205.504L325.055 219.004L330.055 244.504L347.555 269.004L369.055 274.504L395.555 266.004L431.055 249.004L472.555 237.004L465.555 249.004V274.504L450.555 290.504L446.055 321.504L408.555 393.504L395.555 388.004L379.555 393.504L369.055 358.004L360.055 393.504L351.555 397.504V413.504L325.055 442.504V426.004L313.555 442.504H296.555L276.555 459.004L266.555 451.504L258.055 422.504L248.555 417.504L235.055 438.504L226.055 426.004L211.555 400.504L208.555 365.504L182.555 358.004H157.555L137.555 372.004L94.5552 354.004V348.004L90.5552 338.504L73.5552 334.004L77.5552 316.004L51.0552 309.004L41.0552 290.504L51.0552 282.004L70.0552 269.004L90.5552 249.004L103.055 241.504L108.555 257.504L111.555 252.504L124.055 215.004L137.555 201.504V171.004L161.055 127.004V116.004L134.055 86.0044L108.555 102.004L90.5552 99.0044L61.0552 102.004L46.0552 79.0044L51.0552 68.0044L33.5552 46.5044H5.05518L0.555176 33.5044L11.5552 17.5044Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2209, 862.5)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=天津市" data-name-zh="天津市" data-name-en="Tianjin" data-category="省份 · 河海要津" data-desc="天津因漕运而兴，府城、会馆与近代街区并存，建筑体现运河节点城市与近现代工商业口岸的叠加特征。" d="M6.57788 7.59131L15.5779 0.591309L29.0779 7.59131V16.0913L21.0779 33.5913L6.57788 28.5913L0.577881 16.0913L6.57788 7.59131Z" />
-                      </g>
-                      <g class="map-hotspot-g" transform="translate(2313, 1509)">
-                        <path class="map-hotspot-path" data-href="./list.html?province=台湾省" data-name-zh="台湾省" data-name-en="Taiwan" data-category="省份 · 海岛东南" data-desc="台湾传统聚落融合闽南、客家与海洋文化，红砖民居、街屋与宗祠建筑在防台风与适应湿热气候中形成鲜明特色。" d="M0.605225 125.108L5.10522 90.1083L0.605225 80.1083L11.1052 70.6083V61.6083L5.10522 48.6083L24.6052 40.1083L19.6052 27.6083L38.1052 17.6083L46.6052 0.608276L65.1052 6.60828V17.6083L84.6052 27.6083L75.1052 40.1083L94.1052 48.6083L84.6052 56.6083V70.6083L94.1052 90.1083L70.1052 99.6083L65.1052 109.108L38.1052 157.108L19.6052 163.108L0.605225 125.108Z" />
-                      </g>
-                    </svg>
-                    <!-- 省份交互热区容器（含四川补充热区），与底图锚点同坐标系 -->
-                    <div id="mapHotspots" class="absolute inset-0 z-[4]"></div>
-                  </div>
-                </div>
-              </div>
-              <div id="mapStatus" class="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center text-white/75 opacity-0">
-                  <div>加载地图中</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 详情展示区：默认透明不可见 -->
-        <aside
-          id="detail"
-          class="flex items-start justify-end pr-4 py-6 md:pr-8 md:py-8"
-          style="opacity: 0; pointer-events: none; top: 50%; transform: translateY(-50%)"
-          aria-hidden="true"
-        >
-          <div class="glass-card w-full max-w-xl p-9">
-            <div class="flex items-start justify-end">
-              <div class="h-px w-20 bg-gradient-to-r from-qianbai/0 via-qianbai/30 to-qianbai/0"></div>
-            </div>
-
-            <div class="mt-2 relative h-[400px] rounded-lg overflow-hidden">
-              <!-- 轮播图容器 -->
-              <div id="carouselContainer" class="absolute inset-0">
-                <!-- 轮播图片将通过JavaScript动态添加 -->
-              </div>
-
-              <!-- 内容叠加层 -->
-              <div class="absolute inset-0 bg-black/20 flex items-end p-6">
-                <div class="w-full">
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="flex flex-col items-start justify-between py-3">
-                      <div id="provinceName" class="font-serifCN text-white text-4xl leading-none">
-                        广东
-                      </div>
-                      <div class="text-white/90 text-base tracking-wide">
-                        <span id="indexDetailLabel" class="text-white">代表</span>
-                        <span class="mx-1 text-white/60">·</span>
-                        <span id="buildingName" class="text-white">陈家祠</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div id="buildingDesc" class="mt-4 text-white/95 text-base leading-relaxed">
-                    陈家祠是清代岭南建筑代表，以砖雕、陶塑、灰塑等装饰工艺闻名，是岭南民间建筑艺术巅峰，始建于清光绪十四年（1888年）。
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </section>
-    </main>
-
-    <!-- GSAP + ScrollTrigger -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-    <script src="./js/site-lang.js"></script>
-    <script src="./js/map-svg-hotspots.js"></script>
-    <script src="./js/index-china-map-fit.js?v=20260621c"></script>
-
-    <script>
-      // 全局：确保字体渲染更细腻
-      document.documentElement.style.webkitFontSmoothing = "antialiased";
-      document.documentElement.style.mozOsxFontSmoothing = "grayscale";
-
-      gsap.registerPlugin(ScrollTrigger);
-
-      const INDEX_I18N = {
-        zh: {
-          title: "首页 · 古建智寻",
-          brand: "古建智寻",
-          navHome: "首页",
-          navMap: "地图",
-          navCategories: "建筑分类",
-          catResidence: "民居",
-          catPalace: "皇宫",
-          catBridge: "桥梁",
-          catYamen: "官府",
-          searchPlaceholder: "搜索建筑名",
-          searchBtn: "搜索",
-          detailLabel: "代表",
-          loading: "加载地图中",
-          searchEmpty: "请输入建筑名",
-          searchNotFound: "未找到匹配的建筑",
-          switchLabel: "切换为英文",
-          sichuanAria: "四川省，悬停查看代表建筑，点击进入列表",
-        },
-        en: {
-          title: "Home · ArchiQuest",
-          brand: "ArchiQuest",
-          navHome: "Home",
-          navMap: "Map",
-          navCategories: "Categories",
-          catResidence: "Residence",
-          catPalace: "Palace",
-          catBridge: "Bridge",
-          catYamen: "Yamen",
-          searchPlaceholder: "Search architecture",
-          searchBtn: "Search",
-          detailLabel: "Spotlight",
-          loading: "Loading map",
-          searchEmpty: "Please enter a building name",
-          searchNotFound: "No matching architecture found",
-          switchLabel: "Switch to Chinese",
-          sichuanAria: "Sichuan Province, hover to preview, click to open list",
-        },
-      };
-      const PROVINCE_NAME_EN = {
-        北京: "Beijing",
-        山西: "Shanxi",
-        江苏: "Jiangsu",
-        四川: "Sichuan",
-        广东: "Guangdong",
-        河北: "Hebei",
-        天津: "Tianjin",
-        辽宁: "Liaoning",
-        吉林: "Jilin",
-        黑龙江: "Heilongjiang",
-        内蒙古自治区: "Inner Mongolia",
-        山东: "Shandong",
-        河南: "Henan",
-        陕西: "Shaanxi",
-        宁夏回族自治区: "Ningxia",
-        青海: "Qinghai",
-        新疆维吾尔自治区: "Xinjiang",
-        西藏自治区: "Xizang",
-        安徽: "Anhui",
-        浙江: "Zhejiang",
-        上海: "Shanghai",
-        江西: "Jiangxi",
-        湖北: "Hubei",
-        湖南: "Hunan",
-        福建: "Fujian",
-        重庆: "Chongqing",
-        云南: "Yunnan",
-        贵州: "Guizhou",
-        广西壮族自治区: "Guangxi",
-        海南: "Hainan",
-        台湾: "Taiwan",
-      };
-      const BUILDING_NAME_EN = {
-        "北京故宫": "Forbidden City, Beijing",
-        "北京四合院": "Beijing Siheyuan",
-        "卢沟桥": "Marco Polo Bridge",
-        "颐和园": "Summer Palace",
-        "乔家大院": "Qiao Family Compound",
-        "霍州署": "Huozhou Yamen",
-        "鱼沼飞梁": "Yuzhao Flying Bridge",
-        "平遥古城墙": "Pingyao City Wall",
-        "苏州拙政园": "Humble Administrator's Garden",
-        "淮安府衙": "Huai'an Prefecture Yamen",
-        "宝带桥": "Baodai Bridge",
-        "周庄民居": "Zhouzhuang Residence",
-        "阆中古城民居": "Langzhong Ancient Residence",
-        "泸州龙脑桥": "Luzhou Longnao Bridge",
-        "泸定桥": "Luding Bridge",
-        "陈家祠": "Chen Clan Ancestral Hall",
-        "潮州广济桥": "Guangji Bridge, Chaozhou",
-        "开平碉楼": "Kaiping Diaolou",
-      };
-      const BUILDING_DESC_EN = {
-        "北京故宫": "Imperial palace of the Ming and Qing dynasties, and the largest surviving wooden palace complex in the world, begun in 1406.",
-        "北京四合院": "A classic northern courtyard-house type with axial symmetry and inward-facing layout, matured through Yuan to Qing periods.",
-        "卢沟桥": "Founded in 1189, one of North China's oldest surviving stone arch bridges, known for carved balustrade lions.",
-        "颐和园": "A Qing imperial garden and retreat palace complex, founded in 1750 and renowned for integrated landscape planning.",
-        "乔家大院": "A representative Shanxi merchant compound from the Qianlong era, known for deep courtyards and refined brick carving.",
-        "霍州署": "One of the best-preserved state-level yamen complexes in China, originally established in the Tang dynasty.",
-        "鱼沼飞梁": "A cross-shaped stone bridge in Jinci, tracing to Northern Wei, showing early Chinese bridge engineering wisdom.",
-        "平遥古城墙": "A Ming-era city wall, among the most complete surviving county-level defensive walls in China.",
-        "苏州拙政园": "A landmark Jiangnan garden founded in 1509, centered on water and literati landscape composition.",
-        "淮安府衙": "A well-preserved Ming-Qing prefectural office complex, founded in 1370, showing historical administrative planning.",
-        "宝带桥": "A multi-arch stone bridge founded in 816, among China's longest surviving ancient stone bridges.",
-        "周庄民居": "A water-town residence typology with white walls and dark tiles, reflecting Jiangnan urban daily life.",
-        "阆中古城民居": "A Northern Sichuan residence type from Ming-Qing times, combining courtyard logic with terrain adaptation.",
-        "泸州龙脑桥": "A Ming-era carved stone bridge noted for dragon-head motifs and local bridge artistry.",
-        "泸定桥": "A Qing iron-chain bridge founded in 1705 across the Dadu River, iconic in Chinese bridge history.",
-        "陈家祠": "A Lingnan masterpiece founded in 1888, famed for brick, ceramic and plaster ornamental craftsmanship.",
-        "潮州广济桥": "Founded in 1171, a composite bridge of beam, pontoon and arch sections, early in movable-bridge history.",
-        "开平碉楼": "Defensive residential towers from Ming to Republican periods, blending Chinese and Western forms in overseas-Chinese hometowns.",
-      };
-      let currentLang =
-        typeof resolveSiteLang === "function" ? resolveSiteLang() : "zh";
-      const isEn = () => currentLang === "en";
-      const t = (key) => (INDEX_I18N[currentLang] && INDEX_I18N[currentLang][key]) || INDEX_I18N.zh[key] || "";
-      const localProvinceName = (nameZh) => (isEn() ? PROVINCE_NAME_EN[nameZh] || nameZh : nameZh);
-      const localBuildingName = (nameZh) => (isEn() ? BUILDING_NAME_EN[nameZh] || nameZh : nameZh);
-      const localBuildingDesc = (nameZh, fallbackZh) => (isEn() ? BUILDING_DESC_EN[nameZh] || fallbackZh : fallbackZh);
-
-      // Canvas 星空粒子（随机位置、随机大小、随机透明度波动）
-      (() => {
-        const canvas = document.getElementById("starCanvas");
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d", { alpha: true });
-        if (!ctx) return;
-
-        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        let w = 0;
-        let h = 0;
-        let stars = [];
-        let raf = 0;
-
-        const rand = (min, max) => min + Math.random() * (max - min);
-
-        const resize = () => {
-          w = Math.max(1, Math.floor(window.innerWidth));
-          h = Math.max(1, Math.floor(window.innerHeight));
-          canvas.width = Math.floor(w * DPR);
-          canvas.height = Math.floor(h * DPR);
-          canvas.style.width = w + "px";
-          canvas.style.height = h + "px";
-          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-          const density = (w * h) / 14000;
-          const count = Math.max(180, Math.min(560, Math.floor(density)));
-          stars = Array.from({ length: count }).map(() => ({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            r: rand(0.4, 1.8),
-            baseA: rand(0.06, 0.9),
-            speed: rand(0.6, 2.2),
-            phase: rand(0, Math.PI * 2),
-            warm: Math.random() < 0.07,
-          }));
-        };
-
-        const draw = (t) => {
-          const time = (t || 0) * 0.001;
-          ctx.clearRect(0, 0, w, h);
-
-          // 轻微雾化层，避免“死黑”
-          const g = ctx.createRadialGradient(w * 0.5, h * 0.42, 0, w * 0.5, h * 0.42, Math.max(w, h) * 0.65);
-          g.addColorStop(0, "rgba(26,26,46,0.10)");
-          g.addColorStop(1, "rgba(5,5,5,0.0)");
-          ctx.fillStyle = g;
-          ctx.fillRect(0, 0, w, h);
-
-          for (const s of stars) {
-            const tw = 0.55 + 0.45 * Math.sin(time * s.speed + s.phase);
-            const a = Math.max(0, Math.min(1, s.baseA * tw));
-            ctx.beginPath();
-            ctx.fillStyle = s.warm ? `rgba(243,156,18,${a * 0.55})` : `rgba(255,255,255,${a})`;
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-
-          raf = window.requestAnimationFrame(draw);
-        };
-
-        window.addEventListener("resize", resize, { passive: true });
-        resize();
-        raf = window.requestAnimationFrame(draw);
-      })();
-
-      // 古建筑简笔画动画
-      (() => {
-        const canvas = document.getElementById('archCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d', { alpha: true });
-        if (!ctx) return;
-
-        const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-        let w = 0;
-        let h = 0;
-        let raf = 0;
-
-        // 古建筑简笔画路径数据
-        const architectures = [
-          {
-            name: 'temple',
-            path: 'M100,150 L150,100 L200,150 L200,250 L100,250 Z M120,200 L180,200',
-            position: { x: 0.2, y: 0.4 },
-            size: 0.15
-          },
-          {
-            name: 'pagoda',
-            path: 'M150,100 L175,125 L200,100 L187,125 L187,150 L162,150 L162,125 Z M150,150 L200,150 L200,200 L150,200 Z',
-            position: { x: 0.7, y: 0.3 },
-            size: 0.1
-          },
-          {
-            name: 'bridge',
-            path: 'M50,200 L250,200 M50,200 Q150,150 250,200',
-            position: { x: 0.5, y: 0.7 },
-            size: 0.2
-          },
-          {
-            name: 'palace',
-            path: 'M80,180 L220,180 L220,250 L80,250 Z M100,150 L200,150 L220,180 L80,180 Z M120,200 L180,200 M120,225 L180,225',
-            position: { x: 0.3, y: 0.6 },
-            size: 0.18
-          }
-        ];
-
-        const resize = () => {
-          w = Math.max(1, Math.floor(window.innerWidth));
-          h = Math.max(1, Math.floor(window.innerHeight));
-          canvas.width = Math.floor(w * DPR);
-          canvas.height = Math.floor(h * DPR);
-          canvas.style.width = w + 'px';
-          canvas.style.height = h + 'px';
-          ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-        };
-
-        const drawArchitecture = (arch, time) => {
-          const x = arch.position.x * w;
-          const y = arch.position.y * h;
-          const size = Math.min(w, h) * arch.size;
-          
-          ctx.save();
-          ctx.translate(x - 100, y - 100); // 调整中心点
-          ctx.scale(size / 200, size / 200);
-          
-          // 绘制金色轮廓
-          ctx.strokeStyle = '#d4af37';
-          ctx.lineWidth = 2;
-          ctx.globalAlpha = 0.8 + 0.2 * Math.sin(time * 0.001 + architectures.indexOf(arch));
-          
-          // 解析路径
-          const commands = arch.path.split(' ');
-          let currentX = 0;
-          let currentY = 0;
-          
-          ctx.beginPath();
-          for (let i = 0; i < commands.length; i++) {
-            const cmd = commands[i];
-            if (cmd === 'M') {
-              currentX = parseFloat(commands[++i]);
-              currentY = parseFloat(commands[++i]);
-              ctx.moveTo(currentX, currentY);
-            } else if (cmd === 'L') {
-              currentX = parseFloat(commands[++i]);
-              currentY = parseFloat(commands[++i]);
-              ctx.lineTo(currentX, currentY);
-            } else if (cmd === 'Q') {
-              const ctrlX = parseFloat(commands[++i]);
-              const ctrlY = parseFloat(commands[++i]);
-              currentX = parseFloat(commands[++i]);
-              currentY = parseFloat(commands[++i]);
-              ctx.quadraticCurveTo(ctrlX, ctrlY, currentX, currentY);
-            } else if (cmd === 'Z') {
-              ctx.closePath();
-            }
-          }
-          ctx.stroke();
-          
-          ctx.restore();
-        };
-
-        const draw = (t) => {
-          const time = (t || 0);
-          ctx.clearRect(0, 0, w, h);
-
-          // 绘制所有古建筑
-          architectures.forEach(arch => {
-            drawArchitecture(arch, time);
-          });
-
-          raf = window.requestAnimationFrame(draw);
-        };
-
-        window.addEventListener('resize', resize, { passive: true });
-        resize();
-        raf = window.requestAnimationFrame(draw);
-      })();
-
-      const detailEl = document.getElementById("detail");
-      const provinceNameEl = document.getElementById("provinceName");
-      const buildingNameEl = document.getElementById("buildingName");
-      const buildingDescEl = document.getElementById("buildingDesc");
-      const carouselContainer = document.getElementById("carouselContainer");
-      const mapStatusEl = document.getElementById("mapStatus");
-
-      const applyIndexLanguage = () => {
-        document.documentElement.lang = isEn() ? "en" : "zh-CN";
-        document.documentElement.classList.toggle("lang-en", isEn());
-        document.title = t("title");
-        const brandEl = document.getElementById("indexNavBrand");
-        if (brandEl) brandEl.textContent = t("brand");
-        const homeEl = document.getElementById("indexNavHome");
-        if (homeEl) homeEl.textContent = t("navHome");
-        const mapEl = document.getElementById("indexNavMap");
-        if (mapEl) mapEl.textContent = t("navMap");
-        const categoriesEl = document.getElementById("indexNavCategories");
-        if (categoriesEl) categoriesEl.textContent = t("navCategories");
-        const catResidenceEl = document.getElementById("indexCatResidence");
-        if (catResidenceEl) catResidenceEl.textContent = t("catResidence");
-        const catPalaceEl = document.getElementById("indexCatPalace");
-        if (catPalaceEl) catPalaceEl.textContent = t("catPalace");
-        const catBridgeEl = document.getElementById("indexCatBridge");
-        if (catBridgeEl) catBridgeEl.textContent = t("catBridge");
-        const catYamenEl = document.getElementById("indexCatYamen");
-        if (catYamenEl) catYamenEl.textContent = t("catYamen");
-        const starNavEl = document.getElementById("indexNavStar");
-        if (starNavEl) starNavEl.textContent = isEn() ? "Star Explore" : "星际探索";
-        const mapStarBtn = document.getElementById("mapStarBtn");
-        if (mapStarBtn) {
-          const starLbl = mapStarBtn.querySelector("span:last-child");
-          if (starLbl) starLbl.textContent = isEn() ? "Star Explore" : "星际探索";
-          const starHref = new URL(mapStarBtn.getAttribute("href"), window.location.href);
-          starHref.searchParams.set("lang", currentLang);
-          mapStarBtn.setAttribute("href", `${starHref.pathname}${starHref.search}`);
-        }
-        const searchInputEl = document.getElementById("searchInput");
-        if (searchInputEl) searchInputEl.placeholder = t("searchPlaceholder");
-        const searchBtnEl = document.getElementById("searchBtn");
-        if (searchBtnEl) searchBtnEl.textContent = t("searchBtn");
-        const detailLabelEl = document.getElementById("indexDetailLabel");
-        if (detailLabelEl) detailLabelEl.textContent = t("detailLabel");
-        if (mapStatusEl && mapStatusEl.firstElementChild) mapStatusEl.firstElementChild.textContent = t("loading");
-        const langBtn = document.getElementById("indexLangSwitchBtn");
-        if (langBtn) {
-          langBtn.textContent = isEn() ? "中" : "EN";
-          langBtn.setAttribute("aria-label", t("switchLabel"));
-        }
-        const sichuanBtn = document.querySelector(".map-sichuan-hit-face");
-        if (sichuanBtn) sichuanBtn.setAttribute("aria-label", t("sichuanAria"));
-
-        document.querySelectorAll('a[href^="./list.html?category="]').forEach((a) => {
-          const href = new URL(a.getAttribute("href"), window.location.href);
-          href.searchParams.set("lang", currentLang);
-          a.setAttribute("href", `${href.pathname}${href.search}`);
-        });
-
-        const listLink = document.getElementById("indexNavCategories");
-        if (listLink) {
-          const href = new URL(listLink.getAttribute("href"), window.location.href);
-          href.searchParams.set("lang", currentLang);
-          listLink.setAttribute("href", `${href.pathname}${href.search}`);
-        }
-
-        document.querySelectorAll('.map-hotspot-path[data-href]').forEach((path) => {
-          const raw = path.getAttribute("data-href");
-          if (!raw) return;
-          const href = new URL(raw, window.location.href);
-          href.searchParams.set("lang", currentLang);
-          path.setAttribute("data-href", `${href.pathname}${href.search}`);
-        });
-
-      };
-      applyIndexLanguage();
-
-      // 详情卡片初始位移（避免和 CSS transform 叠加）
-      gsap.set(detailEl, { y: 0, opacity: 0 });
-
-      // 建筑数据库 - 按省份分类
-      const BUILDINGS_DB = {
-        "北京": [
-          { name: "北京故宫", category: "皇宫", desc: "明清两代皇家宫殿，世界现存规模最大的木质结构古建筑群，始建于明永乐四年（1406年），体现中国古代皇家建筑最高成就。" },
-          { name: "北京四合院", category: "民居", desc: "典型北方民居，中轴对称、院落围合，承载传统礼制与市井生活文化，元代定型，明清成熟。" },
-          { name: "卢沟桥", category: "桥梁", desc: "始建于金大定二十九年（1189年），华北地区现存最古老的石拱桥，桥身雕刻精美，见证多段历史。" },
-          { name: "颐和园", category: "官府", desc: "清代皇家园林，集南北造园艺术之大成，属于皇家行宫建筑，始建于清乾隆十五年（1750年）。" }
-        ],
-        "山西": [
-          { name: "乔家大院", category: "民居", desc: "清代晋商大院代表，高墙深院、砖雕精美，体现晋商文化与家族聚居形态，始建于清乾隆年间（1756年）。" },
-          { name: "霍州署", category: "官府", desc: "我国现存最完整的古代州级衙署，与故宫、直隶总督署、内乡县衙并称中国四大古代官衙，始建于唐。" },
-          { name: "鱼沼飞梁", category: "桥梁", desc: "晋祠内十字形石桥，始建于北魏，是中国现存最早的十字形桥梁，展现古代桥梁工程智慧。" },
-          { name: "平遥古城墙", category: "官府", desc: "明代城墙，是中国现存最完整的古代县城城墙，体现古代城市防御与官府规划智慧。" }
-        ],
-        "江苏": [
-          { name: "苏州拙政园", category: "民居", desc: "明代江南园林代表，以水为核心，亭台楼阁错落，是文人写意山水园的典范，始建于明正德初年（1509年）。" },
-          { name: "淮安府衙", category: "官府", desc: "明清府级官署，现存建筑保存完整，展现古代地方行政机构布局，始建于明洪武三年（1370年）。" },
-          { name: "宝带桥", category: "桥梁", desc: "唐代多孔连拱石桥，是中国现存最长的古代石桥之一，为大运河重要遗产点，始建于唐元和十一年（816年）。" },
-          { name: "周庄民居", category: "民居", desc: "江南水乡民居代表，粉墙黛瓦、依水而建，体现江南市井生活与建筑美学。" }
-        ],
-        "四川": [
-          { name: "阆中古城民居", category: "民居", desc: "明清川北民居代表，融合北方四合院与南方吊脚楼特点，依山傍水布局，古城格局形成于唐宋。" },
-          { name: "泸州龙脑桥", category: "桥梁", desc: "明代石雕桥，以龙首雕刻为特色，是四川地区古代桥梁艺术精品，始建于明洪武年间（1378年）。" },
-          { name: "泸定桥", category: "桥梁", desc: "清代铁索桥，横跨大渡河，是中国古代索桥建筑的杰出代表，始建于清康熙四十四年（1705年）。" }
-        ],
-        "广东": [
-          { name: "陈家祠", category: "民居", desc: "清代岭南建筑代表，以砖雕、陶塑、灰塑等装饰工艺闻名，是岭南民间建筑艺术巅峰，始建于清光绪十四年（1888年）。" },
-          { name: "潮州广济桥", category: "桥梁", desc: "南宋启闭式石桥，集梁桥、浮桥、拱桥于一体，被誉为世界上最早的启闭式桥梁，始建于南宋乾道七年（1171年）。" },
-          { name: "开平碉楼", category: "民居", desc: "明清至民国时期防御性民居，融合中西建筑元素，是岭南侨乡建筑代表，最早建于明，现存大量清代碉楼。" }
-        ]
-      };
-
-      const BUILDING_IMAGE_MAP = {
-        "北京故宫": [
-          "./assets/gugong-hero-1.png",
-          "./assets/gugong-hero-5.png"
-        ],
-        "北京四合院": ["https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"],
-        "卢沟桥": ["./assets/lugou-carousel-1.png"],
-        "颐和园": ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Summer_Palace_Beijing_2019.jpg/1200px-Summer_Palace_Beijing_2019.jpg"],
-        "乔家大院": [
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Qiao_Family_Compound_2013.jpg/1200px-Qiao_Family_Compound_2013.jpg",
-          "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200",
-          "https://images.unsplash.com/photo-1549897164-7c6978e9d9de?w=1200"
-        ],
-        "霍州署": ["https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?w=1200"],
-        "鱼沼飞梁": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Jinci_Temple_Taiyuan_2013.jpg/1200px-Jinci_Temple_Taiyuan_2013.jpg"],
-        "平遥古城墙": ["https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Pingyao_city_wall_2012.jpg/1200px-Pingyao_city_wall_2012.jpg"],
-        "苏州拙政园": ["https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Zhuozheng_Garden_Suzhou_2012.jpg/1200px-Zhuozheng_Garden_Suzhou_2012.jpg"],
-        "淮安府衙": [
-          "https://images.unsplash.com/photo-1605774088793-fc32f88d1a33?w=1200",
-          "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?w=1200",
-          "https://images.unsplash.com/photo-1470004914212-05527e49370b?w=1200"
-        ],
-        "宝带桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Suzhou_Precious_Belt_Bridge_2013.jpg/1200px-Suzhou_Precious_Belt_Bridge_2013.jpg"],
-        "周庄民居": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Zhouzhuang_2012.jpg/1200px-Zhouzhuang_2012.jpg"],
-        "阆中古城民居": [
-          "https://images.unsplash.com/photo-1586339949129-1e4a5b87b0f4?w=1200",
-          "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?w=1200",
-          "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200"
-        ],
-        "泸州龙脑桥": ["https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200"],
-        "泸定桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Luding_Bridge_2016.jpg/1200px-Luding_Bridge_2016.jpg"],
-        "陈家祠": [
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Chen_Clan_Academy_2012.jpg/1200px-Chen_Clan_Academy_2012.jpg",
-          "https://images.unsplash.com/photo-1536421469767-80559bb6f5e1?w=1200",
-          "https://images.unsplash.com/photo-1565967511849-76a60a516170?w=1200"
-        ],
-        "潮州广济桥": ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Guangji_Bridge_Chaozhou_2012.jpg/1200px-Guangji_Bridge_Chaozhou_2012.jpg"],
-        "开平碉楼": ["https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Kaiping_Diaolou_2012.jpg/1200px-Kaiping_Diaolou_2012.jpg"]
-      };
-
-      // 省份首页展示：固定一个代表建筑，并按用户指定序号轮播本地图片
-      const PROVINCE_SPOTLIGHT = {
-        "北京": "北京故宫",
-        "山西": "乔家大院",
-        "江苏": "淮安府衙",
-        "四川": "阆中古城民居",
-        "广东": "陈家祠"
-      };
-
-      // 约定：如“第134张”按 [1,3,4] 处理；如你想改为 [134]，只改这里即可
-      const LOCAL_IMAGE_RULES = {
-        "陈家祠": {
-          baseDir: "assets/chen",
-          picks: [1, 2, 3]
-        },
-        "乔家大院": {
-          baseDir: "assets/qiao",
-          picks: [1, 2, 3]
-        },
-        "阆中古城民居": {
-          baseDir: "assets/langzhong",
-          picks: [1, 2, 3]
-        },
-        "淮安府衙": {
-          baseDir: "assets/huaian",
-          picks: [1, 2, 3]
-        }
-      };
-
-      // 省份弹卡代表建筑的本地图片兜底（避免外链失效导致黑屏）
-      const SPOTLIGHT_LOCAL_IMAGE_MAP = {
-        "北京故宫": "./assets/gugong-hero-1.png",
-        "乔家大院": "./assets/qiao-hero.png",
-        "淮安府衙": "./assets/huaian-hero.png",
-        "阆中古城民居": "./assets/langzhong-hero.png",
-        "陈家祠": "./assets/chen-hero.png",
-        "燕赵古建": "./assets/gugong-hero-5.png",
-        "玉皇阁": "./assets/hebei-yuhuangge.png",
-        "河西陇原": "./assets/luding-hero.png",
-        "嘉峪关": "./assets/gansu-jiayuguan.png",
-        "河海津门": "./assets/baodai-hero.png",
-        "辽东古建": "./assets/pingyao-hero.png",
-        "关东聚落": "./assets/zhouzhuang-hero.png",
-        "伪满皇宫": "./assets/jilin-weiman-huanggong.png",
-        "寒地建筑": "./assets/langzhong-hero.png",
-        "五教道德院": "./assets/heilongjiang-wujiao-daodeyuan.png",
-        "草原营造": "./assets/longnao-hero.png",
-        "喀喇沁亲王府": "./assets/neimenggu-kalaqin-qinwangfu.png",
-        "齐鲁古建": "./assets/huozhou-hero.png",
-        "青州古城": "./assets/shandong-qingzhou-gucheng.png",
-        "中原古建": "./assets/qiao-hero.png",
-        "应天门": "./assets/henan-yingtianmen.png",
-        "关中古建": "./assets/yuzao-hero.png",
-        "秦王宫": "./assets/shaanxi-qinwanggong.png",
-        "塞上营造": "./assets/luding-hero.png",
-        "玉皇阁": "./assets/ningxia-yuhuangge.png",
-        "高原建筑": "./assets/longnao-hero.png",
-        "丹噶尔古城": "./assets/qinghai-dangaer-gucheng.png",
-        "西域古建": "./assets/xinjiang-mosque-card.png",
-        "约特干故城": "./assets/xinjiang-yuetegan-gucheng.png",
-        "雪域寺院": "./assets/xizang-xueyu-siyuan.png",
-        "徽派古建": "./assets/zhouzhuang-hero.png",
-        "江南宅院": "./assets/zhouzhuang-hero.png",
-        "花戏楼": "./assets/anhui-huaxilou.png",
-        "东阳卢宅": "./assets/zhejiang-dongyang-luzhai.png",
-        "海派里弄": "./assets/chen-hero.png",
-        "赣派聚落": "./assets/kaiping-hero.png",
-        "滕王阁": "./assets/jiangxi-tengwangge.png",
-        "荆楚古建": "./assets/huaian-hero.png",
-        "黄鹤楼": "./assets/hubei-huanghelou.png",
-        "湖湘建筑": "./assets/qiao-hero.png",
-        "凤凰古城": "./assets/hunan-fenghuang-gucheng.png",
-        "闽地土楼": "./assets/kaiping-hero.png",
-        "福建土楼": "./assets/fujian-tulou.png",
-        "巴渝吊脚楼": "./assets/langzhong-hero.png",
-        "石宝寨": "./assets/chongqing-shibaozhai.png",
-        "滇地古建": "./assets/chen-hero.png",
-        "双龙桥": "./assets/yunnan-shuanglongqiao.png",
-        "山地聚落": "./assets/yuzao-hero.png",
-        "沱江吊脚楼": "./assets/guizhou-tuojiang-diaojiaolou.png",
-        "风雨桥楼": "./assets/guangji-hero.png",
-        "风雨桥": "./assets/guangxi-fengyuqiao.png",
-        "海岛民居": "./assets/zhouzhuang-hero.png",
-        "罗驿古村": "./assets/hainan-luoyi-gucun.png",
-        "闽南街屋": "./assets/chen-hero.png",
-        "竹堑城": "./assets/taiwan-zhuqiancheng.png",
-      };
-
-      const LOCAL_IMAGE_EXTS = ["jpg", "jpeg", "png", "webp", "JPG", "JPEG", "PNG", "WEBP"];
-      const localImageCache = new Map();
-
-      const preloadImage = (src) =>
-        new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = src;
-        });
-
-      const resolveLocalImagesByRule = async (rule) => {
-        if (!rule || !rule.baseDir || !Array.isArray(rule.picks) || !rule.picks.length) return [];
-        const resolved = [];
-        
-        // 实际的图片文件路径映射
-        const actualImagePaths = {
-          "assets/chen": {
-            1: "./assets/chen-hero.png",
-            2: "./assets/chen-paper-1.png",
-            3: "./assets/chen-paper-2.png"
-          },
-          "assets/qiao": {
-            1: "./assets/qiao-hero.png",
-            2: "./assets/qiao-paper-1.png",
-            3: "./assets/qiao-paper-2.png"
-          },
-          "assets/langzhong": {
-            1: "./assets/langzhong-hero.png",
-            2: "./assets/langzhong-paper-1.png",
-            3: "./assets/langzhong-paper-2.png"
-          },
-          "assets/huaian": {
-            1: "./assets/huaian-hero.png",
-            2: "./assets/huaian-paper-1.png",
-            3: "./assets/huaian-paper-2.png"
-          }
-        };
-        
-        for (const n of rule.picks) {
-          if (actualImagePaths[rule.baseDir] && actualImagePaths[rule.baseDir][n]) {
-            const candidate = actualImagePaths[rule.baseDir][n];
-            // eslint-disable-next-line no-await-in-loop
-            const ok = await preloadImage(candidate);
-            if (ok) {
-              resolved.push(candidate);
-            }
-          }
-        }
-        return resolved;
-      };
-
-      const getBuildingImages = async (buildingName) => {
-        if (localImageCache.has(buildingName)) return localImageCache.get(buildingName);
-        const spotlightLocal = SPOTLIGHT_LOCAL_IMAGE_MAP[buildingName];
-        if (spotlightLocal) {
-          const local = [spotlightLocal];
-          localImageCache.set(buildingName, local);
-          return local;
-        }
-        const rule = LOCAL_IMAGE_RULES[buildingName];
-        const localImgs = await resolveLocalImagesByRule(rule);
-        const imgs = localImgs.length ? localImgs : (BUILDING_IMAGE_MAP[buildingName] || []);
-        localImageCache.set(buildingName, imgs);
-        return imgs;
-      };
-
-      // 省份名称映射
-      const provinceMap = {
-        "北京市": "北京",
-        "山西省": "山西",
-        "江苏省": "江苏",
-        "四川省": "四川",
-        "广东省": "广东",
-        "河北省": "河北",
-        "甘肃省": "甘肃",
-        "天津市": "天津",
-        "辽宁省": "辽宁",
-        "吉林省": "吉林",
-        "黑龙江省": "黑龙江",
-        "内蒙古自治区": "内蒙古自治区",
-        "山东省": "山东",
-        "河南省": "河南",
-        "陕西省": "陕西",
-        "宁夏回族自治区": "宁夏回族自治区",
-        "青海省": "青海",
-        "新疆维吾尔自治区": "新疆维吾尔自治区",
-        "西藏自治区": "西藏自治区",
-        "安徽省": "安徽",
-        "浙江省": "浙江",
-        "上海市": "上海",
-        "江西省": "江西",
-        "湖北省": "湖北",
-        "湖南省": "湖南",
-        "福建省": "福建",
-        "重庆市": "重庆",
-        "云南省": "云南",
-        "贵州省": "贵州",
-        "广西壮族自治区": "广西壮族自治区",
-        "海南省": "海南",
-        "台湾省": "台湾"
-      };
-
-      const HOTSPOT_PROVINCE_META = {
-        "河北省": { name: "河北", building: "玉皇阁", desc: "河北环拱京畿，长城关隘、皇家陵寝与古城村镇类型齐全，体现北方防御体系与礼制空间的双重传统。" },
-        "甘肃省": { name: "甘肃", building: "嘉峪关", desc: "甘肃地跨陇中与河西走廊，关隘城堡、石窟寺院与夯土聚落沿丝路展开，建筑风貌兼具交通要冲与多元文化交汇特征。" },
-        "天津市": { name: "天津", building: "河海津门", desc: "天津因漕运而兴，府城、会馆与近代街区并存，建筑体现运河节点城市与近现代工商业口岸的叠加特征。" },
-        "辽宁省": { name: "辽宁", building: "辽东古建", desc: "辽宁连接关内外，清代宫苑、城垣与东北民居类型并存，建筑形态兼具北方秩序与边疆开拓特征。" },
-        "吉林省": { name: "吉林", building: "伪满皇宫", desc: "吉林地跨山地与平原，长白山周边聚落、关东民居与近代城市遗存并存，建筑风貌质朴而适应寒冷环境。" },
-        "黑龙江省": { name: "黑龙江", building: "五教道德院", desc: "黑龙江地处中国最北，寒地聚落、边境城镇与近现代工业遗存并见，建筑重视保温、防雪与边疆交通联系。" },
-        "内蒙古自治区": { name: "内蒙古自治区", building: "喀喇沁亲王府", desc: "内蒙古横跨北疆，草原聚落、召庙与边塞城镇并存，建筑在广袤气候条件下形成开阔、厚实的地域特征。" },
-        "山东省": { name: "山东", building: "青州古城", desc: "山东兼具齐鲁礼乐传统与海岱山川格局，府城、祠庙、书院与海防建筑丰富，承载深厚的儒家文化空间。" },
-        "河南省": { name: "河南", building: "应天门", desc: "河南位居中原腹地，宫殿、寺观、石窟与古城遗存丰厚，是中华礼制建筑与都城文明的重要承载地。" },
-        "陕西省": { name: "陕西", building: "秦王宫", desc: "陕西关中平原与陕北高原并存，帝都遗址、塔寺与窑洞民居交织，是中国古代都城与陵寝建筑的重要区域。" },
-        "宁夏回族自治区": { name: "宁夏回族自治区", building: "玉皇阁", desc: "宁夏地处黄河上游，清真寺、夯土聚落与灌溉绿洲共生，建筑兼具西北防护需求与回族文化特色。" },
-        "青海省": { name: "青海", building: "丹噶尔古城", desc: "青海高原辽阔，寺院、城堡式聚落与高原民居顺应气候与地形，展现出厚重、朴实而富宗教气息的空间特征。" },
-        "新疆维吾尔自治区": { name: "新疆维吾尔自治区", building: "约特干故城", desc: "新疆地域辽阔，绿洲城镇、清真寺与夯土街巷深受丝路文明影响，建筑风貌兼具防风避暑与商旅交流特征。" },
-        "西藏自治区": { name: "西藏自治区", building: "雪域寺院", desc: "西藏高寒高海拔，宫殿、寺院与碉房依山就势，厚墙小窗与鲜明色彩共同回应高原环境与宗教生活。" },
-        "安徽省": { name: "安徽", building: "花戏楼", desc: "安徽南北风貌差异鲜明，徽派民居以白墙黛瓦、马头墙和精细木石砖雕著称，是中国传统民居的重要代表。" },
-        "浙江省": { name: "浙江", building: "东阳卢宅", desc: "浙江河港密布、商贸兴盛，古城街巷、廊桥与江南宅院共同塑造精巧细腻的空间气质，兼具山地与水乡特色。" },
-        "上海市": { name: "上海", building: "海派里弄", desc: "上海地处江海交汇，近代里弄、石库门与开埠建筑并存，展现传统民居向近现代都市建筑转型的独特面貌。" },
-        "江西省": { name: "江西", building: "滕王阁", desc: "江西山水与书院文化深厚，白墙黛瓦、祠堂书院与古村落相互映照，赣派建筑在礼制与生活之间取得平衡。" },
-        "湖北省": { name: "湖北", building: "黄鹤楼", desc: "湖北位居长江中游，古城、书院与桥梁建筑类型丰富，荆楚地区建筑兼具水网环境适应与礼制空间传统。" },
-        "湖南省": { name: "湖南", building: "凤凰古城", desc: "湖南依山带水，书院、祠堂与民居兼具湖湘文脉与山地适应性，木构穿斗、封火墙与院落组合富有地域辨识度。" },
-        "福建省": { name: "福建", building: "福建土楼", desc: "福建山海相依，土楼、宗祠与滨海聚落并存，夯土围合与木构穿斗体现了闽地建筑在防御、聚族与适应气候上的智慧。" },
-        "重庆市": { name: "重庆", building: "石宝寨", desc: "重庆山城临江而建，吊脚楼、码头街巷与崖壁聚落共同塑造立体城市肌理，巴渝民居因地制宜，空间层次鲜明。" },
-        "云南省": { name: "云南", building: "双龙桥", desc: "云南山川纵横、民族聚居，民居与寺庙建筑常结合高原气候与地方工艺，形成院落、木构与彩饰并重的多样风貌。" },
-        "贵州省": { name: "贵州", building: "沱江吊脚楼", desc: "贵州多山湿润，吊脚楼、石板寨与鼓楼风雨桥共同构成多民族聚落景观，建筑强调地形适应与木石工艺结合。" },
-        "广西壮族自治区": { name: "广西壮族自治区", building: "风雨桥", desc: "广西喀斯特山水与多民族聚落相映，干栏式建筑、风雨桥与鼓楼体现了南方木构传统与山地生活智慧。" },
-        "海南省": { name: "海南", building: "罗驿古村", desc: "海南四面环海，聚落与民居常结合热带气候、骑楼街区与侨乡文化，空间通风开敞、遮阳避雨特征鲜明。" },
-        "台湾省": { name: "台湾", building: "竹堑城", desc: "台湾传统聚落融合闽南、客家与海洋文化，红砖民居、街屋与宗祠建筑在防台风与适应湿热气候中形成鲜明特色。" },
-      };
-
-      // 根据省份获取建筑列表
-      const getBuildingsByProvince = (province) => {
-        const mappedProvince = provinceMap[province] || province;
-        const existing = BUILDINGS_DB[mappedProvince];
-        if (existing && existing.length) return existing;
-        const fallback = HOTSPOT_PROVINCE_META[province] || HOTSPOT_PROVINCE_META[mappedProvince];
-        if (!fallback) return [];
-        return [
-          {
-            name: fallback.building,
-            category: "省份",
-            desc: fallback.desc,
-          },
-        ];
-      };
-
-      let detailVisible = false;
-      let hideTimer = null;
-      let detailCarouselTimer = null;
-      let activeProvince = "";
-      let activeBuildingIndex = 0;
-      let activeImageIndex = 0;
-      let detailRenderToken = 0;
-
-      // 创建轮播图
-      const createCarousel = (images) => {
-        if (!carouselContainer) return;
-        carouselContainer.innerHTML = '';
-        images.forEach((imgSrc, index) => {
-          const img = document.createElement('div');
-          img.className = 'absolute inset-0 transition-opacity duration-500';
-          img.style.backgroundImage = `url('${imgSrc}')`;
-          img.style.backgroundSize = 'cover';
-          img.style.backgroundPosition = 'center';
-          img.style.opacity = index === 0 ? '1' : '0';
-          carouselContainer.appendChild(img);
-        });
-      };
-
-      // 更新轮播图
-      const updateCarousel = (index) => {
-        if (!carouselContainer) return;
-        const images = carouselContainer.children;
-        if (!images.length) return;
-        const safeIndex = ((index % images.length) + images.length) % images.length;
-        for (let i = 0; i < images.length; i++) {
-          images[i].style.opacity = i === safeIndex ? '1' : '0';
-        }
-      };
-
-      const updateDetailByIndex = async (province, index) => {
-        const renderToken = ++detailRenderToken;
-        const mappedProvince = provinceMap[province] || province;
-        const list = getBuildingsByProvince(province);
-        if (!list.length) return;
-        const spotlight = PROVINCE_SPOTLIGHT[mappedProvince];
-        const it = list.find((b) => b.name === spotlight) || list[0];
-        const fallbackImages = ["./assets/index-bg.png"];
-        const resolvedImages = await getBuildingImages(it.name);
-        const imgList = resolvedImages.length ? resolvedImages : fallbackImages;
-        if (renderToken !== detailRenderToken) return; // 防止异步加载后覆盖新 hover 的内容
-
-        provinceNameEl.textContent = localProvinceName(mappedProvince);
-        buildingNameEl.textContent = localBuildingName(it.name);
-        buildingDescEl.textContent = localBuildingDesc(it.name, it.desc);
-        
-        // 创建并更新轮播图
-        createCarousel(imgList);
-        const safeIndex = imgList.length ? ((index % imgList.length) + imgList.length) % imgList.length : 0;
-        updateCarousel(safeIndex);
-      };
-
-      const stopDetailCarousel = () => {
-        if (detailCarouselTimer) {
-          window.clearInterval(detailCarouselTimer);
-          detailCarouselTimer = null;
-        }
-      };
-
-      const startDetailCarousel = (province) => {
-        stopDetailCarousel();
-        const mappedProvince = provinceMap[province] || province;
-        if (!PROVINCE_SPOTLIGHT[mappedProvince]) return;
-        detailCarouselTimer = window.setInterval(() => {
-          activeImageIndex += 1;
-          updateCarousel(activeImageIndex);
-        }, 2600);
-      };
-
-      const showDetail = (province) => {
-        if (!province) return;
-        const mappedProvince = provinceMap[province] || province;
-        const list = getBuildingsByProvince(province);
-        if (!list.length) return;
-
-        if (activeProvince !== province) {
-          activeProvince = province;
-          activeBuildingIndex = 0;
-          activeImageIndex = 0;
-        }
-        updateDetailByIndex(activeProvince, activeImageIndex);
-        startDetailCarousel(activeProvince);
-
-        if (hideTimer) {
-          window.clearTimeout(hideTimer);
-          hideTimer = null;
-        }
-
-        if (!detailVisible) {
-          detailVisible = true;
-          detailEl.style.pointerEvents = "auto";
-          detailEl.setAttribute("aria-hidden", "false");
-          gsap.killTweensOf(detailEl);
-          gsap.to(detailEl, { duration: 0.55, opacity: 1, y: 0, ease: "power3.out" });
-        } else {
-          // 已显示时，轻微“呼吸”刷新（保持丝滑）
-          gsap.killTweensOf(detailEl);
-          gsap.fromTo(
-            detailEl,
-            { opacity: 1, y: 6 },
-            { duration: 0.32, opacity: 1, y: 0, ease: "power2.out" }
-          );
-        }
-      };
-
-      const hideDetail = () => {
-        if (!detailVisible) return;
-        stopDetailCarousel();
-        activeProvince = "";
-        activeBuildingIndex = 0;
-        clearHotspotActive();
-        gsap.killTweensOf(detailEl);
-        gsap.to(detailEl, {
-          duration: 0.45,
-          opacity: 0,
-          y: 20,
-          ease: "power3.inOut",
-          onComplete: () => {
-            detailVisible = false;
-            detailEl.style.pointerEvents = "none";
-            detailEl.setAttribute("aria-hidden", "true");
-          },
-        });
-      };
-
-      /** 四川省轮廓：按最新 SVG 数据与底图坐标精确定位 */
-      const SICHUAN_HOTSPOT = {
-        x: 1502.5,
-        y: 1103,
-        w: 381,
-        h: 377,
-        bgW: 3448,
-        bgH: 1900,
-        path: "M23.5 0.5L41 10.5L53 41.5L76 62H91L105.5 80H128L136 54H152L169.5 41.5L178 29L169.5 10.5L188 0.5H208.5V18L223.5 22L242 33.5L251 54V72.5L266 80L281 72.5L292 62L302 68L312 74H329.5L341 68L345 80L359.5 82L380 100V106.5H370L336 127.5L341 132.5L329.5 145.5L312 156.5H321V163V169L302 185V201.5L285 220.5L297 227.5V240.5L312 246.5H329.5L321 252.5L302 259L292 270.5L297 281.5L292 288L285 281.5L266 292.5L251 288V259L242 252.5L236 270.5L223.5 281.5L216 301.5L198 331.5L204.5 356.5L182 367.5L157 375.5L117 292.5L105.5 301.5L98.5 281.5L91 259L76 246.5L69.5 281.5L63 270.5L58 246.5V234V193V163L48.5 145.5L53 132.5L41 114.5L32 90.5L10.5 82L0.5 62V46L10.5 33.5L0.5 22V10.5L10.5 0.5H23.5Z"
-      };
-
-      const validHoverProvinces = [
-        "北京市",
-        "河北省",
-        "甘肃省",
-        "天津市",
-        "山西省",
-        "辽宁省",
-        "吉林省",
-        "黑龙江省",
-        "内蒙古自治区",
-        "山东省",
-        "河南省",
-        "陕西省",
-        "宁夏回族自治区",
-        "青海省",
-        "新疆维吾尔自治区",
-        "西藏自治区",
-        "江苏省",
-        "安徽省",
-        "浙江省",
-        "上海市",
-        "江西省",
-        "湖北省",
-        "湖南省",
-        "福建省",
-        "广东省",
-        "重庆市",
-        "四川省",
-        "云南省",
-        "贵州省",
-        "广西壮族自治区",
-        "海南省",
-        "台湾省",
-      ];
-      const validClickNav = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
-      const hotspotNameToProvince = {
-        北京: "北京市",
-        河北: "河北省",
-        河北省: "河北省",
-        甘肃: "甘肃省",
-        天津市: "天津市",
-        山西省: "山西省",
-        辽宁省: "辽宁省",
-        吉林省: "吉林省",
-        黑龙江省: "黑龙江省",
-        内蒙古自治区: "内蒙古自治区",
-        山东省: "山东省",
-        河南省: "河南省",
-        陕西省: "陕西省",
-        宁夏回族自治区: "宁夏回族自治区",
-        青海省: "青海省",
-        新疆维吾尔自治区: "新疆维吾尔自治区",
-        西藏自治区: "西藏自治区",
-        江苏省: "江苏省",
-        安徽省: "安徽省",
-        浙江省: "浙江省",
-        上海市: "上海市",
-        江西省: "江西省",
-        湖北省: "湖北省",
-        湖南省: "湖南省",
-        福建省: "福建省",
-        广东省: "广东省",
-        重庆市: "重庆市",
-        云南省: "云南省",
-        贵州省: "贵州省",
-        广西壮族自治区: "广西壮族自治区",
-        海南省: "海南省",
-        台湾省: "台湾省",
-      };
-
-      const mapHotspotsEl = document.getElementById("mapHotspots");
-      const mapWrapEl = document.getElementById("mapWrap");
-      const mapHotspotSvgEl = document.getElementById("chinaMapHotspotSvg");
-
-      function clearHotspotActive() {
-        mapHotspotsEl?.querySelectorAll(".map-sichuan-hit-face.is-active").forEach((el) => {
-          el.classList.remove("is-active");
-        });
-        mapHotspotsEl?.querySelector(".map-sichuan-overlay")?.classList.remove("sichuan-lit");
-        mapHotspotSvgEl?.querySelectorAll(".map-hotspot-path.is-active").forEach((el) => {
-          el.classList.remove("is-active");
-        });
-      }
-
-      function setHotspotActive(province) {
-        clearHotspotActive();
-        if (!province) return;
-        mapHotspotSvgEl
-          ?.querySelector(`.map-hotspot-path[data-province="${province}"]`)
-          ?.classList.add("is-active");
-        if (province === "四川省") {
-          mapHotspotsEl?.querySelector(".map-sichuan-overlay")?.classList.add("sichuan-lit");
-          mapHotspotsEl?.querySelector(".map-sichuan-hit-face")?.classList.add("is-active");
-        }
-      }
-
-      if (mapHotspotsEl) {
-        const svgNS = "http://www.w3.org/2000/svg";
-        const sichuanWrap = document.createElement("div");
-        sichuanWrap.className = "map-sichuan-overlay";
-        sichuanWrap.setAttribute("data-province", "四川省");
-        const sichuanHitSvg = document.createElementNS(svgNS, "svg");
-        sichuanHitSvg.setAttribute("class", "map-sichuan-hit-svg");
-        sichuanHitSvg.setAttribute("viewBox", `0 0 ${SICHUAN_HOTSPOT.w} ${SICHUAN_HOTSPOT.h}`);
-        sichuanHitSvg.setAttribute("preserveAspectRatio", "none");
-        sichuanHitSvg.setAttribute("aria-hidden", "true");
-        const sichuanPathEl = document.createElementNS(svgNS, "path");
-        sichuanPathEl.setAttribute("d", SICHUAN_HOTSPOT.path);
-        sichuanPathEl.setAttribute("vector-effect", "non-scaling-stroke");
-        sichuanWrap.style.left = `${(SICHUAN_HOTSPOT.x / SICHUAN_HOTSPOT.bgW) * 100}%`;
-        sichuanWrap.style.top = `${(SICHUAN_HOTSPOT.y / SICHUAN_HOTSPOT.bgH) * 100}%`;
-        sichuanWrap.style.width = `${(SICHUAN_HOTSPOT.w / SICHUAN_HOTSPOT.bgW) * 100}%`;
-        sichuanWrap.style.height = `${(SICHUAN_HOTSPOT.h / SICHUAN_HOTSPOT.bgH) * 100}%`;
-        sichuanHitSvg.appendChild(sichuanPathEl);
-        const sichuanHitBtn = document.createElement("button");
-        sichuanHitBtn.type = "button";
-        sichuanHitBtn.className = "map-sichuan-hit-face";
-        sichuanHitBtn.dataset.province = "四川省";
-        sichuanHitBtn.setAttribute("aria-label", t("sichuanAria"));
-        sichuanWrap.appendChild(sichuanHitSvg);
-        sichuanWrap.appendChild(sichuanHitBtn);
-        mapHotspotsEl.appendChild(sichuanWrap);
-
-        const attachPreviewHandlers = (el, province) => {
-          const openPreview = () => {
-            if (!validHoverProvinces.includes(province)) return;
-            setHotspotActive(province);
-            showDetail(province);
-          };
-          el.addEventListener("mouseenter", openPreview);
-          el.addEventListener("touchstart", openPreview, { passive: true });
-          if (el.tagName === "BUTTON") {
-            el.addEventListener("focus", openPreview);
-          }
-        };
-
-        attachPreviewHandlers(sichuanHitBtn, "四川省");
-
-        // ★ 只有 5 个有建筑详情页的省份可点击跳转，其余仅高亮+悬浮卡片
-        const PROVINCES_WITH_BUILDINGS = ["北京市", "山西省", "江苏省", "四川省", "广东省"];
-
-        mapHotspotSvgEl?.querySelectorAll(".map-hotspot-path").forEach((pathEl) => {
-          const nameZh = pathEl.getAttribute("data-name-zh") || "";
-          const province = hotspotNameToProvince[nameZh] || nameZh;
-          if (!province) return;
-          pathEl.setAttribute("data-province", province);
-          attachPreviewHandlers(pathEl, province);
-
-          // 非建筑省份：移除 data-href 禁止点击跳转（悬浮高亮不受影响）
-          if (!PROVINCES_WITH_BUILDINGS.includes(province)) {
-            pathEl.removeAttribute("data-href");
-          }
-        });
-
-        mapHotspotsEl.addEventListener("mouseout", (e) => {
-          const to = e.relatedTarget;
-          if (to && mapHotspotsEl.contains(to)) return;
-          if (to && detailEl && detailEl.contains(to)) return;
-          if (hideTimer) window.clearTimeout(hideTimer);
-          hideTimer = window.setTimeout(() => {
-            clearHotspotActive();
-            hideDetail();
-          }, 140);
-        });
-
-        if (detailEl) {
-          detailEl.addEventListener("mouseenter", () => {
-            if (hideTimer) {
-              window.clearTimeout(hideTimer);
-              hideTimer = null;
-            }
-          });
-          detailEl.addEventListener("mouseout", (e) => {
-            const to = e.relatedTarget;
-            if (to && mapHotspotsEl.contains(to)) return;
-            if (to && detailEl.contains(to)) return;
-            if (hideTimer) window.clearTimeout(hideTimer);
-            hideTimer = window.setTimeout(() => {
-              clearHotspotActive();
-              hideDetail();
-            }, 140);
-          });
-        }
-
-        mapHotspotsEl.addEventListener("click", (e) => {
-          const sichuanBtn = e.target.closest(".map-sichuan-hit-face");
-          if (!sichuanBtn) return;
-          const province = sichuanBtn.dataset.province;
-          if (!province) return;
-          if (validClickNav.includes(province)) {
-            window.location.href =
-              "list.html?province=" + encodeURIComponent(province) + "&lang=" + encodeURIComponent(currentLang);
-          }
-        });
-
-        mapHotspotSvgEl?.addEventListener("mouseout", (e) => {
-          const to = e.relatedTarget;
-          if (to && mapHotspotSvgEl.contains(to)) return;
-          if (to && mapHotspotsEl.contains(to)) return;
-          if (to && detailEl && detailEl.contains(to)) return;
-          if (hideTimer) window.clearTimeout(hideTimer);
-          hideTimer = window.setTimeout(() => {
-            clearHotspotActive();
-            hideDetail();
-          }, 140);
-        });
-      }
-
-      // 初始微动：让画面更“呼吸”
-      gsap.fromTo(
-        mapWrapEl,
-        { opacity: 0, filter: "blur(6px)" },
-        { opacity: 1, filter: "blur(0px)", duration: 0.9, ease: "power2.out" }
+  </noscript>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      color: #2a1608;
+    }
+
+    /* ── 视频全屏 ── */
+    #bg-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+    #bg-video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* 仅顶部极淡渐变，保护导航文字可读性 */
+    #bg-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(245,235,210,0.35) 0%,
+        transparent 30%
       );
+    }
 
-      // 搜索功能
-      const searchInput = document.getElementById('searchInput');
-      const searchBtn = document.getElementById('searchBtn');
+    /* ── 顶部导航（居中品牌名） ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.4rem 2rem;
+    }
 
-      // 收集所有建筑数据
-      const allBuildings = [];
-      for (const province in BUILDINGS_DB) {
-        BUILDINGS_DB[province].forEach(building => {
-          allBuildings.push(building);
-        });
-      }
+    .nav-brand {
+      font-family: 'Ma Shan Zheng', 'ZCOOL XiaoWei', 'Noto Serif SC', serif !important;
+      font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+      color: #3e1a06 !important;
+      letter-spacing: 0.06em !important;
+      line-height: 1 !important;
+      text-decoration: none !important;
+      text-shadow:
+        0 1px 0 rgba(255, 245, 224, 0.5),
+        0 1px 6px rgba(200, 150, 60, 0.25);
+    }
 
-      // 搜索函数
-      const searchBuilding = () => {
-        const searchTerm = searchInput.value.trim();
-        if (!searchTerm) {
-          alert(t("searchEmpty"));
-          return;
-        }
+    /* ── 主标题区 ── */
+    .hero {
+      position: relative;
+      z-index: 10;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* 视频上方中部是最空的区域，约在视口 12%~48% 之间 */
+      justify-content: flex-start;
+      padding-top: clamp(4.5rem, 9vw, 7rem);
+      text-align: center;
+    }
 
-        // 查找匹配的建筑
-        const matchedBuilding = allBuildings.find(building => 
-          building.name.includes(searchTerm) ||
-          (BUILDING_NAME_EN[building.name] || "").toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    /* 眉标 */
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-bottom: 1.4rem;
+      color: #7d5530;
+      font-family: 'Noto Serif SC', 'SimSun', 'Noto Sans SC', serif;
+      font-size: clamp(0.85rem, 1.2vw, 1rem);
+      font-weight: 500;
+      letter-spacing: 0.28em;
+    }
+    .eyebrow::before,
+    .eyebrow::after {
+      content: '';
+      width: 2.8rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c8a96e, #c8a96e, transparent);
+      opacity: 0.65;
+    }
 
-        if (matchedBuilding) {
-          // 跳转到详情页
-          window.location.href = `detail.html?building=${encodeURIComponent(matchedBuilding.name)}&lang=${encodeURIComponent(currentLang)}`;
-        } else {
-          alert(t("searchNotFound"));
-        }
-      };
+    /* 主标题 */
+    h1 {
+      font-family: 'Ma Shan Zheng', 'Zhi Mang Xing', 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-weight: 400;
+      font-size: clamp(3rem, 7.5vw, 6rem);
+      line-height: 1.08;
+      letter-spacing: 0.16em;
+      color: #1e1008;
+      text-shadow:
+        0 1px 0 rgba(255,245,220,0.7),
+        0 2px 20px rgba(200,150,80,0.15);
+    }
 
-      // 搜索按钮点击事件
-      if (searchBtn) {
-        searchBtn.addEventListener('click', searchBuilding);
-      }
+    /* 分隔装饰 — 传统纹样菱形分隔线 */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      margin: 1.5rem auto 0;
+      width: fit-content;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      width: 2.2rem;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c8a96e);
+      opacity: 0.6;
+    }
+    .divider::after {
+      background: linear-gradient(90deg, #c8a96e, transparent);
+    }
+    .divider .diamond {
+      width: 6px;
+      height: 6px;
+      background: #b8904e;
+      transform: rotate(45deg);
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
 
-      // 回车键搜索
-      if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            searchBuilding();
-          }
-        });
-      }
+    /* 副句 */
+    .tagline {
+      margin-top: 1.2rem;
+      font-family: 'Noto Serif SC', 'SimSun', serif;
+      font-size: clamp(0.92rem, 1.6vw, 1.1rem);
+      font-weight: 500;
+      color: #4a2e14;
+      letter-spacing: 0.32em;
+    }
 
-      const indexLangSwitchBtn = document.getElementById("indexLangSwitchBtn");
-      if (indexLangSwitchBtn) {
-        indexLangSwitchBtn.addEventListener("click", () => {
-          currentLang = isEn() ? "zh" : "en";
-          if (typeof persistSiteLang === "function") persistSiteLang(currentLang);
-          applyIndexLanguage();
-          if (activeProvince) updateDetailByIndex(activeProvince, activeImageIndex);
-        });
-      }
+    /* CTA — 古建风格金彩按钮 */
+    .cta {
+      margin-top: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      position: relative;
+      padding: 0.75rem 2.8rem;
+      border-radius: 0.45rem;
+      text-decoration: none;
+      font-family: 'Ma Shan Zheng', 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-size: 1.12rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      color: #fef6e6;
+      background: linear-gradient(
+        170deg,
+        #a0522d 0%,
+        #8b4513 30%,
+        #6b3410 60%,
+        #4a2008 100%
+      );
+      border: 1.5px solid rgba(212, 175, 120, 0.55);
+      box-shadow:
+        0 4px 20px rgba(100, 44, 10, 0.45),
+        0 1px 0 rgba(255, 220, 140, 0.35) inset,
+        0 0 0 4px rgba(212, 175, 120, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+      cursor: pointer;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    /* 金色装饰内边框 */
+    .cta::before {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: calc(0.45rem - 2px);
+      border: 1px solid rgba(240, 200, 100, 0.2);
+      pointer-events: none;
+    }
+    /* 角饰：左上 */
+    .cta::after {
+      content: '';
+      position: absolute;
+      top: -4px; left: -4px;
+      width: 12px; height: 12px;
+      border-top: 2px solid #d4af37;
+      border-left: 2px solid #d4af37;
+      border-radius: 1px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .cta .corner {
+      position: absolute;
+      width: 12px; height: 12px;
+      pointer-events: none;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .cta .corner-tr {
+      top: -4px; right: -4px;
+      border-top: 2px solid #d4af37;
+      border-right: 2px solid #d4af37;
+    }
+    .cta .corner-bl {
+      bottom: -4px; left: -4px;
+      border-bottom: 2px solid #d4af37;
+      border-left: 2px solid #d4af37;
+    }
+    .cta .corner-br {
+      bottom: -4px; right: -4px;
+      border-bottom: 2px solid #d4af37;
+      border-right: 2px solid #d4af37;
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      border-color: rgba(241, 210, 158, 0.84);
+      box-shadow:
+        0 8px 30px rgba(100, 44, 10, 0.55),
+        0 1px 0 rgba(255, 230, 150, 0.45) inset,
+        0 0 0 5px rgba(212, 175, 120, 0.2);
+    }
+    .cta:hover::after,
+    .cta:hover .corner { opacity: 0.9; }
+    .cta:active {
+      transform: translateY(0px);
+      filter: brightness(0.92);
+    }
+    .cta svg { width: 16px; height: 16px; opacity: 0.9; }
 
-      (function initChinaMapSvgHotspots() {
-        const root = document.querySelector(".map-china-map-media");
-        const img = document.getElementById("mapChinaMap");
-        const anchor = document.getElementById("chinaMapSvgAnchor");
-        const svg = document.getElementById("chinaMapHotspotSvg");
-        if (root && img && anchor && svg && typeof window.initMapSvgHotspots === "function") {
-          const api = window.initMapSvgHotspots({ root, img, anchor, svg });
-          if (api && typeof api.layout === "function") {
-            window.__chinaMapHotspotLayout = api.layout;
-            if (typeof window.__registerChinaMapHotspotLayout === "function") {
-              window.__registerChinaMapHotspotLayout(api.layout);
-            }
-          }
-          if (typeof window.__fitChinaMapFull === "function") window.__fitChinaMapFull();
-        }
-      })();
+    /* ── 底部极简署名 ── */
+    .footer-hint {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      color: rgba(55,28,8,0.7);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      white-space: nowrap;
+      text-shadow: 0 0 12px rgba(255,245,220,0.7), 0 0 24px rgba(255,245,220,0.35);
+    }
 
-      /* 北京：点击省界热区 → 故宫探秘长卷（gugong-explore）；在长卷中点击「故宫」再进北京故宫详情轮播页 */
-      (function bindBeijingToForbiddenCityDetail() {
-        var svg = document.getElementById("chinaMapHotspotSvg");
-        if (!svg) return;
-        var detailUrl = "./gugong-explore.html";
-        svg.addEventListener(
-          "click",
-          function (e) {
-            var path = e.target.closest(".map-hotspot-path");
-            if (!path || path.getAttribute("data-name-zh") !== "北京") return;
-            e.preventDefault();
-            e.stopPropagation();
-            
-            var starter = null;
-            if (typeof window.triggerBeijingBgmFilm === "function") {
-              starter = window.triggerBeijingBgmFilm();
-            } else if (typeof window.playBeijingBGM === "function") {
-              starter = window.playBeijingBGM();
-            }
+    /* 移动端 */
+    @media (max-width: 640px) {
+      nav { padding: 1.1rem 1.4rem; }
+      h1 { font-size: clamp(2.4rem, 13vw, 3.2rem); }
+    }
+  </style>
+</head>
+<body>
 
-            Promise.resolve(starter).finally(function () {
-              setTimeout(function () {
-                window.location.assign(detailUrl + "?lang=" + encodeURIComponent(currentLang));
-              }, 600);
-            });
-          },
-          true
-        );
-      })();
-    </script>
-    <style id="china-map-full-override">
-      .map-china-layer {
-        display: flex !important;
-        align-items: flex-end !important;
-        justify-content: center !important;
-        transform: none !important;
-        overflow: visible !important;
-      }
-      .map-china-map-media {
-        overflow: hidden !important;
-      }
-      #mapChinaMap {
-        position: absolute !important;
-        max-width: none !important;
-        object-fit: fill !important;
-        object-position: left top !important;
-      }
-    </style>
-  </body>
+<!-- 视频背景 -->
+<div id="bg-wrap">
+  <video id="bg-video" muted playsinline autoplay loop preload="auto">
+    <source src="./assets/welcome-bg.mp4" type="video/mp4" />
+  </video>
+</div>
+
+<!-- 顶部导航 -->
+<nav>
+  <a class="nav-brand" href="./">古建智寻</a>
+</nav>
+
+<!-- 主体 -->
+<div class="hero">
+  <div class="eyebrow">中国古建筑文化导览平台</div>
+  <h1>探寻千年遗韵</h1>
+  <div class="divider"><span class="diamond"></span></div>
+  <p class="tagline">以 AI 为引 · 品读古建之美</p>
+  <a class="cta" href="./map.html">
+    <span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span>
+    <span class="corner corner-br"></span>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="8" cy="8" r="6"/><path d="M6 5.5l5 2.5-5 2.5V5.5z" fill="currentColor" stroke="none"/>
+    </svg>
+    开始探索
+  </a>
+</div>
+
+<!-- 底部署名 -->
+<p class="footer-hint">古建智寻 · 让每一处遗迹都有人铭记</p>
+
+<script>
+  const v = document.getElementById('bg-video');
+  v.play().catch(() => document.addEventListener('click', () => v.play(), { once: true }));
+</script>
+
+</body>
 </html>

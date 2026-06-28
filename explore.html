@@ -527,14 +527,14 @@
 
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-y-3 px-4 py-4">
-        <a id="exBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
+        <a id="exBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2 font-flow text-base tracking-[0.22em] md:space-x-8">
           <div class="group relative">
-            <a id="exNavHome" href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+            <a id="exNavHome" href="./map.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
             <div
               class="invisible absolute left-0 z-50 mt-2 w-48 rounded-md border border-amber-200/35 bg-[#5a1414]/95 opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:visible group-hover:opacity-100"
             >
-              <a id="exSubMap" href="./index.html" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
+              <a id="exSubMap" href="./map.html" class="block px-4 py-2 text-sm text-amber-50/90 hover:bg-amber-200/15">地图</a>
             </div>
           </div>
           <div class="group relative">
@@ -909,11 +909,11 @@
 
           const q = encodeURIComponent(exCurrentLang);
           const brand = document.getElementById("exBrand");
-          if (brand) brand.setAttribute("href", "./index.html?lang=" + q);
+          if (brand) brand.setAttribute("href", "./map.html?lang=" + q);
           const home = document.getElementById("exNavHome");
-          if (home) home.setAttribute("href", "./index.html?lang=" + q);
+          if (home) home.setAttribute("href", "./map.html?lang=" + q);
           const subMap = document.getElementById("exSubMap");
-          if (subMap) subMap.setAttribute("href", "./index.html?lang=" + q);
+          if (subMap) subMap.setAttribute("href", "./map.html?lang=" + q);
           const list = document.getElementById("exNavList");
           if (list) list.setAttribute("href", "./list.html?lang=" + q);
           const catIds = [

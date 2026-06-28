@@ -402,9 +402,9 @@
   <body class="font-sansCN">
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <a id="gxBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
+        <a id="gxBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
-          <a id="gxNavHome" href="./index.html" class="site-nav-btn text-amber-100">首页</a>
+          <a id="gxNavHome" href="./map.html" class="site-nav-btn text-amber-100">首页</a>
           <a id="gxNavCategories" href="./list.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">建筑分类</a>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-3">
@@ -417,7 +417,7 @@
           >
           <a
             id="gxHomeReturn"
-            href="./index.html"
+            href="./map.html"
             class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-5 py-2.5 font-flow text-lg tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:text-xl md:tracking-[0.16em]"
           >
             返回首页
@@ -611,9 +611,9 @@
         setText("gxTransitionTitle", "transitionTitle");
         setText("gxTransitionSubtext", "transitionSubtext");
         const brand = document.getElementById("gxBrand");
-        if (brand) brand.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+        if (brand) brand.setAttribute("href", `./map.html?lang=${encodeURIComponent(gxCurrentLang)}`);
         const navHome = document.getElementById("gxNavHome");
-        if (navHome) navHome.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+        if (navHome) navHome.setAttribute("href", `./map.html?lang=${encodeURIComponent(gxCurrentLang)}`);
         const mapButtons = [
           { id: "gxBtnGongwang", key: "btnGongwang" },
           { id: "gxBtnWanning", key: "btnWanning" },
@@ -651,7 +651,7 @@
           };
         }
         const homeReturn = document.getElementById("gxHomeReturn");
-        if (homeReturn) homeReturn.setAttribute("href", `./index.html?lang=${encodeURIComponent(gxCurrentLang)}`);
+        if (homeReturn) homeReturn.setAttribute("href", `./map.html?lang=${encodeURIComponent(gxCurrentLang)}`);
 
         const path = document.querySelector('#gugongJourney1HotspotSvg .map-hotspot-path[data-name-zh="故宫"]');
         if (path) {

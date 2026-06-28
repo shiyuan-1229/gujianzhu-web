@@ -254,9 +254,9 @@
   <body class="font-sansCN">
     <nav class="site-nav fixed left-0 right-0 top-0 z-50 border-b border-amber-200/40 text-amber-50 shadow-[0_10px_30px_rgba(44,8,8,0.45)] backdrop-blur-xl" style="background: linear-gradient(90deg, rgba(90, 24, 24, 0.78), rgba(153, 116, 62, 0.52));">
       <div class="site-nav-container container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <a id="pmBrand" href="./index.html" class="site-nav-brand">古建智寻</a>
+        <a id="pmBrand" href="./map.html" class="site-nav-brand">古建智寻</a>
         <div class="flex flex-wrap items-center gap-6 font-flow text-xl tracking-[0.2em] md:text-2xl md:tracking-[0.22em]">
-          <a id="pmNavHome" href="./index.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
+          <a id="pmNavHome" href="./map.html" class="site-nav-btn text-amber-50/90 transition-colors hover:text-amber-100">首页</a>
           <a id="pmNavExplore" href="./gugong-explore.html" class="site-nav-btn text-amber-100">故宫探秘</a>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-2 md:gap-3">
@@ -269,7 +269,7 @@
           </a>
           <a
             id="pmHomeReturn"
-            href="./index.html"
+            href="./map.html"
             class="site-nav-btn rounded-md border border-amber-200/45 bg-[#6b1a1a]/82 px-4 py-2.5 font-flow text-base tracking-[0.14em] text-amber-50 transition-colors hover:bg-[#7b1f1f]/90 md:px-5 md:text-lg md:tracking-[0.16em]"
           >
             返回首页
@@ -457,13 +457,13 @@
         const taihe = document.getElementById("pmPillTaihe");
         if (taihe) taihe.setAttribute("aria-label", pmT("ariaTaihe"));
         const brand = document.getElementById("pmBrand");
-        if (brand) brand.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        if (brand) brand.setAttribute("href", `./map.html?lang=${encodeURIComponent(pmCurrentLang)}`);
         const navHome = document.getElementById("pmNavHome");
-        if (navHome) navHome.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        if (navHome) navHome.setAttribute("href", `./map.html?lang=${encodeURIComponent(pmCurrentLang)}`);
         const navExplore = document.getElementById("pmNavExplore");
         if (navExplore) navExplore.setAttribute("href", `./gugong-explore.html?lang=${encodeURIComponent(pmCurrentLang)}`);
         const homeReturn = document.getElementById("pmHomeReturn");
-        if (homeReturn) homeReturn.setAttribute("href", `./index.html?lang=${encodeURIComponent(pmCurrentLang)}`);
+        if (homeReturn) homeReturn.setAttribute("href", `./map.html?lang=${encodeURIComponent(pmCurrentLang)}`);
         const back = document.getElementById("pmBack");
         if (back) {
           back.onclick = function () {

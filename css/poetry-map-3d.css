@@ -1,0 +1,973 @@
+/* 诗词山河 · 真实中国版图底图 + 竖排诗词垂直于底图 */
+
+.poetry-map-3d {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  overflow: hidden;
+  color: #f5f0e6;
+  font-family: "Noto Serif SC", "SimSun", serif;
+}
+
+.poetry-map-3d.is-open {
+  display: block;
+  cursor: grab;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.poetry-map-3d.is-open ::selection {
+  background: transparent;
+}
+
+.poetry-map-3d.is-open * {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.poetry-map-3d.is-open.is-orbit-dragging {
+  cursor: grabbing;
+}
+
+/* ── 图1：云海金色调背景 ── */
+.poetry-map-3d__backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background: #c8b08a;
+}
+
+.poetry-map-3d__bg-cloudsky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 30%, rgba(255, 248, 235, 0.95) 0%, rgba(232, 210, 175, 0.7) 45%, rgba(180, 155, 120, 0.5) 100%),
+    linear-gradient(180deg, #f5ead8 0%, #dcc9a8 35%, #b89870 70%, #8a7050 100%);
+}
+
+.poetry-map-3d__bg-cloudlayer {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(ellipse 55% 35% at 25% 70%, rgba(255, 255, 255, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 75% 65%, rgba(255, 252, 245, 0.45) 0%, transparent 68%),
+    radial-gradient(ellipse 80% 50% at 50% 85%, rgba(255, 255, 255, 0.35) 0%, transparent 72%);
+  animation: poetry-cloud-drift 36s ease-in-out infinite alternate;
+  opacity: 0.85;
+}
+
+.poetry-map-3d__bg-cloudlayer--far {
+  inset: -8%;
+  opacity: 0.5;
+  filter: blur(8px);
+  animation-duration: 48s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes poetry-cloud-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(2%, -1.5%) scale(1.04); }
+}
+
+.poetry-map-3d__bg-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 82% at 50% 48%, transparent 42%, rgba(60, 45, 30, 0.35) 100%),
+    linear-gradient(to bottom, rgba(80, 60, 40, 0.15) 0%, transparent 25%, transparent 75%, rgba(50, 38, 25, 0.25) 100%);
+}
+
+/* 隐藏旧星云层 */
+.poetry-map-3d__bg-space,
+.poetry-map-3d__bg-nebula,
+.poetry-map-3d__bg-starfield,
+.poetry-map-3d__bg-stars,
+.poetry-map-3d__bg-core-glow,
+.poetry-map-3d__bg-frame,
+.poetry-map-3d__shanshui,
+.poetry-map-3d__bg-base,
+.poetry-map-3d__bg-aurora,
+.poetry-map-3d__bg-mountains,
+.poetry-map-3d__bg-clouds,
+.poetry-map-3d__bg-pattern,
+.poetry-map-3d__bg-glow {
+  display: none;
+}
+
+.poetry-map-3d__loading {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(192, 182, 170, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.poetry-map-3d.is-loading .poetry-map-3d__loading {
+  display: flex;
+}
+
+.poetry-map-3d__loading-text {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(160, 130, 90, 0.35);
+  background: rgba(245, 236, 220, 0.92);
+  color: rgba(58, 40, 24, 0.88);
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  animation: poetry-map-loading-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes poetry-map-loading-pulse {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+.poetry-map-3d__topbar {
+  position: absolute;
+  top: 3.1rem;
+  left: 0;
+  right: 0;
+  z-index: 13;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  pointer-events: none;
+}
+
+.poetry-map-3d__top-actions {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+.poetry-map-3d__hud {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  z-index: 12;
+  padding: 0.65rem 1.35rem;
+  border-radius: 4px;
+  border: 1px solid rgba(180, 140, 90, 0.45);
+  background: rgba(245, 232, 210, 0.82);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 24px rgba(60, 45, 25, 0.25);
+  text-align: center;
+  pointer-events: none;
+  max-width: min(92vw, 520px);
+}
+
+.poetry-map-3d__hud-title {
+  margin: 0;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  font-size: clamp(1.2rem, 3vw, 1.65rem);
+  letter-spacing: 0.28em;
+  color: #3a2818;
+  text-shadow: none;
+}
+
+.poetry-map-3d__hud-sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: rgba(58, 40, 24, 0.72);
+}
+
+.poetry-map-3d__close-mode,
+.poetry-map-3d__reset-btn {
+  position: relative;
+  top: auto;
+  right: auto;
+  z-index: 13;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.75rem;
+  height: 2.125rem;
+  min-width: 5.75rem;
+  min-height: 2.125rem;
+  padding: 0;
+  border: 1px solid rgba(232, 201, 107, 0.32);
+  background: linear-gradient(145deg, rgba(40, 28, 24, 0.88), rgba(18, 32, 24, 0.85));
+  color: #f8edd0;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: 999px;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.poetry-map-3d__close-mode:hover,
+.poetry-map-3d__reset-btn:hover {
+  border-color: rgba(232, 201, 107, 0.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 12px rgba(232, 201, 107, 0.15);
+  color: #fff8e8;
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__topbar {
+  top: 3rem;
+}
+
+.poetry-map-3d.is-open.is-satellite-terrain {
+  cursor: grab;
+  background: #c0b6aa;
+}
+
+body.poetry-map-open #app {
+  visibility: hidden;
+}
+
+/* 卫星模式下保留淡云氛围，与域外底色自然过渡 */
+.poetry-map-3d.is-open.is-satellite-terrain .poetry-map-3d__backdrop {
+  display: block !important;
+  opacity: 0.42;
+  z-index: 1;
+}
+
+.poetry-map-3d.is-open.is-satellite-terrain .poetry-map-3d__bg-vignette {
+  opacity: 0.55;
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__viewport {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+}
+
+/* 地图边缘柔化：中心清晰、四周渐隐进纸色背景 */
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__viewport::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 88% 78% at 50% 46%, transparent 44%, rgba(168, 158, 144, 0.32) 100%),
+    linear-gradient(
+      180deg,
+      rgba(210, 202, 190, 0.22) 0%,
+      transparent 16%,
+      transparent 84%,
+      rgba(158, 148, 136, 0.18) 100%
+    );
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.35;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 40%, rgba(255, 252, 245, 0.18) 0%, transparent 70%);
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__hud {
+  background: rgba(245, 236, 220, 0.78);
+  border-color: rgba(160, 130, 90, 0.35);
+  color: #3a2818;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 28px rgba(60, 45, 30, 0.12);
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__hud-title {
+  color: #3a2818;
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__hud-sub {
+  color: rgba(58, 40, 24, 0.72);
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__close-mode,
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__reset-btn {
+  background: rgba(245, 236, 220, 0.82);
+  border-color: rgba(160, 130, 90, 0.38);
+  color: #3a2818;
+  box-shadow: 0 4px 16px rgba(60, 45, 30, 0.1);
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__canvas-host,
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__canvas-host .maplibregl-map,
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__canvas-host .maplibregl-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 4;
+}
+
+.poetry-map-3d.is-satellite-terrain .maplibregl-marker {
+  z-index: 6;
+  pointer-events: auto;
+}
+
+/* 勿强制拉伸 WebGL canvas，避免平移时出现重影/叠图 */
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__canvas-host canvas.maplibregl-canvas {
+  display: block;
+}
+
+.poetry-map-3d__label-map {
+  transform: none;
+}
+
+.poetry-map-3d__label-pin {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(212, 175, 55, 0.95);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.poetry-map-3d__scs-inset {
+  display: none;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 25;
+  width: min(228px, 32vw);
+  height: min(272px, 38vw);
+  min-width: 160px;
+  min-height: 190px;
+  border: 1px solid rgba(160, 130, 90, 0.45);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(216, 208, 196, 0.9) 0%, rgba(186, 176, 164, 0.92) 100%);
+  box-shadow: 0 4px 18px rgba(60, 45, 30, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.poetry-map-3d__scs-inset-label {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  color: rgba(58, 40, 24, 0.88);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.poetry-map-3d__scs-inset-host {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 20px;
+}
+
+.poetry-map-3d__scs-inset-host .maplibregl-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.poetry-map-3d__scs-inset-host canvas.maplibregl-canvas {
+  display: block;
+}
+
+.poetry-map-3d.is-poem-open .poetry-map-3d__scs-inset {
+  opacity: 0.35;
+}
+
+.poetry-map-3d.is-satellite-terrain .poetry-map-3d__scs-inset {
+  display: block;
+}
+
+.poetry-map-3d.is-satellite-terrain .maplibregl-ctrl-bottom-left {
+  bottom: 12px;
+  left: 12px;
+}
+
+.poetry-map-3d__viewport {
+  position: absolute;
+  top: 3.25rem;
+  left: 0;
+  right: 0;
+  bottom: 1.25rem;
+  z-index: 5;
+  pointer-events: auto;
+  overflow: hidden;
+  background: #c0b6aa;
+}
+
+.poetry-map-3d__canvas-host {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  z-index: 4;
+}
+
+.poetry-map-3d__canvas-host canvas {
+  display: block;
+  outline: none;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.poetry-map-3d__label-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.poetry-map-3d__label-3d {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate(-50%, -100%);
+}
+
+.poetry-map-3d.is-orbit-dragging .poetry-map-3d__label-3d {
+  pointer-events: none;
+}
+
+.poetry-map-3d__yaw {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.poetry-map-3d__yaw.is-snapping {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poetry-map-3d__pitch {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.poetry-map-3d__pitch.is-snapping {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poetry-map-3d__plate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vw, 960px);
+  aspect-ratio: 16 / 10;
+  height: auto;
+  transform: translate(-50%, -50%);
+  transform-style: preserve-3d;
+  --plate-thickness: 44px;
+  filter: drop-shadow(0 28px 48px rgba(40, 30, 15, 0.45));
+}
+
+.poetry-map-3d__plate-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 105%;
+  height: 105%;
+  transform: translate(-50%, -50%) translateZ(-12px);
+  background: radial-gradient(ellipse 100% 100% at 50% 50%,
+    rgba(255, 240, 210, 0.25) 0%,
+    rgba(200, 170, 120, 0.12) 45%,
+    transparent 70%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.poetry-map-3d__plate-body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.poetry-map-3d__plate-top {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(calc(var(--plate-thickness) / 2));
+  transform-style: preserve-3d;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 240, 210, 0.35),
+    0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.poetry-map-3d__plate-bottom {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(calc(var(--plate-thickness) / -2)) rotateX(180deg);
+  background: linear-gradient(165deg, #5a4a38 0%, #3a3028 40%, #2a2418 100%);
+  border-radius: 6px;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.45);
+}
+
+.poetry-map-3d__rim {
+  position: absolute;
+  background: linear-gradient(180deg, #8a7860 0%, #6a5840 30%, #4a4030 60%, #3a3428 100%);
+  border: 1px solid rgba(180, 150, 100, 0.35);
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 240, 210, 0.15);
+}
+
+.poetry-map-3d__rim--west {
+  left: 0;
+  top: 0;
+  width: var(--plate-thickness);
+  height: 100%;
+  transform-origin: left center;
+  transform: rotateY(-90deg);
+}
+
+.poetry-map-3d__rim--east {
+  right: 0;
+  top: 0;
+  width: var(--plate-thickness);
+  height: 100%;
+  transform-origin: right center;
+  transform: rotateY(90deg);
+}
+
+.poetry-map-3d__rim--north {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: var(--plate-thickness);
+  transform-origin: top center;
+  transform: rotateX(90deg);
+}
+
+.poetry-map-3d__rim--south {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--plate-thickness);
+  transform-origin: bottom center;
+  transform: rotateX(-90deg);
+}
+
+.poetry-map-3d__island-img,
+.poetry-map-3d__china {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  outline: none;
+  border: none;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.poetry-map-3d__scene {
+  position: absolute;
+  left: 4%;
+  top: 5%;
+  right: 6%;
+  bottom: 14%;
+  transform-style: preserve-3d;
+  pointer-events: auto;
+}
+
+/* 锚点落在版图；诗词竖排自地图点向上垂挂 */
+.poetry-map-3d__marker {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) translateZ(calc(var(--plate-thickness) / 2 + 4px));
+  transform-origin: center bottom;
+  cursor: pointer;
+}
+
+.poetry-map-3d__label-wrap {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-style: preserve-3d;
+  transform: translateX(-50%) translateZ(calc(var(--z, 36) * 1px))
+    rotateX(var(--billboard-x, 0deg)) rotateY(var(--billboard-y, 0deg));
+  transform-origin: center bottom;
+  transition: transform 0.22s ease, filter 0.22s ease;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
+}
+
+.poetry-map-3d__label-string {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(to top, rgba(255, 248, 230, 0.85), rgba(255, 248, 230, 0.2));
+  box-shadow: 0 0 6px rgba(255, 240, 200, 0.45);
+  flex-shrink: 0;
+}
+
+.poetry-map-3d__label-scroll {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 0.15rem 0.1rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  max-height: 12rem;
+}
+
+.poetry-map-3d__hang-title {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  font-size: clamp(0.88rem, 1.8vw, 1.05rem);
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  color: rgba(255, 252, 245, 0.98);
+  text-shadow:
+    0 0 14px rgba(0, 0, 0, 0.9),
+    0 2px 8px rgba(0, 0, 0, 0.85),
+    0 0 3px rgba(0, 0, 0, 1);
+  white-space: nowrap;
+}
+
+.poetry-map-3d__hang-author {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: "Noto Serif SC", "SimSun", serif;
+  font-size: clamp(0.72rem, 1.4vw, 0.84rem);
+  letter-spacing: 0.2em;
+  color: rgba(255, 248, 235, 0.78);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.8),
+    0 1px 4px rgba(0, 0, 0, 0.7);
+  margin-top: 0.15rem;
+}
+
+.poetry-map-3d__marker:hover .poetry-map-3d__label-wrap {
+  transform: translateX(-50%) translateZ(calc(var(--z, 36) * 1px + 16px))
+    rotateX(var(--billboard-x, 0deg)) rotateY(var(--billboard-y, 0deg)) scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 12px rgba(255, 240, 200, 0.25));
+}
+
+.poetry-map-3d__label-3d:hover .poetry-map-3d__hang-title,
+.poetry-map-3d__label-3d:hover .poetry-map-3d__hang-author {
+  color: #fffef8;
+  filter: brightness(1.12);
+}
+
+.poetry-map-3d__upright {
+  display: none !important;
+}
+
+.poetry-map-3d__label-card,
+.poetry-map-3d__building-name,
+.poetry-map-3d__poem-short,
+.poetry-map-3d__poem-author-mini {
+  display: none !important;
+}
+
+
+/* 旧竖排柱（已弃用，保留兼容） */
+.poetry-map-3d__poem-col,
+.poetry-map-3d__stack,
+.poetry-map-3d__building {
+  display: none !important;
+}
+
+.poetry-map-3d__poem-col {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  direction: ltr;
+  letter-spacing: 0.14em;
+  font-size: clamp(0.74rem, 1.3vw, 0.9rem);
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+  padding: 0.2rem 0.05rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 34vh;
+  transform: scaleY(-1);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.poetry-map-3d__building {
+  flex-shrink: 0;
+  margin-bottom: 0.35rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: rgba(255, 248, 230, 0.92);
+  background: rgba(40, 55, 45, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transform: scaleY(-1);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.poetry-map-3d__stack {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+  max-height: 38vh;
+}
+
+.poetry-map-3d__poem-col:last-child {
+  border-left: none;
+}
+
+.poetry-map-3d__poem-title {
+  display: inline;
+}
+
+.poetry-map-3d__poem-author {
+  display: inline;
+  font-size: 0.76em;
+  color: rgba(220, 200, 160, 0.82);
+  margin-top: 0.55em;
+}
+
+.poetry-map-3d.is-poem-open .poetry-map-3d__viewport {
+  opacity: 0.12;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.poetry-map-3d__poem-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 2rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(232, 201, 107, 0.06) 0%, transparent 60%),
+    linear-gradient(165deg, rgba(26, 14, 18, 0.97) 0%, rgba(14, 24, 18, 0.96) 50%, rgba(8, 14, 11, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  animation: poetry-map-fade-in 0.4s ease;
+}
+
+.poetry-map-3d.is-poem-open .poetry-map-3d__poem-stage {
+  display: flex;
+}
+
+@keyframes poetry-map-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.poetry-map-3d__poem-back {
+  position: absolute;
+  top: 4.5rem;
+  left: 1rem;
+  z-index: 2;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(18, 28, 22, 0.78);
+  color: #f5ecd8;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.poetry-map-3d__poem-article {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: min(92vw, 720px);
+  text-align: center;
+}
+
+.poetry-map-3d__poem-stage-title {
+  margin: 0 0 0.5rem;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  letter-spacing: 0.18em;
+  color: #f5ecd8;
+}
+
+.poetry-map-3d__poem-stage-meta {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.58);
+  letter-spacing: 0.1em;
+}
+
+.poetry-map-3d__poem-stage-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: min(680px, 92vw);
+  max-height: min(52vh, 420px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0.5rem 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.poetry-map-3d__poem-line {
+  margin: 0;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  direction: ltr;
+  letter-spacing: 0.1em;
+  line-height: 1.9;
+  font-size: clamp(0.95rem, 2.2vw, 1.12rem);
+  color: rgba(255, 255, 255, 0.94);
+  white-space: normal;
+  word-break: normal;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.poetry-map-3d__poem-stage-tag {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(220, 200, 160, 0.82);
+  letter-spacing: 0.08em;
+}
+
+.poetry-map-3d__poem-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.poetry-map-3d__building-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 201, 107, 0.45);
+  background: linear-gradient(135deg, rgba(90, 24, 24, 0.88), rgba(40, 70, 55, 0.88));
+  color: #fef3c7;
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.poetry-map-3d__building-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.poetry-map-3d__detail {
+  display: none !important;
+}
+
+#openPoetryLandscapeBtn.is-active {
+  background: linear-gradient(135deg, rgba(180, 100, 40, 0.95), rgba(60, 100, 70, 0.95)) !important;
+  box-shadow: 0 0 24px rgba(232, 201, 107, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poetry-map-3d__bg-cloudlayer {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .poetry-map-3d__topbar {
+    top: 2.85rem;
+    padding: 0 0.65rem;
+  }
+
+  .poetry-map-3d__top-actions {
+    right: 0.65rem;
+    gap: 0.35rem;
+  }
+
+  .poetry-map-3d__close-mode,
+  .poetry-map-3d__reset-btn {
+    width: 5rem;
+    height: 1.95rem;
+    min-width: 5rem;
+    min-height: 1.95rem;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+  }
+
+  .poetry-map-3d__hud {
+    max-width: calc(100vw - 9.5rem);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .poetry-map-3d__plate {
+    width: 94vw;
+  }
+
+  .poetry-map-3d__poem-stage {
+    padding: 4.5rem 1rem 1.5rem;
+  }
+
+  .poetry-map-3d__poem-stage-body {
+    max-height: 42vh;
+  }
+}

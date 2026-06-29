@@ -16,16 +16,6 @@ import edge_tts  # Edge TTS（微软免费在线语音，中文音质好）
 
 from config import DOCS_DIR, PROJECT_DIR
 from rag import stream_answer
-from poems_service import (
-    get_building_entry,
-    get_poem,
-    get_poetry_landscape,
-    get_stats,
-    list_buildings,
-    list_poems,
-    list_poems_by_building,
-    random_poem,
-)
 
 
 class ChatRequest(BaseModel):
@@ -217,69 +207,6 @@ def get_file(file_path: str):
     return FileResponse(path=target)
 
 
-# ── 建筑古诗词 API ────────────────────────────────────────────────
-@app.get("/api/poetry-landscape")
-def api_poetry_landscape(scope: str = "all") -> dict:
-    return get_poetry_landscape(scope=scope)
-
-
-@app.get("/api/buildings")
-def api_list_buildings(province: str | None = None) -> dict:
-    return list_buildings(province=province)
-
-
-@app.get("/api/buildings/{building_name}/poems")
-def api_poems_by_building(
-    building_name: str,
-    page: int = 1,
-    size: int = 20,
-) -> dict:
-    result = list_poems_by_building(building_name, page=page, size=size)
-    if result["total"] == 0 and not get_building_entry(building_name):
-        raise HTTPException(status_code=404, detail="未找到该建筑")
-    return result
-
-
-@app.get("/api/poems")
-def api_list_poems(
-    keyword: str | None = None,
-    author: str | None = None,
-    tag: str | None = None,
-    dynasty: str | None = None,
-    page: int = 1,
-    size: int = 20,
-) -> dict:
-    return list_poems(
-        keyword=keyword,
-        author=author,
-        tag=tag,
-        dynasty=dynasty,
-        page=page,
-        size=size,
-    )
-
-
-@app.get("/api/poems/stats")
-def api_poems_stats() -> dict:
-    return get_stats()
-
-
-@app.get("/api/poems/random")
-def api_random_poem(tag: str | None = None) -> dict:
-    poem = random_poem(tag=tag)
-    if not poem:
-        raise HTTPException(status_code=404, detail="暂无诗词")
-    return poem
-
-
-@app.get("/api/poems/{poem_id}")
-def api_get_poem(poem_id: int) -> dict:
-    poem = get_poem(poem_id)
-    if not poem:
-        raise HTTPException(status_code=404, detail="诗词不存在")
-    return poem
-
-
 static_dir = PROJECT_DIR
 if static_dir.exists():
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="site")
@@ -288,4 +215,4 @@ if static_dir.exists():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8090, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

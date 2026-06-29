@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>古建智览 · 图像扫描 → 数据流 → 代码</title>
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; overflow:hidden; }
+  body{ font-family:system-ui,"Noto Sans SC",sans-serif; background:#15100a; }
+
+  /* 背景：暖金故宫底图（开场后慢慢浮现） */
+  #bg{ position:fixed; inset:0; z-index:0; opacity:0; transition:opacity 2.6s ease;
+    background:
+      linear-gradient(90deg, rgba(26,12,4,0.40) 0%, rgba(26,12,4,0.12) 30%, rgba(26,12,4,0) 52%, rgba(26,12,4,0.10) 100%),
+      url("./assets/welcome-bg.jpg") center center / cover no-repeat,
+      linear-gradient(135deg,#fbe7c4,#e7a94d); }
+  #vignette{ position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 55%, rgba(20,9,3,0.34) 100%); }
+
+  /* 开场：纯主题色背景上的金粒子文字 */
+  #intro{ position:fixed; inset:0; z-index:50; opacity:1; transition:opacity 1.8s ease;
+    background:
+      radial-gradient(circle at 13% 20%, rgba(231,198,107,0.07), transparent 30%),
+      radial-gradient(circle at 88% 82%, rgba(231,198,107,0.06), transparent 32%),
+      radial-gradient(circle at 50% 44%, #241a0f 0%, #160f08 62%, #100b06 100%); }
+  #intro.hide{ opacity:0; pointer-events:none; }
+  #introCanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  /* 四角金线纹样 */
+  .intro-corner{ position:absolute; width:clamp(78px,9vw,130px); height:clamp(78px,9vw,130px);
+    opacity:0.5; pointer-events:none; z-index:2; }
+  .ic-tl{ top:26px; left:26px; }
+  .ic-tr{ top:26px; right:26px; transform:scaleX(-1); }
+  .ic-bl{ bottom:26px; left:26px; transform:scaleY(-1); }
+  .ic-br{ bottom:26px; right:26px; transform:scale(-1,-1); }
+  /* 四边中点小花 */
+  .intro-edge{ position:absolute; width:30px; height:30px; opacity:0.4; pointer-events:none; z-index:2; }
+  .ie-t{ top:18px; left:50%; transform:translateX(-50%); }
+  .ie-b{ bottom:18px; left:50%; transform:translateX(-50%) scaleY(-1); }
+
+  /* ===== 右侧：照片扫描（输入） ===== */
+  #cards{ position:fixed; top:50%; right:1.5%; width:42%; height:60%; transform:translateY(-50%);
+    z-index:3; overflow:hidden; opacity:0; transition:opacity 1.6s ease;   /* 背景浮现后再接入 */
+    /* 右侧整条左右边缘淡入淡出，卡片进出更平顺 */
+    -webkit-mask-image:linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+            mask-image:linear-gradient(to right, transparent, #000 9%, #000 91%, transparent); }
+  #cardRow{ position:absolute; top:50%; left:0; height:100%; display:flex; align-items:center; gap:46px;
+    white-space:nowrap; will-change:transform; transform:translateY(-50%); }
+  /* 卡片四边羽化，柔和融进背景，不留硬边 */
+  .card-wrapper{ position:relative; flex-shrink:0;
+    -webkit-mask-image:linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
+                       linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+    -webkit-mask-composite:source-in;
+            mask-image:linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
+                       linear-gradient(to bottom, transparent, #000 9%, #000 91%, transparent);
+            mask-composite:intersect; }
+  .card-normal{ position:absolute; inset:0; border-radius:14px; overflow:hidden; z-index:2; clip-path:inset(0 0 0 var(--clip-right,0%)); }
+  .card-normal img{ width:100%; height:100%; object-fit:cover; filter:brightness(1.04) contrast(1.03) sepia(0.08) saturate(1.04); }
+  /* 扫描线左侧的已扫描部分 → 代码（羽化由 .card-wrapper 统一处理，依旧柔边） */
+  .card-ascii{ position:absolute; inset:0; border-radius:14px; overflow:hidden; z-index:1;
+    background:linear-gradient(180deg, rgba(40,20,8,0.80), rgba(26,12,4,0.74));
+    clip-path:inset(0 calc(100% - var(--clip-left,0%)) 0 0); }
+  .card-ascii pre{ position:absolute; inset:0; margin:0; padding:0; font-family:ui-monospace,"SFMono-Regular",monospace;
+    color:rgba(247,206,108,0.92); white-space:pre; overflow:hidden;
+    -webkit-mask-image:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.16));
+            mask-image:linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.16)); }
+  #scanLine{ position:absolute; top:50%; left:15%; width:2px; transform:translate(-50%,-50%); border-radius:3px; z-index:6;
+    pointer-events:none; opacity:0; transition:opacity 0.3s;
+    background:linear-gradient(to bottom, transparent, #ffcf4e 42%, #fff0c6 50%, #ffcf4e 58%, transparent);
+    box-shadow:0 0 10px #e7c66b,0 0 22px #e7c66b,0 0 42px #c9952f; }
+  #scanLine.on{ opacity:1; }
+
+  /* ===== 左侧：代码刷新（输出） ===== */
+  #codeWrap{ position:fixed; top:50%; left:2.2%; width:38%; height:74%; transform:translateY(-50%); z-index:3;
+    opacity:0; transition:opacity 2.6s ease;     /* 等第一张卡片扫过后再慢慢浮现 */
+    /* 柔边暖色底，融进背景不突兀 */
+    -webkit-mask-image:linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent),
+                       linear-gradient(90deg, #000 60%, transparent);
+            mask-image:linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent),
+                       linear-gradient(90deg, #000 60%, transparent);
+    -webkit-mask-composite:source-in; mask-composite:intersect; }
+  #codeWrap::before{ content:""; position:absolute; inset:-6% -10% -6% -10%; z-index:-1;
+    background:radial-gradient(120% 80% at 20% 50%, rgba(18,8,3,0.55), rgba(18,8,3,0.0) 75%); }
+  #codeStream{ position:absolute; inset:0; margin:0; font-family:ui-monospace,"SFMono-Regular","Consolas",monospace;
+    color:#f0c46e; font-size:15px; line-height:1.55; white-space:pre; overflow:hidden;
+    text-shadow:0 0 8px rgba(231,170,70,0.5), 0 0 2px rgba(255,238,190,0.6); }
+  #codeStream .k{ color:#ffe9b0; }            /* 关键标记高亮 */
+  #codeStream .d{ color:#caa15a; opacity:0.8; } /* 注释/暗淡 */
+  #codeStream .n{ color:#fff3cf; }            /* 数字/值 */
+
+  .eyebrow{ position:fixed; top:6.5%; left:50%; transform:translateX(-50%); z-index:4; text-align:center; pointer-events:none; }
+  .eyebrow .zh{ display:block; font-family:"Noto Serif SC","Ma Shan Zheng",serif; font-weight:600; font-size:22px; letter-spacing:0.5em;
+    color:rgba(255,238,186,0.94); text-shadow:0 2px 14px rgba(40,16,4,0.6); }
+  .eyebrow .en{ display:block; margin-top:8px; font-family:"Cormorant Garamond",serif; font-size:12px; letter-spacing:0.42em;
+    text-transform:uppercase; color:rgba(231,190,120,0.8); }
+  .eyebrow .pipe{ display:block; margin-top:6px; font-size:11px; letter-spacing:0.3em; color:rgba(231,190,120,0.72); }
+
+  .label{ position:fixed; z-index:4; font-family:"Cormorant Garamond","Noto Serif SC",serif;
+    letter-spacing:0.3em; text-transform:uppercase; font-size:12px; color:rgba(255,236,180,0.82);
+    text-shadow:0 1px 6px rgba(40,16,4,0.6); }
+  #labIn{ right:6%; bottom:9%; }
+  #labOut{ left:5%; bottom:9%; }
+</style>
+</head>
+<body>
+  <div id="bg"></div>
+  <div id="vignette"></div>
+  <div id="intro">
+    <canvas id="introCanvas"></canvas>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+      <symbol id="ornCorner" viewBox="0 0 120 120">
+        <g fill="none" stroke="#e7c66b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8,120 L8,34 Q8,8 34,8 L120,8"/>
+          <path d="M19,120 L19,39 Q19,19 39,19 L120,19" opacity="0.55"/>
+          <path d="M44,8 a36,36 0 0 0 -36,36" opacity="0.4"/>
+          <path d="M31,31 a9,9 0 1 0 9,-3" opacity="0.8"/>
+        </g>
+        <circle cx="8" cy="8" r="2.8" fill="#e7c66b"/>
+      </symbol>
+      <symbol id="ornEdge" viewBox="0 0 30 30">
+        <g fill="none" stroke="#e7c66b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15,3 l6,7 -6,7 -6,-7 z"/><path d="M15,17 v6"/>
+        </g>
+      </symbol>
+    </defs></svg>
+    <svg class="intro-corner ic-tl" viewBox="0 0 120 120"><use href="#ornCorner"/></svg>
+    <svg class="intro-corner ic-tr" viewBox="0 0 120 120"><use href="#ornCorner"/></svg>
+    <svg class="intro-corner ic-bl" viewBox="0 0 120 120"><use href="#ornCorner"/></svg>
+    <svg class="intro-corner ic-br" viewBox="0 0 120 120"><use href="#ornCorner"/></svg>
+    <svg class="intro-edge ie-t" viewBox="0 0 30 30"><use href="#ornEdge"/></svg>
+    <svg class="intro-edge ie-b" viewBox="0 0 30 30"><use href="#ornEdge"/></svg>
+  </div>
+
+  <canvas id="flow"></canvas>            <!-- 金色数据流连线 -->
+
+  <div id="codeWrap"><pre id="codeStream"></pre></div>
+  <div id="cards"><div id="cardRow"></div><div id="scanLine"></div></div>
+
+  <div class="eyebrow">
+    <span class="zh">古 建 数 字 化</span>
+    <span class="en">Architectural Heritage · Digitized</span>
+    <span class="pipe">影像 → 点云 → 代码</span>
+  </div>
+
+  <div class="label" id="labIn">影像输入 · IMAGE IN</div>
+  <div class="label" id="labOut">代码输出 · CODE OUT</div>
+
+<script>
+(function(){
+  /* ---------------------------------------------------------
+     右：照片扫描（输入）
+     --------------------------------------------------------- */
+  var IMAGES = [
+    "gugong-hero-1.png","gugong-hero-2.png","gugong-hero-5.png","gugong-hero-4.png",
+    "gugong-hero-6.png","gugong-hero-3.png","pingyao-hero.png","zhouzhuang-hero.png",
+    "qiao-hero.png","langzhong-hero.png","kaiping-hero.png","taihedian-hero.jpg"
+  ];
+  var cards=document.getElementById("cards"), row=document.getElementById("cardRow"), line=document.getElementById("scanLine");
+  var RW,RH,CH,CW,GAP=46,REPEAT=4,total=0,lineW=0,pos=0, vel=260,dir=-1,MINV=200;
+  var CH_SET="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789(){}[]<>;:,._-+=!@#$%^&*|/\\\"'`~?";
+  var COLS,ROWS,FS,LH;
+  function genCode(){ var t=""; for(var i=0;i<COLS*ROWS;i++) t+=CH_SET[(Math.random()*CH_SET.length)|0];
+    var o=""; for(var r=0;r<ROWS;r++) o+=t.substr(r*COLS,COLS)+"\n"; return o; }
+  function measureCards(){ var rect=cards.getBoundingClientRect(); RW=rect.width; RH=rect.height;
+    CH=Math.round(RH*0.68); CW=Math.round(CH*1.5); FS=Math.max(9,Math.round(CH/22)); LH=Math.round(FS*1.18);
+    COLS=Math.floor(CW/(FS*0.62)); ROWS=Math.floor(CH/LH); line.style.height=Math.round(RH*0.97)+"px"; }
+  function buildCards(){ measureCards(); total=IMAGES.length*REPEAT; var html="";
+    for(var i=0;i<total;i++){ var src="./assets/"+IMAGES[i%IMAGES.length];
+      html+='<div class="card-wrapper" style="width:'+CW+'px;height:'+CH+'px">'
+          +   '<div class="card-normal"><img src="'+src+'" alt=""></div>'
+          +   '<div class="card-ascii"><pre style="font-size:'+FS+'px;line-height:'+LH+'px">'+genCode()+'</pre></div>'
+          + '</div>'; }
+    row.innerHTML=html;
+    Array.prototype.forEach.call(row.querySelectorAll(".card-ascii pre"),function(p){ p.dataset.orig=p.textContent; });
+    lineW=(CW+GAP)*total; pos=RW; }
+  function scramble(pre){ if(pre.dataset.s==="1") return; pre.dataset.s="1"; var n=0;
+    var iv=setInterval(function(){ pre.textContent=genCode(); if(++n>=8){ clearInterval(iv); pre.textContent=pre.dataset.orig; pre.dataset.s="0"; } },32); }
+  var scanActive=false, scanCenter={x:0,y:0};
+  function updateCards(){ var rect=cards.getBoundingClientRect(); var sx=rect.left+RW*0.15, sl=sx-4, sr=sx+4, any=false, ws=row.children;
+    scanCenter.x=sx; scanCenter.y=rect.top+RH/2;
+    for(var i=0;i<ws.length;i++){ var w=ws[i], r=w.getBoundingClientRect(), normal=w.firstChild, ascii=w.lastChild;
+      if(r.right<rect.left-2 || r.left>rect.right+2) continue;
+      if(r.left<sr && r.right>sl){ any=true;
+        if(w.dataset.sc!=="1"){ scramble(ascii.firstChild); w.dataset.sc="1"; }
+        var il=Math.max(sl-r.left,0), ir=Math.min(sr-r.left,r.width);
+        normal.style.setProperty("--clip-right",(il/r.width*100).toFixed(1)+"%");
+        ascii.style.setProperty("--clip-left",(ir/r.width*100).toFixed(1)+"%");
+      } else { w.dataset.sc="0";
+        if(r.right<sl){ normal.style.setProperty("--clip-right","100%"); ascii.style.setProperty("--clip-left","100%"); }
+        else { normal.style.setProperty("--clip-right","0%"); ascii.style.setProperty("--clip-left","0%"); } }
+    }
+    scanActive=any; line.classList.toggle("on", any);
+  }
+
+  /* ---------------------------------------------------------
+     左：代码刷新（输出）——把"扫描到的古建"写成结构化代码
+     --------------------------------------------------------- */
+  var codeEl=document.getElementById("codeStream");
+  var BUILD=["太和殿","乾清宫","角楼","午门","平遥城楼","周庄廊桥","乔家大院","阆中华光楼","开平碉楼"];
+  var DYN=["Ming","Qing","Yuan","Song"];
+  var FEAT=["dougong斗拱","feiyan飞檐","liuli琉璃瓦","xumizuo须弥座","wuji庑殿顶","queti雀替","caihua彩画"];
+  function hex(n){ var s=""; for(var i=0;i<n;i++) s+="0123456789ABCDEF"[(Math.random()*16)|0]; return s; }
+  function ri(a,b){ return (a+Math.random()*(b-a))|0; }
+  function pick(a){ return a[(Math.random()*a.length)|0]; }
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  // 行模板，返回带 span 高亮的 HTML
+  var TEMPLATES=[
+    function(){ return '<span class="d">// scan frame '+ri(1000,9999)+' → vectorize</span>'; },
+    function(){ return 'const int N = <span class="n">'+ri(100000,999999)+'</span>;'; },
+    function(){ return 'void <span class="k">extract</span>('+pick(["roof","wall","bracket","eave"])+'_t *p){'; },
+    function(){ return '  feature[<span class="n">'+ri(0,255)+'</span>] = <span class="k">'+pick(["detect","trace","encode"])+'</span>(img);'; },
+    function(){ return '&lt;Building name="'+esc(pick(BUILD))+'" dynasty="<span class="k">'+pick(DYN)+'</span>"&gt;'; },
+    function(){ return '  &lt;Component key="'+pick(FEAT)+'" hash="<span class="n">0x'+hex(6)+'</span>"/&gt;'; },
+    function(){ return '  &lt;Vec3 x="<span class="n">'+ri(-99,99)+'</span>" y="<span class="n">'+ri(-99,99)+'</span>" z="<span class="n">'+ri(0,40)+'</span>"/&gt;'; },
+    function(){ return '&lt;Data key="<span class="k">LicensingCode</span>"&gt;GU-'+hex(4)+'-'+hex(4)+'&lt;/Data&gt;'; },
+    function(){ return '<span class="d">&lt;!-- auto-set by scan_pipeline.py --&gt;</span>'; },
+    function(){ return '  return struct{ <span class="k">'+pick(["dougong","feiyan","liuli"])+'</span>: '+ri(2,12)+' };'; },
+    function(){ return 'for(int i=0;i&lt;n;i++) emit(<span class="k">code</span>[i]);'; },
+    function(){ return 'pixel('+ri(0,999)+','+ri(0,999)+') ⇒ <span class="n">0x'+hex(6)+'</span>;'; }
+  ];
+  var lines=[], MAXLINES=46;
+  function newLine(){ return TEMPLATES[(Math.random()*TEMPLATES.length)|0](); }
+  function seedCode(){ lines=[]; for(var i=0;i<MAXLINES;i++) lines.push(newLine()); codeEl.innerHTML=lines.join("\n"); }
+  var codeAcc=0, codeStarted=false;
+  function tickCode(dt){
+    codeAcc+=dt;
+    var step=0.06;                         // 每 ~60ms 推一行（不断刷新/流动）
+    while(codeAcc>=step){ codeAcc-=step; lines.push(newLine()); if(lines.length>MAXLINES) lines.shift(); }
+    codeEl.innerHTML=lines.join("\n");
+  }
+
+  /* ---------------------------------------------------------
+     中：金色数据流连线（右扫描点 → 左代码区）
+     --------------------------------------------------------- */
+  var canvas=document.getElementById("flow"), ctx=canvas.getContext("2d"), dpr=1, FW,FH;
+  function resizeFlow(){ dpr=Math.min(window.devicePixelRatio||1,2); FW=innerWidth; FH=innerHeight;
+    canvas.width=FW*dpr; canvas.height=FH*dpr; canvas.style.position="fixed"; canvas.style.inset="0";
+    canvas.style.width=FW+"px"; canvas.style.height=FH+"px"; canvas.style.zIndex=2; canvas.style.pointerEvents="none";
+    ctx.setTransform(dpr,0,0,dpr,0,0); }
+  var STREAMS=6, packets=[];
+  var samplePts=[]; for(var sp=0;sp<28;sp++) samplePts.push({ ry:sp/27, ph:Math.random()*6.2832 });
+  function initPackets(){ packets=[]; for(var s=0;s<STREAMS;s++) for(var k=0;k<4;k++) packets.push({ s:s, t:Math.random() }); }
+  function codeAnchor(){ var r=document.getElementById("codeWrap").getBoundingClientRect(); return { x:r.right-r.width*0.46, top:r.top, h:r.height }; }
+  function drawFlow(dt){
+    ctx.clearRect(0,0,FW,FH);
+    if(!scanActive && scanCenter.x===0) return;
+    var ca=codeAnchor();
+    var ox=scanCenter.x, oy=scanCenter.y;     // 数据从扫描线发出
+    ctx.globalCompositeOperation="lighter";
+    for(var s=0;s<STREAMS;s++){
+      var ty=ca.top + ca.h*(0.18 + 0.64*(s/(STREAMS-1)));
+      var tx=ca.x;
+      var c1x=ox-(ox-tx)*0.35, c1y=oy+(ty-oy)*0.05 + Math.sin(performance.now()/900+s)*14;
+      var c2x=tx+(ox-tx)*0.30, c2y=ty - Math.sin(performance.now()/1100+s)*14;
+      // 基础流线
+      ctx.beginPath(); ctx.moveTo(ox,oy); ctx.bezierCurveTo(c1x,c1y,c2x,c2y,tx,ty);
+      ctx.strokeStyle="rgba(231,184,90,"+(scanActive?0.22:0.10)+")"; ctx.lineWidth=1; ctx.stroke();
+      // 数据包：沿曲线移动的发光点
+      for(var p=0;p<packets.length;p++){ var pk=packets[p]; if(pk.s!==s) continue;
+        pk.t+=dt*(0.35+0.12*s); if(pk.t>1) pk.t-=1;
+        var t=pk.t, mt=1-t;
+        var x=mt*mt*mt*ox+3*mt*mt*t*c1x+3*mt*t*t*c2x+t*t*t*tx;
+        var y=mt*mt*mt*oy+3*mt*mt*t*c1y+3*mt*t*t*c2y+t*t*t*ty;
+        var a=(scanActive?1:0.5)*Math.sin(Math.PI*t);   // 两端淡出
+        var g=ctx.createRadialGradient(x,y,0,x,y,7); g.addColorStop(0,"rgba(255,240,200,"+(0.95*a)+")"); g.addColorStop(1,"rgba(255,210,110,0)");
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,7,0,6.2832); ctx.fill();
+        ctx.fillStyle="rgba(255,248,220,"+(0.9*a)+")"; ctx.beginPath(); ctx.arc(x,y,1.6,0,6.2832); ctx.fill();
+      }
+    }
+    // 扫描线上对建筑表面取金色采样点（点云）—— 数字化的“可见瞬间”
+    if(scanActive){ var topY=oy-RH*0.40, spanY=RH*0.80, tnow=performance.now();
+      for(var q=0;q<samplePts.length;q++){ var st=samplePts[q];
+        var yy=topY+spanY*st.ry, xx=ox+Math.sin(tnow/300+st.ph)*3;
+        var aa=0.30+0.55*Math.abs(Math.sin(tnow/420+st.ph));
+        ctx.fillStyle="rgba(255,238,188,"+aa.toFixed(2)+")"; ctx.beginPath(); ctx.arc(xx,yy,1.6,0,6.2832); ctx.fill(); }
+    }
+    ctx.globalCompositeOperation="source-over";
+  }
+
+  /* ---------------------------------------------------------
+     开场：金粒子文字（古建智寻 → 用信息化展现 → 文化魅力）
+     --------------------------------------------------------- */
+  var intro = (function(){
+    var canvas=document.getElementById("introCanvas"), ctx=canvas.getContext("2d");
+    var W2,H2,dpr2, ps=[], GOLD=[231,198,107], G2=6, MD=24, MAXP=2600, CAP=4, curText="";
+    function rnd(a,b){ return a+Math.random()*(b-a); }
+    function rs(){ dpr2=Math.min(window.devicePixelRatio||1,2); W2=innerWidth; H2=innerHeight;
+      canvas.width=W2*dpr2; canvas.height=H2*dpr2; canvas.style.width=W2+"px"; canvas.style.height=H2+"px"; ctx.setTransform(dpr2,0,0,dpr2,0,0); }
+    rs(); addEventListener("resize", function(){ rs(); if(curText) build(curText); });
+    function sample(text){
+      var off=document.createElement("canvas"); off.width=W2; off.height=H2; var o=off.getContext("2d");
+      var fs=Math.min(H2*0.26, W2*0.82/Math.max(text.length,1)*1.4);
+      o.fillStyle="#fff"; o.textAlign="center"; o.textBaseline="middle";
+      o.font="700 "+fs+'px "Noto Serif SC","Microsoft YaHei","Ma Shan Zheng",serif';
+      o.fillText(text, W2/2, H2/2);
+      var d=o.getImageData(0,0,W2,H2).data, pts=[];
+      for(var y=0;y<H2;y+=G2) for(var x=0;x<W2;x+=G2){ if(d[(y*W2+x)*4+3]>128) pts.push({x:x,y:y}); }
+      return pts;
+    }
+    function build(text){ curText=text; var t=sample(text);
+      if(t.length>MAXP){ for(var s=t.length-1;s>0;s--){ var r=(Math.random()*(s+1))|0, tmp=t[s]; t[s]=t[r]; t[r]=tmp; } t.length=MAXP; }
+      for(var i=0;i<t.length;i++){ if(i<ps.length){ ps[i].tx=t[i].x; ps[i].ty=t[i].y; }
+        else ps.push({ x:rnd(0,W2), y:rnd(0,H2), vx:0, vy:0, tx:t[i].x, ty:t[i].y, size:rnd(1.1,2.2), k:rnd(0.012,0.03) }); }
+      ps.length=t.length;
+    }
+    function burst(){ for(var i=0;i<ps.length;i++){ var p=ps[i], a=Math.random()*6.2832, sp=rnd(8,22); p.vx=Math.cos(a)*sp; p.vy=Math.sin(a)*sp; } }
+    function update(dt){ for(var i=0;i<ps.length;i++){ var p=ps[i]; p.vx+=(p.tx-p.x)*p.k; p.vy+=(p.ty-p.y)*p.k; p.vx*=0.86; p.vy*=0.86; p.x+=p.vx+rnd(-0.15,0.15); p.y+=p.vy+rnd(-0.15,0.15); } }
+    var grid={};
+    function render(){ ctx.clearRect(0,0,W2,H2); ctx.globalCompositeOperation="lighter"; grid={}; var cell=MD;
+      for(var i=0;i<ps.length;i++){ var p=ps[i], gx=(p.x/cell)|0, gy=(p.y/cell)|0, key=gx+","+gy; (grid[key]||(grid[key]=[])).push(p); }
+      ctx.lineWidth=0.6;
+      for(var i2=0;i2<ps.length;i2++){ var a=ps[i2], gx2=(a.x/cell)|0, gy2=(a.y/cell)|0, cn=0;
+        nb: for(var ox=0;ox<=1;ox++){ for(var oy=(ox===0?0:-1);oy<=1;oy++){ var bk=grid[(gx2+ox)+","+(gy2+oy)]; if(!bk) continue;
+          for(var j=0;j<bk.length;j++){ var b=bk[j]; if(b===a) continue; var dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy;
+            if(d2<MD*MD){ var al=(1-Math.sqrt(d2)/MD)*0.5; ctx.strokeStyle="rgba("+GOLD[0]+","+GOLD[1]+","+GOLD[2]+","+al.toFixed(3)+")";
+              ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); if(++cn>=CAP) break nb; } } } } }
+      for(var k=0;k<ps.length;k++){ var p2=ps[k], dist=Math.hypot(p2.tx-p2.x,p2.ty-p2.y), gl=Math.min(1,dist/60);
+        ctx.fillStyle="rgba("+GOLD[0]+","+GOLD[1]+","+GOLD[2]+","+(0.7+0.3*gl).toFixed(3)+")"; ctx.beginPath(); ctx.arc(p2.x,p2.y,p2.size*(1+gl*0.6),0,6.2832); ctx.fill(); }
+      ctx.globalCompositeOperation="source-over";
+    }
+    return { build:build, burst:burst, update:update, render:render };
+  })();
+
+  /* ---------------------------------------------------------
+     主循环（开场 → 背景浮现 → 卡片接入 → 扫描 → 代码）
+     --------------------------------------------------------- */
+  var PHASE="intro", phraseIdx=0, phaseT=performance.now(), revealT=0;
+  var PHRASES=["古建智寻","展现文化魅力"], PHRASE_HOLD=2800, CARDS_IN_DELAY=1900;
+  var introEl=document.getElementById("intro"), bgEl=document.getElementById("bg"), cardsEl=document.getElementById("cards");
+  intro.build(PHRASES[0]); intro.burst();
+
+  var t0=performance.now();
+  function loop(){
+    var now=performance.now(), dt=Math.min(0.05,(now-t0)/1000); t0=now;
+
+    if(PHASE==="intro" || PHASE==="reveal"){ intro.update(dt); intro.render(); }
+
+    if(PHASE==="intro"){
+      if(now - phaseT > PHRASE_HOLD){
+        phraseIdx++;
+        if(phraseIdx < PHRASES.length){ intro.build(PHRASES[phraseIdx]); intro.burst(); phaseT=now; }
+        else { PHASE="reveal"; revealT=now; introEl.classList.add("hide"); bgEl.style.opacity="1"; }   // 背景慢慢浮现
+      }
+    } else if(PHASE==="reveal"){
+      if(now - revealT > CARDS_IN_DELAY){ PHASE="scan"; pos=RW; cardsEl.style.opacity="1"; }            // 浮现差不多 → 卡片接入
+    } else if(PHASE==="scan"){
+      if(vel>MINV) vel*=0.96; else vel=MINV;
+      pos+=vel*dir*dt; if(pos<-lineW) pos=RW; else if(pos>RW) pos=-lineW;
+      row.style.transform="translateY(-50%) translateX("+pos.toFixed(1)+"px)";
+      updateCards();
+      // 第一张卡片扫过扫描线后，左侧代码才开始慢慢浮现并逐行累积
+      if(!codeStarted && scanActive){ codeStarted=true; document.getElementById("codeWrap").style.opacity="1"; }
+      if(codeStarted) tickCode(dt);
+      drawFlow(dt);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  addEventListener("wheel", function(e){ vel=Math.min(1200, vel+Math.abs(e.deltaY)*0.6); }, { passive:true });
+  addEventListener("resize", function(){ buildCards(); resizeFlow(); });
+
+  resizeFlow(); buildCards(); initPackets();   // 卡片预建但隐藏；代码留空等扫描触发
+  requestAnimationFrame(loop);
+  window.__rebuild=function(){ buildCards(); resizeFlow(); };
+})();
+</script>
+</body>
+</html>
